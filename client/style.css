@@ -1,0 +1,30 @@
+body {
+    background-color: rgb(18, 36, 65);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#head {
+    max-height: 10%;
+}
+
+h1 {
+    font-size: 1.5rem;
+    padding: 5px;
+    margin:0;
+    color: rgb(23, 53, 80);
+    background-color: rgb(13, 24, 37);
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.3rem;
+    background-color: aquamarine; 
+    color: rgb(18, 36, 65);
+    width: 100%;
+    padding: 5px;
+    margin:0;
+    text-align: center;
+    max-height: 10%;
+    display: block;
+    cursor: pointer;
+}

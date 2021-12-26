@@ -76,6 +76,12 @@ var noledger = new Vue({
                 ["encrypt", "decrypt"]
             );            
         },
+        generateNewAccount: async function () {
+            console.log("generate new account ...")
+            this.keyPair = await this.generateKeyPair();
+            // flush wrapper content
+            document.getElementById('wrapper').innerHTML="";
+        },
         request: function (options, path) {
       
             return new Promise(function (resolve, reject) {
