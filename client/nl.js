@@ -58,11 +58,20 @@ var noledger = new Vue({
             const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
             return this.encryption.decoder.decode(dataEncoded);
         },
-        keyExport: async function (keyPair) {
-            await window.crypto.subtle.exportKey(
-                'raw',
-                key,
+        keyExport: async function (key) {
+            const exported = window.crypto.subtle.exportKey(
+              "jwk",
+              key
             );
+            return exported
+        },
+        generateContactsPage: async function () {
+            let wrapper = document.getElementById('wrapper');
+            let addressHeader = document.createElement('div');
+            let address = await this.getAddress();
+            address = address.slice(0,9)
+            addressHeader.innerHTML = `<div id="generate" class="row no-gutters"><h3>address: ${address}...</h3></div>`;
+            wrapper.appendChild(addressHeader);
         },
         generateKeyPair: async function () {
             return window.crypto.subtle.generateKey(
@@ -80,7 +89,14 @@ var noledger = new Vue({
             console.log("generate new account ...")
             this.keyPair = await this.generateKeyPair();
             // flush wrapper content
-            document.getElementById('wrapper').innerHTML="";
+            let wrapper = document.getElementById('wrapper');
+            wrapper.innerHTML = "";
+            // build contacts page
+            await this.generateContactsPage();
+        },
+        getAddress: async function () {
+            let pub = await this.keyExport(this.keyPair.publicKey);
+            return pub.n;
         },
         request: function (options, path) {
       
