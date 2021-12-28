@@ -78,6 +78,14 @@ h3 {
     cursor: pointer;
 }
 
+.input-box {
+    background-color: #ddd;
+    height: 20%;
+    width: 100%;
+    padding: 10px;
+    position: relative
+}
+
 .thread-box {
     width: 100%;
     cursor: pointer;
