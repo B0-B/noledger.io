@@ -80,6 +80,8 @@ var noledger = new Vue({
         },
         loadContactsPage: async function () {
             let wrapper = document.getElementById('wrapper');
+
+            // build the self address bar
             let addressHeader = document.createElement('div');
             let address_raw = await this.getAddress();
             address = address_raw.slice(0,9);
@@ -106,6 +108,52 @@ var noledger = new Vue({
                 navigator.clipboard.writeText(address_raw);
                 document.getElementById('address-tooltip').innerHTML = 'copied'
             }
+
+            // create contacts threads
+            let contactsWrapper = document.createElement('div');
+            contactsWrapper.id = 'contacts-wrapper';
+            wrapper.appendChild(contactsWrapper);
+            contactsWrapper.className = 'container-fluid p-0';
+            for (const address in this.contacts) {
+                this.loadNewContactThread(contactsWrapper, address)
+            }
+            this.loadNewContactButton(contactsWrapper)
+            
+        },
+        loadNewContactButton: async function (parent) {
+            let el = document.createElement('span');
+            el.className = 'contact-box clickable';
+            el_payload = document.createElement('p');
+            el_payload.innerHTML = "+ add contact";
+            el.onmousedown = function () {
+                // create address input
+                this.remove();
+                let el = document.createElement('span');
+                el.className = 'contact-box';
+                input_field = document.createElement('input');
+                el.appendChild(input_field);
+                parent.appendChild(el);
+
+                // reload contact button on out focus
+                input_field.onmouseout = function () {
+                    el.remove()
+                    console.log('blur')
+                    noledger.loadNewContactButton(parent)
+                }
+
+                parent.appendChild(el)
+            }
+
+            //el.className = "new-contact";
+            el.appendChild(el_payload);
+            parent.appendChild(el);
+        },
+        loadNewContactThread: async function (el, address) {
+            let thread_box = document.createElement('span');
+            thread_box.innerHTML = `${address.slice(0,9)}...`;
+            thread_box.className = 'thread-box';
+            thread_box.nodeValue = address;
+            el.appendChild(thread_box)
         },
         generateKeyPair: async function () {
             return window.crypto.subtle.generateKey(

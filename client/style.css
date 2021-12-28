@@ -40,6 +40,7 @@ h3 {
 #address {
     cursor: pointer;
     position: relative;
+    margin: 0
 }
 
 #address-tooltip {
@@ -51,4 +52,38 @@ h3 {
     padding: 2px;
     bottom: 0;
     right: 0;
+    
+}
+
+#contacts-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.contact-box {
+    width: 100%;
+    height: 10%;
+    display: block;
+    color: aquamarine;
+    background: rgb(51, 77, 148);
+    text-align: center;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    line-height: 100%;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+.thread-box {
+    width: 100%;
+    cursor: pointer;
+    background: rgb(51, 77, 148);
+    color: #ddd;
+    padding: 10px;
+    height: 20%;
+    position: relative
 }
