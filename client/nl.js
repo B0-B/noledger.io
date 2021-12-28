@@ -65,13 +65,47 @@ var noledger = new Vue({
             );
             return exported
         },
-        generateContactsPage: async function () {
+        generateNewAccount: async function () {
+            console.log("generate new account ...")
+            this.keyPair = await this.generateKeyPair();
+            // flush wrapper content
+            let wrapper = document.getElementById('wrapper');
+            wrapper.innerHTML = "";
+            // build contacts page
+            await this.loadContactsPage();
+        },
+        getAddress: async function () {
+            let pub = await this.keyExport(this.keyPair.publicKey);
+            return pub.n;
+        },
+        loadContactsPage: async function () {
             let wrapper = document.getElementById('wrapper');
             let addressHeader = document.createElement('div');
-            let address = await this.getAddress();
-            address = address.slice(0,9)
-            addressHeader.innerHTML = `<div id="generate" class="row no-gutters"><h3>address: ${address}...</h3></div>`;
+            let address_raw = await this.getAddress();
+            address = address_raw.slice(0,9);
+            addressHeader.innerHTML = `<div id="generate" class="row no-gutters">
+                <h3 id="address">address: ${address}...</h3>
+            </div>`;
             wrapper.appendChild(addressHeader);
+            el = document.getElementById('address');
+            el.zIndex = 0
+            el.onmouseover = function () {
+                console.log('copied')
+                span = document.createElement('span');
+                span.id = 'address-tooltip';
+                span.innerHTML = 'copy'
+                span.zIndex = 100
+                this.appendChild(span)
+                this.style.outline = "1px solid rgb(51, 77, 148)"
+            }
+            el.onmouseout = function () {
+                document.getElementById('address-tooltip').remove()
+                this.style.outline = "0px"
+            }
+            el.onmousedown = function () {
+                navigator.clipboard.writeText(address_raw);
+                document.getElementById('address-tooltip').innerHTML = 'copied'
+            }
         },
         generateKeyPair: async function () {
             return window.crypto.subtle.generateKey(
@@ -84,19 +118,6 @@ var noledger = new Vue({
                 true,
                 ["encrypt", "decrypt"]
             );            
-        },
-        generateNewAccount: async function () {
-            console.log("generate new account ...")
-            this.keyPair = await this.generateKeyPair();
-            // flush wrapper content
-            let wrapper = document.getElementById('wrapper');
-            wrapper.innerHTML = "";
-            // build contacts page
-            await this.generateContactsPage();
-        },
-        getAddress: async function () {
-            let pub = await this.keyExport(this.keyPair.publicKey);
-            return pub.n;
         },
         request: function (options, path) {
       

@@ -11,7 +11,7 @@ h1 {
     font-size: 1.5rem;
     padding: 5px;
     margin:0;
-    color: rgb(23, 53, 80);
+    color: rgb(51, 77, 148);
     background-color: rgb(13, 24, 37);
     text-align: center;
 }
@@ -32,6 +32,23 @@ h2 {
 h3 {
     font-size: 1.2rem;
     width: 100%;
-    color: #ddd;
+    color: rgb(51, 77, 148);
+    padding: 5px;
     text-align: center;
+}
+
+#address {
+    cursor: pointer;
+    position: relative;
+}
+
+#address-tooltip {
+    font-size: 0.9rem;
+    color: rgb(18, 36, 65);
+    background: rgb(51, 77, 148);
+    display: block;
+    position: absolute;
+    padding: 2px;
+    bottom: 0;
+    right: 0;
 }
