@@ -27,6 +27,7 @@ var noledger = new Vue({
                 ...
     */
     data: {
+        chatVisible: false,
         contacts: {},
         encryption: {
             encoder: new TextEncoder(),
@@ -37,7 +38,9 @@ var noledger = new Vue({
             length: 4096,
             hash: 'SHA-256'
         },
-        keyPair: {}
+        keyPair: {},
+        toAddress: '',
+        wrapperVisible: true,
     },
 
     mounted: async function () {
@@ -50,6 +53,10 @@ var noledger = new Vue({
     },
 
     methods: {
+        backToContacts: async function () {
+            this.wrapperVisible = true;
+            this.chatVisible = false;
+        },
         encrypt: async function (data, key) {
             const dataEncoded = this.encryption.encoder.encode(data);
             return crypto.subtle.encrypt(this.encryption.algorithm, key, dataEncoded);
@@ -77,6 +84,17 @@ var noledger = new Vue({
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
             return pub.n;
+        },
+        loadChat: async function (address) {
+            if (!address in this.contacts) {
+                this.contacts[address] = {
+                    from:[],
+                    to:[]
+                }
+            }
+            this.toAddress = address;
+            this.chatVisible = true;
+            this.wrapperVisible = false;
         },
         loadContactsPage: async function () {
             let wrapper = document.getElementById('wrapper');
@@ -127,13 +145,13 @@ var noledger = new Vue({
             el_payload = document.createElement('p');
             el_payload.innerHTML = "+ add contact";
             el.onmousedown = function () {
-
                 // create address input
                 this.remove();
                 let el = document.createElement('span');
                 el.className = 'contact-box';
                 input_field = document.createElement('input');
                 input_field.className = 'input-box';
+                input_field.placeholder = 'enter address';
                 el.appendChild(input_field);
                 parent.appendChild(el);
                 // reload contact button on out focus
@@ -141,6 +159,16 @@ var noledger = new Vue({
                     el.remove();
                     console.log('blur');
                     noledger.loadNewContactButton(parent);
+                }
+                // trigger when address is confirmed via enter
+                input_field.onkeydown = function (e) {
+                    e = e || window.event;
+                    switch (e.keyCode) {
+                        case 13 : //Your Code Here (13 is ascii code for 'ENTER')
+                            noledger.loadChat(this.value);
+                            noledger.loadNewContactThread(document.getElementById('contacts-wrapper'), this.value);
+                            console.log('trigger', this.value);
+                    }
                 }
             }
 
@@ -151,8 +179,9 @@ var noledger = new Vue({
         loadNewContactThread: async function (el, address) {
             let thread_box = document.createElement('span');
             thread_box.innerHTML = `${address.slice(0,9)}...`;
-            thread_box.className = 'thread-box';
-            thread_box.nodeValue = address;
+            thread_box.className = 'contact-box clickable';
+            thread_box.value = address; // stack address in element value
+            thread_box.onmousedown = function () {noledger.loadChat(address)}
             el.appendChild(thread_box)
         },
         generateKeyPair: async function () {

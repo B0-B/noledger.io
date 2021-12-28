@@ -16,10 +16,25 @@
             <div id="head" class="container-fluid p-0">
                 <h1>noledger</h1>
             </div>
-            <div id="wrapper" class="container-fluid p-0">
-                
+            <div id="wrapper" v-show="wrapperVisible" class="container-fluid p-0">
                 <div id="generate" class="row no-gutters">
                     <h2 href="#" v-on:click="generateNewAccount()">generate</h2>
+                </div>
+            </div>
+            <div id="chatWindow" v-show="chatVisible" class="container-fluid p-0">
+                <div id="chatNavi" class="container-fluid p-0">
+                    <div class="col-sm-3">
+                        <p class="symbol clickable" v-on:click="backToContacts()">←</p>
+                    </div>
+                </div>
+                <div id="toAddress" class="container-fluid p-0">
+                    <p>chat with <strong style="color:aquamarine">{{toAddress.slice(0,9)}}...</strong></p>
+                </div>
+                <div id="messageFrame" class="container-fluid p-0">
+
+                </div>
+                <div id="entryFrame" class="container-fluid p-0">
+
                 </div>
             </div>
         </div>
