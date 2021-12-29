@@ -4,16 +4,17 @@ body {
 }
 
 #head {
-    max-height: 10%;
+    max-height: 5vh;
 }
 
 h1 {
     font-size: 1.5rem;
-    padding: 5px;
     margin:0;
     color: rgb(51, 77, 148);
     background-color: rgb(13, 24, 37);
     text-align: center;
+    height: 100%;
+    line-height: 5vh
 }
 
 h2 {
@@ -56,7 +57,7 @@ h3 {
 }
 #chatNavi {
     width: 100%;
-    height: 10%;
+    height: 5vh;
     margin: 0;
     display: block;
     color:#ddd;
@@ -76,16 +77,15 @@ h3 {
 
 .contact-box {
     width: 100%;
-    height: 10%;
+    height: 10vh;
     display: block;
     color: aquamarine;
     background: rgb(51, 77, 148);
     font-size: 1.5rem;
     text-align: center;
-    padding: 10px;
     margin-top: 5px;
     margin-bottom: 5px;
-    line-height: 100%;
+    line-height: 10vh;
 }
 
 .clickable {
@@ -95,42 +95,51 @@ h3 {
 #entryFrame {
     background-color: #383838;;
     width: 100%;
-    height: 20%;
+    height: 20vh;
     display: block;
+}
+
+#entryInput {
+    width: 80%;
+    text-align: left;
+    margin: 5px;
+    line-height: 300%;
+}
+
+#head {
+    height: 5vh;
+    line-height: 5vh;
 }
 
 .input-box {
-    height: 20%;
     width: 100%;
-    padding: 10px;
     position: relative
-}
-
-#toAddress {
-    height: 10%;
-    width: 100%;
-    display: block;
-    margin: 0;
-    text-align: center;
-    background-color: cadetblue;
-    color: #383838
-}
-
-#toAddress p {
-    margin: 0;
-    height: 100%;
-    display: block;
 }
 
 #messageFrame {
     background-color: #ddd;
     width: 100%;
-    height: 60%;
+    min-height: 70vh;
     display: block;
+}
+
+#toAddressLabel {
+    line-height: 200%;
+    text-align: center;
+    
+    height: 100%;
+    display: block;
+}
+
+#toAddressLabel p {
+    height: 5vh;
+    line-height: 5vh;
+    margin: 0 !important
 }
 
 .symbol {
     font-size: 1.5rem;
+    margin: 0;
 }
 
 .thread-box {
@@ -139,6 +148,6 @@ h3 {
     background: rgb(51, 77, 148);
     color: #ddd;
     padding: 10px;
-    height: 20%;
+    height: 20vh;
     position: relative
 }

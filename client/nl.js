@@ -70,7 +70,38 @@ var noledger = new Vue({
               "jwk",
               key
             );
+            console.log('jwk', exported)
             return exported
+        
+        },
+        keyImport: async function (key) {
+            const exported = window.crypto.subtle.importKey(
+                "jwk",
+                {   
+                    alg: this.encryption.algorithm,
+                    e: "AQAB",
+                    ext: true,
+                    key_ops: ["encrypt"],
+                    kty: "RSA",
+                    n: key
+                },
+                this.encryption.algorithm,
+                true,
+                ['encrypt']
+            );
+            return exported
+        },
+        generateKeyPair: async function () {
+            return window.crypto.subtle.generateKey(
+                {
+                  name: this.encryption.algorithm.name,
+                  modulusLength: this.encryption.length,
+                  publicExponent: new Uint8Array([1, 0, 1]),
+                  hash: this.encryption.hash
+                },
+                true,
+                ["encrypt", "decrypt"]
+            );            
         },
         generateNewAccount: async function () {
             console.log("generate new account ...")
@@ -86,8 +117,11 @@ var noledger = new Vue({
             return pub.n;
         },
         loadChat: async function (address) {
-            if (!address in this.contacts) {
+            console.log('load chat ...')
+            if (!(address in this.contacts)) {
+                console.log('initialize first contact.')
                 this.contacts[address] = {
+                    key: this.keyImport(address),
                     from:[],
                     to:[]
                 }
@@ -184,18 +218,6 @@ var noledger = new Vue({
             thread_box.onmousedown = function () {noledger.loadChat(address)}
             el.appendChild(thread_box)
         },
-        generateKeyPair: async function () {
-            return window.crypto.subtle.generateKey(
-                {
-                  name: this.encryption.algorithm.name,
-                  modulusLength: this.encryption.length,
-                  publicExponent: new Uint8Array([1, 0, 1]),
-                  hash: this.encryption.hash
-                },
-                true,
-                ["encrypt", "decrypt"]
-            );            
-        },
         request: function (options, path) {
       
             return new Promise(function (resolve, reject) {
@@ -226,5 +248,8 @@ var noledger = new Vue({
                 xhr.send(JSON.stringify(options)); 
             });
         },
+        send: async function (address, msg) {
+
+        }
     }
 });

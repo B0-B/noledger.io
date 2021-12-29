@@ -23,18 +23,20 @@
             </div>
             <div id="chatWindow" v-show="chatVisible" class="container-fluid p-0">
                 <div id="chatNavi" class="container-fluid p-0">
-                    <div class="col-sm-3">
-                        <p class="symbol clickable" v-on:click="backToContacts()">←</p>
+                    <div class="row no-gutters">
+                        <div class="col-sm-4">
+                            <p class="symbol clickable" v-on:click="backToContacts()">←</p>
+                        </div>
+                        <div id="toAddressLabel" class="col-sm-4">
+                            <p>chat with <strong style="color:aquamarine">{{toAddress.slice(0,9)}}...</strong></p>
+                        </div>
                     </div>
                 </div>
-                <div id="toAddress" class="container-fluid p-0">
-                    <p>chat with <strong style="color:aquamarine">{{toAddress.slice(0,9)}}...</strong></p>
-                </div>
                 <div id="messageFrame" class="container-fluid p-0">
-
+                    abc
                 </div>
                 <div id="entryFrame" class="container-fluid p-0">
-
+                    <input id="entryInput">
                 </div>
             </div>
         </div>

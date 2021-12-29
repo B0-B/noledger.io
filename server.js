@@ -32,6 +32,17 @@ node.prototype.build = function () {
             response.send('./client/index.html')
         }
     });
+    api.get('/ledger',function(request, response){
+
+        /* FIREWALL */
+        console.log('client request ...')
+        result = firewall(request);
+        
+        if (result) {
+            response.redirect('./client');
+            response.send('./client/index.html')
+        }
+    });
 
     // wrap https server
     let privateKey  = fs.readFileSync('./cert/ssl.key', 'utf8'),
