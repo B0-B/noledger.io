@@ -5,6 +5,21 @@
 */
 
 
+/* Base64URL encoding/decoding */
+function unescape (str) {
+    return (str + '==='.slice((str.length + 3) % 4))
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+}
+
+function escape (str) {
+    return str.replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=/g, '')
+}
+/**/
+
+/* noledger main object */
 var noledger = new Vue({
 
     el: '#noledger',
@@ -34,6 +49,9 @@ var noledger = new Vue({
             decoder: new TextDecoder(),
             algorithm: {
                 name: 'RSA-OAEP',
+                hash: {
+                    name: 'SHA-256'
+                }
             },
             length: 4096,
             hash: 'SHA-256'
@@ -66,6 +84,7 @@ var noledger = new Vue({
             return this.encryption.decoder.decode(dataEncoded);
         },
         keyExport: async function (key) {
+            
             const exported = window.crypto.subtle.exportKey(
               "jwk",
               key
@@ -75,21 +94,25 @@ var noledger = new Vue({
         
         },
         keyImport: async function (key) {
-            const exported = window.crypto.subtle.importKey(
+            // encode the key to base64url
+            key_enc = window.btoa(unescape(encodeURIComponent( key )));
+            key_enc = key_enc.slice(0,key_enc.length-1)
+            //key_enc = escape(key_enc)
+            console.log(key, '\n\n', key_enc)
+            const imported = window.crypto.subtle.importKey(
                 "jwk",
-                {   
-                    alg: this.encryption.algorithm,
-                    e: "AQAB",
+                { 
+                    kty: "RSA", 
+                    e: "AQAB", 
+                    n: key_enc,
+                    alg: this.encryption.algorithm.name,
                     ext: true,
-                    key_ops: ["encrypt"],
-                    kty: "RSA",
-                    n: key
                 },
                 this.encryption.algorithm,
-                true,
+                false,
                 ['encrypt']
-            );
-            return exported
+            )
+            return imported
         },
         generateKeyPair: async function () {
             return window.crypto.subtle.generateKey(
@@ -114,6 +137,7 @@ var noledger = new Vue({
         },
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
+            console.log('public',pub)
             return pub.n;
         },
         loadChat: async function (address) {
@@ -201,7 +225,7 @@ var noledger = new Vue({
                         case 13 : //Your Code Here (13 is ascii code for 'ENTER')
                             noledger.loadChat(this.value);
                             noledger.loadNewContactThread(document.getElementById('contacts-wrapper'), this.value);
-                            console.log('trigger', this.value);
+                            //console.log('trigger', this.value);
                     }
                 }
             }
@@ -249,7 +273,12 @@ var noledger = new Vue({
             });
         },
         send: async function (address, msg) {
-
+            key = this.contacts[address].key;
+            pkg = {}
+            pkg.payload = this.encrypt(msg, key);
+            pkg.adress = this.encrypt(this.getAddress(), key);
+            pkg.signature = this.encrypt('noledger', key);
+            pkg.timestamp = new Date().getTime()
         }
     }
 });

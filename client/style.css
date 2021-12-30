@@ -124,17 +124,20 @@ h3 {
 }
 
 #toAddressLabel {
-    line-height: 200%;
     text-align: center;
-    
     height: 100%;
     display: block;
+    text-overflow: ellipsis;
 }
 
 #toAddressLabel p {
     height: 5vh;
     line-height: 5vh;
-    margin: 0 !important
+    margin: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    white-space: nowrap
 }
 
 .symbol {
