@@ -47,8 +47,11 @@ var noledger = new Vue({
         encryption: {
             encoder: new TextEncoder(),
             decoder: new TextDecoder(),
+            rsa: {
+                algorithm: "RSA-OAEP-256"
+            },
             algorithm: {
-                name: 'RSA-OAEP',
+                name: "RSA-OAEP",
                 hash: {
                     name: 'SHA-256'
                 }
@@ -62,12 +65,12 @@ var noledger = new Vue({
     },
 
     mounted: async function () {
-        this.keyPair = await this.generateKeyPair();
-        testphrase = 'Hello 123 !'
-        enc = await this.encrypt(testphrase, this.keyPair.publicKey)
-        dec = await this.decrypt(enc)
-        console.log(enc)
-        console.log(dec)
+        // this.keyPair = await this.generateKeyPair();
+        // testphrase = 'Hello 123 !'
+        // enc = await this.encrypt(testphrase, this.keyPair.publicKey)
+        // dec = await this.decrypt(enc)
+        // console.log(enc)
+        // console.log(dec)
     },
 
     methods: {
@@ -89,28 +92,28 @@ var noledger = new Vue({
               "jwk",
               key
             );
-            console.log('jwk', exported)
             return exported
         
         },
-        keyImport: async function (key) {
+        keyImport: async function (key, usage="encrypt") {
             // encode the key to base64url
             key_enc = window.btoa(unescape(encodeURIComponent( key )));
             key_enc = key_enc.slice(0,key_enc.length-1)
             //key_enc = escape(key_enc)
+            key_enc = key;
             console.log(key, '\n\n', key_enc)
-            const imported = window.crypto.subtle.importKey(
+            const imported = crypto.subtle.importKey(
                 "jwk",
                 { 
                     kty: "RSA", 
                     e: "AQAB", 
                     n: key_enc,
-                    alg: this.encryption.algorithm.name,
+                    alg: this.encryption.rsa.algorithm,
                     ext: true,
                 },
                 this.encryption.algorithm,
                 false,
-                ['encrypt']
+                [usage]
             )
             return imported
         },
