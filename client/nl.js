@@ -90,7 +90,7 @@ var noledger = new Vue({
             span = document.createElement('span');
             p = document.createElement('p');
             span.className = 'row no-gutters'
-            frame.appendChild(span);
+            
             if (pkg.type == 'to') {
                 p.style.backgroundColor = '#22bf33' 
                 span.style.direction = 'rtl'
@@ -100,6 +100,33 @@ var noledger = new Vue({
             p.className = 'messageBox';
             p.innerHTML = `${pkg.msg}`;
             span.appendChild(p)
+
+            // decide if to animate
+            frame.appendChild(span);
+            if (fresh) {
+                m = 0
+                for (let i = 0; i < 1000; i++) {
+                    m += 0.01;
+                    att = `${m}vw`;
+                    if (pkg.type == 'to') {
+                        span.style.marginRight = att
+                    } else {
+                        span.style.marginLeft = att
+                    }
+                    this.sleep(.01)
+                }
+                for (let i = 0; i < 500; i++) {
+                    m -= 0.01;
+                    att = `${m}vw`;
+                    if (pkg.type == 'to') {
+                        span.style.marginRight = att
+                    } else {
+                        span.style.marginLeft = att
+                    }
+                    this.sleep(.01)
+                }
+                span.style.marginRight = "0vw";
+            }
 
             // scroll to bottom
             frame.scrollTop = frame.scrollHeight;
@@ -198,9 +225,15 @@ var noledger = new Vue({
                 console.log('initialize first contact.')
                 this.contacts[address] = {
                     key: this.keyImport(address),
-                    from:[],
-                    to:[]
+                    stack: []
                 }
+            }
+            let frame = document.getElementById('messageFrame');
+            frame.innerHTML = "" // flush
+            // load messages from stack
+            let stack = this.contacts[address].stack;
+            for (let i = 0; i < stack.length; i++) {
+                this.blob(stack[i], false)
             }
             this.toAddress = address;
             this.chatVisible = true;
@@ -359,10 +392,10 @@ var noledger = new Vue({
 
             // append plain msg to UI chat
             internal = {msg: msg, time: pkg.time, type: 'to' };
-            this.contacts[address].to.push(internal)
+            this.contacts[address].stack.push(internal);
 
             // build blob msg window
-            this.blob(internal)
+            this.blob(internal, fresh=true)
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {
