@@ -1,3 +1,9 @@
+.blue {
+    background-color: rgb(30, 48, 63)
+}
+.green {
+    background-color: rgb(24, 65, 34)
+}
 body {
     background-color: rgb(18, 36, 65);
     font-family: Arial, Helvetica, sans-serif;
@@ -5,6 +11,11 @@ body {
 
 #head {
     max-height: 5vh;
+}
+
+a {
+    color: aquamarine;
+    font-style: bold;
 }
 
 h1 {
@@ -64,6 +75,9 @@ h3 {
     display: block;
     color:#ddd;
     background-color: #383838;
+    -webkit-box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
+    box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
+    z-index: 100;
 }
 #chatWindow {
     width: 100%;
@@ -121,13 +135,20 @@ h3 {
 .messageBox{
     color: #ddd;
     width: 50vw;
-    padding: 5px;
+    margin: 5px;
     min-width: 400px;
     max-width: 800px;
     min-height: 2rem;
     height: auto;
     -webkit-border-radius: 5px 5px 5px 5px;
     border-radius: 5px 5px 5px 5px;
+}
+
+.messageBox p {
+    width: 100%;
+    overflow-wrap: break-word;
+    padding: 5px;
+    margin: 0
 }
 
 #messageFrame {
@@ -137,10 +158,21 @@ h3 {
     max-height: 70vh;
     display: block;
     overflow-y: scroll;
+    -webkit-box-shadow:inset 0 0 6px 0 rgba(0,0,0,0.6);
+    box-shadow:inset 0 0 6px 0 rgba(0,0,0,0.6);
 }
 
 .symbol {
     font-size: 1.5rem;
+    margin: 0;
+}
+
+.timeLabel {
+    text-align: right;
+    color: rgb(151, 151, 151);
+    font-size: 0.8rem;
+    width: 100%;
+    padding: 2px;
     margin: 0;
 }
 

@@ -73,10 +73,45 @@ var noledger = new Vue({
         console.log(enc)
         console.log(dec)
         this.initKeyBindings();
-        
     },
 
     methods: {
+        animate: async function (el, type) {
+            /* Global UI Animation Tool */
+            if          (type == 'poke left') {
+                backup = String(el.style.marginRight)
+                m = 0
+                for (let i = 0; i < 1000; i++) {
+                    m += 0.01;
+                    att = `${m}vw`;
+                    el.style.marginRight = att;
+                    this.sleep(.01)
+                }
+                for (let i = 0; i < 1000; i++) {
+                    m -= 0.01;
+                    att = `${m}vw`;
+                    el.style.marginRight = att
+                    this.sleep(.01)
+                }
+                el.style.marginRight = backup;
+            } else if   (type == 'poke right') {
+                backup = String(el.style.marginLeft)
+                m = 0
+                for (let i = 0; i < 1000; i++) {
+                    m += 0.01;
+                    att = `${m}vw`;
+                    el.style.marginLeft= att;
+                    this.sleep(.01)
+                }
+                for (let i = 0; i < 1000; i++) {
+                    m -= 0.01;
+                    att = `${m}vw`;
+                    el.style.marginLeft = att
+                    this.sleep(.01)
+                }
+                el.style.marginLeft = backup;
+            }
+        },
         backToContacts: async function () {
             this.wrapperVisible = true;
             this.chatVisible = false;
@@ -86,46 +121,61 @@ var noledger = new Vue({
                 pkg - msg package
                 fresh - if true: the msg is fresh and will be animated with sound
             */
+
+                /* crude form
+                <div #messageFrame .container>
+                    <span .row>
+                        <div .container>
+                            <row>
+                                <p .messageBox .green/blue>
+                            <row_2>
+                                <p .timeLabel>
+                */
+
+            // build & append msg box in chat frame
             frame = document.getElementById('messageFrame');
             span = document.createElement('span');
             p = document.createElement('p');
             span.className = 'row no-gutters'
+            p.innerHTML = await this.renderMessage(pkg.msg);
+            let div = document.createElement('div');
+                div.className = "container-fluid p-0";
+            let row = document.createElement('div');
+                row.className = "row no-gutters";
             
+            // color and align dependence on type
             if (pkg.type == 'to') {
-                p.style.backgroundColor = '#22bf33' 
+                div.className = 'messageBox green' 
                 span.style.direction = 'rtl'
             } else {
-                p.style.background = 'blue';
+                div.className = 'messageBox blue';
             }
-            p.className = 'messageBox';
-            p.innerHTML = `${pkg.msg}`;
-            span.appendChild(p)
 
-            // decide if to animate
+            // append datetime label
+            let row_2 = document.createElement('div');
+                row_2.className = "row no-gutters";
+            let dt = document.createElement('p');
+                dt.className = 'timeLabel';
+            datetime =  new Date(pkg.time);
+            weekDay = new Intl.DateTimeFormat('DE-DE', { weekday: 'long'}).format(datetime);
+            timeString = datetime.toTimeString().split(' ')[0].split(':').slice(0,2).join(':');
+            dt.innerHTML = `${weekDay}, ${timeString}`;
+
+            // assemble
+            row.appendChild(p);
+            div.appendChild(row);
+            div.appendChild(row_2);
+            span.appendChild(div);
+            row_2.appendChild(dt);
+
+            // decide whether to animate
             frame.appendChild(span);
             if (fresh) {
-                m = 0
-                for (let i = 0; i < 1000; i++) {
-                    m += 0.01;
-                    att = `${m}vw`;
-                    if (pkg.type == 'to') {
-                        span.style.marginRight = att
-                    } else {
-                        span.style.marginLeft = att
-                    }
-                    this.sleep(.01)
+                if (pkg.type == 'to') {
+                    this.animate(span, 'poke left')
+                } else {
+                    this.animate(span, 'poke right')
                 }
-                for (let i = 0; i < 500; i++) {
-                    m -= 0.01;
-                    att = `${m}vw`;
-                    if (pkg.type == 'to') {
-                        span.style.marginRight = att
-                    } else {
-                        span.style.marginLeft = att
-                    }
-                    this.sleep(.01)
-                }
-                span.style.marginRight = "0vw";
             }
 
             // scroll to bottom
@@ -166,6 +216,16 @@ var noledger = new Vue({
             let pub = await this.keyExport(this.keyPair.publicKey);
             console.log('public',pub)
             return pub.n;
+        },
+        initContact: async function (address) {
+            // initializes entry in contacts database
+            if (!(address in this.contacts)) {
+                console.log('initialize contact -', address.slice(0,7), '...')
+                this.contacts[address] = {
+                    key: this.keyImport(address),
+                    stack: []
+                }
+            }
         },
         initKeyBindings: async function () {
             // bind enter key for msg sending
@@ -220,14 +280,7 @@ var noledger = new Vue({
             return obj
         },
         loadChat: async function (address) {
-            console.log('load chat ...')
-            if (!(address in this.contacts)) {
-                console.log('initialize first contact.')
-                this.contacts[address] = {
-                    key: this.keyImport(address),
-                    stack: []
-                }
-            }
+            await this.initContact(address);
             let frame = document.getElementById('messageFrame');
             frame.innerHTML = "" // flush
             // load messages from stack
@@ -336,6 +389,34 @@ var noledger = new Vue({
             thread_box.onmousedown = function () {noledger.loadChat(address)}
             el.appendChild(thread_box)
         },
+        receive: async function (address, pkg={}) {
+            await this.initContact(address);
+            x = "Hello World! https://github.com/B0-B";
+            pkg.cipher = x;
+            pkg.time = new Date().getTime()
+            let msg = await this.renderMessage(pkg.cipher),
+                time = pkg.time,
+                type = 'from';
+            internal = {msg: msg, time: time, type: type };
+            this.contacts[address].stack.push(internal)
+            this.blob(internal, fresh=true)
+        },
+        renderMessage: async function (sentence) {
+            let assembly = [];
+            words = sentence.split(' ');
+            console.log(words)
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                if (word.includes('http')) {
+                    assembly.push(`<a href="${word}">${word}</a>`)
+                } else {
+                    assembly.push(word)
+                }
+            }
+            joined = assembly.join(' ')
+            console.log(joined)
+            return joined
+        },
         request: function (options, path) {
       
             return new Promise(function (resolve, reject) {
@@ -388,7 +469,7 @@ var noledger = new Vue({
             } catch (error) {
                 console.log(error)
             }
-            pkg.time = new Date().getTime()
+            pkg.time = new Date().getTime();
 
             // append plain msg to UI chat
             internal = {msg: msg, time: pkg.time, type: 'to' };
