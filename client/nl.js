@@ -281,16 +281,17 @@ var noledger = new Vue({
         },
         loadChat: async function (address) {
             await this.initContact(address);
+            this.toAddress = address;
+            this.chatVisible = true;
+            this.wrapperVisible = false;
             let frame = document.getElementById('messageFrame');
             frame.innerHTML = "" // flush
             // load messages from stack
             let stack = this.contacts[address].stack;
             for (let i = 0; i < stack.length; i++) {
-                this.blob(stack[i], false)
+                await this.blob(stack[i], false)
             }
-            this.toAddress = address;
-            this.chatVisible = true;
-            this.wrapperVisible = false;
+            
         },
         loadContactsPage: async function () {
             let wrapper = document.getElementById('wrapper');
