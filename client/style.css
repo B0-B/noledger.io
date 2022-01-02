@@ -35,13 +35,15 @@ h3 {
     width: 100%;
     color: rgb(51, 77, 148);
     padding: 5px;
+    
     text-align: center;
 }
 
 #address {
     cursor: pointer;
     position: relative;
-    margin: 0
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 #address-tooltip {
@@ -116,11 +118,30 @@ h3 {
     position: relative
 }
 
+.messageBox{
+    color: #ddd;
+    width: 50vw;
+    padding: 5px;
+    min-width: 400px;
+    max-width: 800px;
+    min-height: 2rem;
+    height: auto;
+    -webkit-border-radius: 5px 5px 5px 5px;
+    border-radius: 5px 5px 5px 5px;
+}
+
 #messageFrame {
     background-color: #ddd;
     width: 100%;
     min-height: 70vh;
+    max-height: 70vh;
     display: block;
+    overflow-y: scroll;
+}
+
+.symbol {
+    font-size: 1.5rem;
+    margin: 0;
 }
 
 #toAddressLabel {
@@ -138,11 +159,6 @@ h3 {
     text-overflow: ellipsis;
     display: inline-block;
     white-space: nowrap
-}
-
-.symbol {
-    font-size: 1.5rem;
-    margin: 0;
 }
 
 .thread-box {

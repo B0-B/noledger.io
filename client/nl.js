@@ -43,6 +43,7 @@ var noledger = new Vue({
     */
     data: {
         chatVisible: false,
+        checkString: 'noledger-checksum-plaintext', // very mighty for custom encryption
         contacts: {},
         encryption: {
             encoder: new TextEncoder(),
@@ -65,12 +66,14 @@ var noledger = new Vue({
     },
 
     mounted: async function () {
-        // this.keyPair = await this.generateKeyPair();
-        // testphrase = 'Hello 123 !'
-        // enc = await this.encrypt(testphrase, this.keyPair.publicKey)
-        // dec = await this.decrypt(enc)
-        // console.log(enc)
-        // console.log(dec)
+        this.keyPair = await this.generateKeyPair();
+        testphrase = 'Hello 123 !'
+        enc = await this.encrypt(testphrase, this.keyPair.publicKey)
+        dec = await this.decrypt(enc)
+        console.log(enc)
+        console.log(dec)
+        this.initKeyBindings();
+        
     },
 
     methods: {
@@ -78,44 +81,38 @@ var noledger = new Vue({
             this.wrapperVisible = true;
             this.chatVisible = false;
         },
+        blob: async function (pkg, fresh=true) {
+            /*
+                pkg - msg package
+                fresh - if true: the msg is fresh and will be animated with sound
+            */
+            frame = document.getElementById('messageFrame');
+            span = document.createElement('span');
+            p = document.createElement('p');
+            span.className = 'row no-gutters'
+            frame.appendChild(span);
+            if (pkg.type == 'to') {
+                p.style.backgroundColor = '#22bf33' 
+                span.style.direction = 'rtl'
+            } else {
+                p.style.background = 'blue';
+            }
+            p.className = 'messageBox';
+            p.innerHTML = `${pkg.msg}`;
+            span.appendChild(p)
+
+            // scroll to bottom
+            frame.scrollTop = frame.scrollHeight;
+        },
         encrypt: async function (data, key) {
-            const dataEncoded = this.encryption.encoder.encode(data);
-            return crypto.subtle.encrypt(this.encryption.algorithm, key, dataEncoded);
+            const dataEncoded = await this.encryption.encoder.encode(data);
+            let encrypted = await crypto.subtle.encrypt(this.encryption.algorithm, key, dataEncoded);
+            return encrypted
         },
         decrypt: async function (cipher) {
             const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
-            return this.encryption.decoder.decode(dataEncoded);
-        },
-        keyExport: async function (key) {
-            
-            const exported = window.crypto.subtle.exportKey(
-              "jwk",
-              key
-            );
-            return exported
-        
-        },
-        keyImport: async function (key, usage="encrypt") {
-            // encode the key to base64url
-            key_enc = window.btoa(unescape(encodeURIComponent( key )));
-            key_enc = key_enc.slice(0,key_enc.length-1)
-            //key_enc = escape(key_enc)
-            key_enc = key;
-            console.log(key, '\n\n', key_enc)
-            const imported = crypto.subtle.importKey(
-                "jwk",
-                { 
-                    kty: "RSA", 
-                    e: "AQAB", 
-                    n: key_enc,
-                    alg: this.encryption.rsa.algorithm,
-                    ext: true,
-                },
-                this.encryption.algorithm,
-                false,
-                [usage]
-            )
-            return imported
+            let decoded = await this.encryption.decoder.decode(dataEncoded);
+            return decoded
         },
         generateKeyPair: async function () {
             return window.crypto.subtle.generateKey(
@@ -142,6 +139,58 @@ var noledger = new Vue({
             let pub = await this.keyExport(this.keyPair.publicKey);
             console.log('public',pub)
             return pub.n;
+        },
+        initKeyBindings: async function () {
+            // bind enter key for msg sending
+            document.getElementById("entryInput").onkeydown = function (e) {
+                e = e || window.event;
+                switch (e.keyCode) {
+                    case 13 :
+                        noledger.send()
+                }
+            }
+        },
+        keyExport: async function (key) {
+            
+            const exported = window.crypto.subtle.exportKey(
+              "jwk",
+              key
+            );
+            console.log('exported', exported)
+            return exported
+        
+        },
+        keyImport: async function (key, usage="encrypt") {
+            // encode the key to base64url
+            // key_enc = window.btoa(unescape(encodeURIComponent( key )));
+            // key_enc = key_enc.slice(0,key_enc.length-1)
+            //key_enc = escape(key_enc)
+            key_enc = key;
+            //console.log(key, '\n\n', key_enc)
+            const imported = await crypto.subtle.importKey(
+                "jwk",
+                { 
+                    kty: "RSA", 
+                    e: "AQAB", 
+                    n: key_enc,
+                    alg: this.encryption.rsa.algorithm,
+                    ext: true,
+                },
+                this.encryption.algorithm,
+                false,
+                [usage]
+            )
+
+            // rewrite key to new object
+            const obj = new Object();
+            obj.algorithm = imported.algorithm;
+            obj.extractable = imported.extractable;
+            obj.type = imported.type;
+            obj.usages = imported.usages;
+
+            console.log('imported', imported)
+            console.log('object import', obj)
+            return obj
         },
         loadChat: async function (address) {
             console.log('load chat ...')
@@ -222,13 +271,22 @@ var noledger = new Vue({
                     noledger.loadNewContactButton(parent);
                 }
                 // trigger when address is confirmed via enter
-                input_field.onkeydown = function (e) {
+                input_field.onkeydown = async function (e) {
                     e = e || window.event;
                     switch (e.keyCode) {
                         case 13 : //Your Code Here (13 is ascii code for 'ENTER')
-                            noledger.loadChat(this.value);
-                            noledger.loadNewContactThread(document.getElementById('contacts-wrapper'), this.value);
-                            //console.log('trigger', this.value);
+                            address = await noledger.getAddress();  
+                            test = true  
+                            if (this.value != address || test) {
+                                noledger.loadChat(this.value);
+                                noledger.loadNewContactThread(document.getElementById('contacts-wrapper'), this.value);
+                            } else {
+                                this.value = '';
+                                this.placeholder = 'cannot add your own address.'
+                                await noledger.sleep(3);
+                                this.placeholder = 'enter address';
+                                console.log('ERROR: you cannot add your own address.')
+                            }
                     }
                 }
             }
@@ -275,13 +333,43 @@ var noledger = new Vue({
                 xhr.send(JSON.stringify(options)); 
             });
         },
-        send: async function (address, msg) {
-            key = this.contacts[address].key;
+        send: async function () {
+
+            // draw current address and msg
+            const entry = document.getElementById('entryInput');
+            const msg = `${entry.value}`;
+            const address = this.toAddress;
+
+            // export the contact public key
+            const key = this.contacts[address].key;
+
+            // reset entry
+            entry.value = '';
+
+            // encrypt msg
             pkg = {}
-            pkg.payload = this.encrypt(msg, key);
-            pkg.adress = this.encrypt(this.getAddress(), key);
-            pkg.signature = this.encrypt('noledger', key);
-            pkg.timestamp = new Date().getTime()
+            try {
+                pkg.check = await this.encrypt(this.checkString, key);
+                pkg.cipher = await this.encrypt(msg, key);
+                pkg.from = await this.encrypt(this.getAddress(), key);
+            } catch (error) {
+                console.log(error)
+            }
+            pkg.time = new Date().getTime()
+
+            // append plain msg to UI chat
+            internal = {msg: msg, time: pkg.time, type: 'to' };
+            this.contacts[address].to.push(internal)
+
+            // build blob msg window
+            this.blob(internal)
+        },
+        sleep: function (seconds) {
+            return new Promise(function(resolve) {
+                setTimeout(function() {
+                    resolve(0);
+                }, 1000*seconds);
+            });
         }
     }
 });
