@@ -126,6 +126,8 @@ var noledger = new Vue({
                 <div #messageFrame .container>
                     <span .row>
                         <div .container>
+                            <row_0>
+                                <p>
                             <row>
                                 <p .messageBox .green/blue>
                             <row_2>
@@ -151,6 +153,34 @@ var noledger = new Vue({
                 div.className = 'messageBox blue';
             }
 
+            // --- menu row ---
+            let menu = document.createElement('span');
+                menu.className = 'container-fluid p-0 msgMenu';
+                menu.innerHTML = "delete";
+            let row_0 = document.createElement('div');
+                row_0.className = "row no-gutters";
+            let dots = document.createElement('a');
+                dots.className = 'menuDots';
+            row_0.style.direction = 'rtl';
+            dots.innerHTML = '•••';
+            dots.onmousedown = function () {
+                this.style.color = 'aquamarine';
+                const rect = dots.getBoundingClientRect()
+                menu.style.right = rect.right;
+                menu.style.top = rect.top;
+                document.body.appendChild(menu);
+            }
+                // listen to simulated outside focus events
+            document.addEventListener('click', function(e){   
+                if (document.contains(e.target) && !dots.contains(e.target) ){
+                    console.log('outside')
+                    dots.style.color = '#ddd';
+                    menu.remove()
+                } else{
+                    console.log('inside')
+                }
+            });
+
             // append datetime label
             let row_2 = document.createElement('div');
                 row_2.className = "row no-gutters";
@@ -163,6 +193,8 @@ var noledger = new Vue({
 
             // assemble
             row.appendChild(p);
+            row_0.appendChild(dots);
+            div.appendChild(row_0);
             div.appendChild(row);
             div.appendChild(row_2);
             span.appendChild(div);
