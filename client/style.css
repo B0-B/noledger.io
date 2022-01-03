@@ -152,12 +152,15 @@ h3 {
     height: auto;
     -webkit-border-radius: 5px 5px 5px 5px;
     border-radius: 5px 5px 5px 5px;
+    z-index: 100
 }
 
 .messageBox p {
     width: 100%;
     overflow-wrap: break-word;
     padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
     margin: 0
 }
 
@@ -174,7 +177,7 @@ h3 {
 
 .msgMenu {
     position: absolute;
-    z-index: 100;
+    z-index: 99;
     min-width: 20vw;
     max-width: 30vw;
     height: auto;

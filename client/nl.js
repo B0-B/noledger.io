@@ -165,10 +165,8 @@ var noledger = new Vue({
             dots.innerHTML = '•••';
             dots.onmousedown = function () {
                 this.style.color = 'aquamarine';
-                const rect = dots.getBoundingClientRect()
-                menu.style.right = rect.right;
-                menu.style.top = rect.top;
-                document.body.appendChild(menu);
+                noledger.animate()
+                
             }
                 // listen to simulated outside focus events
             document.addEventListener('click', function(e){   
@@ -440,8 +438,8 @@ var noledger = new Vue({
             console.log(words)
             for (let i = 0; i < words.length; i++) {
                 const word = words[i];
-                if (word.includes('http')) {
-                    assembly.push(`<a href="${word}">${word}</a>`)
+                if (word.includes('https://') || word.includes('http://')) {
+                    assembly.push(`<a href="${word}" target="_blank">${word}</a>`)
                 } else {
                     assembly.push(word)
                 }
