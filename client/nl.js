@@ -140,6 +140,7 @@ var noledger = new Vue({
             p = document.createElement('p');
             span.className = 'row no-gutters'
             p.innerHTML = await this.renderMessage(pkg.msg);
+            console.log('inner', p.innerHTML)
             let div = document.createElement('div');
                 div.className = "container-fluid p-0";
             let row = document.createElement('div');
@@ -166,7 +167,6 @@ var noledger = new Vue({
             dots.onmousedown = function () {
                 this.style.color = 'aquamarine';
                 noledger.animate()
-                
             }
                 // listen to simulated outside focus events
             document.addEventListener('click', function(e){   
@@ -425,28 +425,32 @@ var noledger = new Vue({
             x = "Hello World! https://github.com/B0-B";
             pkg.cipher = x;
             pkg.time = new Date().getTime()
-            let msg = await this.renderMessage(pkg.cipher),
+            let message = pkg.cipher,
                 time = pkg.time,
                 type = 'from';
-            internal = {msg: msg, time: time, type: type };
+            internal = {msg: message, time: time, type: type };
             this.contacts[address].stack.push(internal)
             this.blob(internal, fresh=true)
         },
         renderMessage: async function (sentence) {
-            let assembly = [];
+            let output = '';
             words = sentence.split(' ');
-            console.log(words)
+            console.log('words', words)
+            let thumbnail = false;
             for (let i = 0; i < words.length; i++) {
                 const word = words[i];
                 if (word.includes('https://') || word.includes('http://')) {
-                    assembly.push(`<a href="${word}" target="_blank">${word}</a>`)
+                    output += `<a href="${word}" target="_blank">${word}</a>`;
                 } else {
-                    assembly.push(word)
+                    output += word
                 }
+                if (i != words.length-1) {
+                    output += ' ';
+                }
+                
             }
-            joined = assembly.join(' ')
-            console.log(joined)
-            return joined
+            console.log('output', output)
+            return output
         },
         request: function (options, path) {
       
