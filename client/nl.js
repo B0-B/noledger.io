@@ -547,12 +547,20 @@ var noledger = new Vue({
             /* fetch the url provided */
             var response = await fetch(url);
 
+            /* extract protocol and domain */
+            let protocol;
+            if (url.includes('https')) {
+                protocol = 'https://'
+            } else {
+                protocol = 'http://'
+            } let domain = url.replace(protocol,'').split('/')[0];
+
             /* Extract html object */
             rawHtml = await response.text();
             const parser = new DOMParser();
             dom = parser.parseFromString(rawHtml, "text/html").documentElement;
 
-            // extract images
+            // extract demanded data from dom object
             extractedTitle = dom.getElementsByTagName('title')['0'].innerHTML;
             images = dom.getElementsByTagName('img');
 
@@ -563,7 +571,6 @@ var noledger = new Vue({
                     const uri = img.src;
                     console.log('uri', uri);
                     if (!uri.includes('localhost')) {
-                        
                         let img_el = document.createElement('img');
                         console.log('el', img_el);
                         img_el.src = uri;
@@ -575,11 +582,9 @@ var noledger = new Vue({
                 }
             }
 
-            // build html structure
+            // build thumbnail object
             tn = document.createElement('a');
             tn.className = "thumbnail-container";
-            caption = document.createElement('div');
-            caption.className = "thumbnail-text-centered";
             
             // append link and make thumbnail clickable
             tn.style.cursor = "pointer";
@@ -587,8 +592,10 @@ var noledger = new Vue({
             tn.target = "_blank";
             
             // add a caption
+            caption = document.createElement('div');
+            caption.className = "thumbnail-text-centered";
+            caption.innerHTML = `<strong>${domain}</strong><br><p>${extractedTitle}</p>`
             tn.appendChild(caption);
-
             
             /* pick a suitable image candidate */
             for (let img of images) {
@@ -615,16 +622,6 @@ var noledger = new Vue({
                 tn.appendChild(candidate);
             } else {
                 // --- try to draw the favicon instead ---
-                let prefix;
-                if (url.includes('https')) {
-                    prefix = 'https://'
-                } else {
-                    prefix = 'http://'
-                }
-                let domain = url.replace(prefix, '');
-                if (domain.includes('/')) {
-                    domain = domain.split('/')[0]
-                }
                 
             }
             return tn
