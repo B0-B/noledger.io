@@ -197,7 +197,10 @@ var noledger = new Vue({
             div.appendChild(row_0);
             div.appendChild(row);
             if (msg_pkg.thumbnail) { // append thumbnail if provided from url
-                div.appendChild(msg_pkg.thumbnail)
+                thumb_el = document.createElement('div');
+                thumb_el.className = 'container-fluid p-0';
+                div.appendChild(thumb_el);
+                this.thumbnail(msg_pkg.thumbnail, thumb_el)
             }
             div.appendChild(row_2);
             span.appendChild(div);
@@ -463,7 +466,7 @@ var noledger = new Vue({
             }
             if (thumbnail) {
                 try {
-                    thumbnail = await this.thumbnail(url);
+                    thumbnail = url;
                 } catch (error) {
                     console.log(error);
                     thumbnail = null
@@ -542,7 +545,7 @@ var noledger = new Vue({
                 }, 1000*seconds);
             });
         },
-        thumbnail: async function (url) {
+        thumbnail: async function (url, anchor=null) {
 
             /* fetch the url provided */
             var response = await fetch(url);
@@ -623,6 +626,9 @@ var noledger = new Vue({
             } else {
                 // --- try to draw the favicon instead ---
                 
+            }
+            if (anchor) {
+                anchor.appendChild(tn);
             }
             return tn
         }    
