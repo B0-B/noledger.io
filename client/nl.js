@@ -70,8 +70,6 @@ var noledger = new Vue({
         testphrase = 'Hello 123 !'
         enc = await this.encrypt(testphrase, this.keyPair.publicKey)
         dec = await this.decrypt(enc)
-        result = await this.thumbnail(document.getElementById('noledger'), 'https://github.com/B0-B')
-        console.log('result', result);
         console.log(enc)
         console.log(dec)
         this.initKeyBindings();
@@ -120,6 +118,7 @@ var noledger = new Vue({
         },
         blob: async function (pkg, fresh=true) {
             /*
+            Builds a msg box and appends it to the chat with blob sound.
                 pkg - msg package
                 fresh - if true: the msg is fresh and will be animated with sound
             */
@@ -143,7 +142,7 @@ var noledger = new Vue({
             span.className = 'row no-gutters'
              
             let msg_pkg = await this.renderMessage(pkg.msg);
-            p.innerHTML = msg_pkg.msg;
+            p.innerHTML = msg_pkg.output;
             let div = document.createElement('div');
                 div.className = "container-fluid p-0";
             let row = document.createElement('div');
@@ -197,9 +196,9 @@ var noledger = new Vue({
             row_0.appendChild(dots);
             div.appendChild(row_0);
             div.appendChild(row);
-            let tn = msg_pkg.thumbnail;
-            if (tn != null) { // check if a thumbnail is provided by link
-                div.appendChild(tn)}
+            if (msg_pkg.thumbnail) { // append thumbnail if provided from url
+                div.appendChild(msg_pkg.thumbnail)
+            }
             div.appendChild(row_2);
             span.appendChild(div);
             row_2.appendChild(dt);
@@ -441,7 +440,9 @@ var noledger = new Vue({
         renderMessage: async function (sentence) {
             let output = '';
             words = sentence.split(' ');
-            let thumbnail = false;
+            let thumbnail = false,
+                el,
+                url;
             for (let i = 0; i < words.length; i++) {
                 const word = words[i];
                 if (word.includes('https://') || word.includes('http://')) {
@@ -451,7 +452,7 @@ var noledger = new Vue({
                         el = document.createElement('div');
                         el.src = word;
                         el.className = 'container-fluid p-0 thumbnail'
-                        el.appendChild(el)
+                        url = word;
                     }
                 } else {
                     output += word
@@ -460,9 +461,18 @@ var noledger = new Vue({
                     output += ' ';
                 }
             }
-            if (!thumbnail) {thumbnail = null}
-            else {thumbnail = el}
-            return {'msg': output, 'thumbnail': thumbnail}
+            if (thumbnail) {
+                try {
+                    thumbnail = await this.thumbnail(url);
+                } catch (error) {
+                    console.log(error);
+                    thumbnail = null
+                }
+                
+            } else {
+                thumbnail = null
+            }
+            return {'output': output, 'thumbnail': thumbnail}
         },
         request: function (options, path) {
       
@@ -546,7 +556,7 @@ var noledger = new Vue({
             extractedTitle = dom.getElementsByTagName('title')['0'].innerHTML;
             images = dom.getElementsByTagName('img');
 
-            /* pick a suitable image */
+            /* pick a suitable image candidate */
             let candidate;
             for (let img of images) {
                 try {
@@ -562,32 +572,60 @@ var noledger = new Vue({
                     console.log(error)
                 }
             }
-            
+
             // build html structure
-            tn = document.createElement('span');
-            tn.className = "thumbnail-container"
-            tn.style.position = "relative";
-            tn.style.width="100%";
-            tn.style.height="100%";
-            tn.style.display="block";
-            tn.style.background="#000";
+            tn = document.createElement('a');
+            tn.className = "thumbnail-container";
             caption = document.createElement('div');
             caption.className = "thumbnail-text-centered";
-            caption.innerHTML = `<strong style="font-size: 2rem">${url.replace("https://", "")}</strong><br><p>${extractedTitle}</p>`
-
-            // format style
-            const opacity = 0.4;
-            candidate.style.opacity = `${opacity}`;
-            candidate.style.filter  = 'alpha(opacity=90)'; // IE fallback
             
-            // assemble and append to anchor
-            anchor.appendChild(tn);
+            // append link and make thumbnail clickable
+            tn.style.cursor = "pointer";
+            tn.href = url;
+            tn.target = "_blank";
+            
+            // add a caption
             tn.appendChild(caption);
 
-            /* if a candidate was picked append the fetched image*/
-            if (candidate) {
-                tn.appendChild(candidate);
+            
+            /* pick a suitable image candidate */
+            for (let img of images) {
+                try {
+                    const uri = img.src;
+                    if (!uri.includes('localhost')) {
+                        let img_el = document.createElement('img');
+                        console.log('el', img_el);
+                        img_el.src = uri;
+                        candidate = img_el;
+                        console.log('size', img_el.style.width, img_el.style.height);  
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
             }
+
+            /* if a candidate was picked append the fetched image */
+            if (candidate) {
+                const opacity = 0.4;
+                candidate.style.opacity = `${opacity}`;
+                candidate.style.filter  = 'alpha(opacity=90)'; // IE fallback
+                candidate.className = "thumbnail";
+                tn.appendChild(candidate);
+            } else {
+                // --- try to draw the favicon instead ---
+                let prefix;
+                if (url.includes('https')) {
+                    prefix = 'https://'
+                } else {
+                    prefix = 'http://'
+                }
+                let domain = url.replace(prefix, '');
+                if (domain.includes('/')) {
+                    domain = domain.split('/')[0]
+                }
+                
+            }
+            return tn
         }    
     }
 });
