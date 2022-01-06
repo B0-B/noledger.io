@@ -542,7 +542,7 @@ var noledger = new Vue({
                 }, 1000*seconds);
             });
         },
-        thumbnail: async function (anchor, url) {
+        thumbnail: async function (url) {
 
             /* fetch the url provided */
             var response = await fetch(url);
@@ -561,7 +561,9 @@ var noledger = new Vue({
             for (let img of images) {
                 try {
                     const uri = img.src;
+                    console.log('uri', uri);
                     if (!uri.includes('localhost')) {
+                        
                         let img_el = document.createElement('img');
                         console.log('el', img_el);
                         img_el.src = uri;
