@@ -70,6 +70,8 @@ var noledger = new Vue({
         testphrase = 'Hello 123 !'
         enc = await this.encrypt(testphrase, this.keyPair.publicKey)
         dec = await this.decrypt(enc)
+        result = await this.thumbnail(document.getElementById('noledger'), 'https://github.com/B0-B')
+        console.log('result', result);
         console.log(enc)
         console.log(dec)
         this.initKeyBindings();
@@ -139,8 +141,9 @@ var noledger = new Vue({
             span = document.createElement('span');
             p = document.createElement('p');
             span.className = 'row no-gutters'
-            p.innerHTML = await this.renderMessage(pkg.msg);
-            console.log('inner', p.innerHTML)
+             
+            let msg_pkg = await this.renderMessage(pkg.msg);
+            p.innerHTML = msg_pkg.msg;
             let div = document.createElement('div');
                 div.className = "container-fluid p-0";
             let row = document.createElement('div');
@@ -194,6 +197,9 @@ var noledger = new Vue({
             row_0.appendChild(dots);
             div.appendChild(row_0);
             div.appendChild(row);
+            let tn = msg_pkg.thumbnail;
+            if (tn != null) { // check if a thumbnail is provided by link
+                div.appendChild(tn)}
             div.appendChild(row_2);
             span.appendChild(div);
             row_2.appendChild(dt);
@@ -435,22 +441,28 @@ var noledger = new Vue({
         renderMessage: async function (sentence) {
             let output = '';
             words = sentence.split(' ');
-            console.log('words', words)
             let thumbnail = false;
             for (let i = 0; i < words.length; i++) {
                 const word = words[i];
                 if (word.includes('https://') || word.includes('http://')) {
                     output += `<a href="${word}" target="_blank">${word}</a>`;
+                    if (thumbnail == false) {
+                        thumbnail = true;
+                        el = document.createElement('div');
+                        el.src = word;
+                        el.className = 'container-fluid p-0 thumbnail'
+                        el.appendChild(el)
+                    }
                 } else {
                     output += word
                 }
                 if (i != words.length-1) {
                     output += ' ';
                 }
-                
             }
-            console.log('output', output)
-            return output
+            if (!thumbnail) {thumbnail = null}
+            else {thumbnail = el}
+            return {'msg': output, 'thumbnail': thumbnail}
         },
         request: function (options, path) {
       
@@ -519,6 +531,63 @@ var noledger = new Vue({
                     resolve(0);
                 }, 1000*seconds);
             });
-        }
+        },
+        thumbnail: async function (anchor, url) {
+
+            /* fetch the url provided */
+            var response = await fetch(url);
+
+            /* Extract html object */
+            rawHtml = await response.text();
+            const parser = new DOMParser();
+            dom = parser.parseFromString(rawHtml, "text/html").documentElement;
+
+            // extract images
+            extractedTitle = dom.getElementsByTagName('title')['0'].innerHTML;
+            images = dom.getElementsByTagName('img');
+
+            /* pick a suitable image */
+            let candidate;
+            for (let img of images) {
+                try {
+                    const uri = img.src;
+                    if (!uri.includes('localhost')) {
+                        let img_el = document.createElement('img');
+                        console.log('el', img_el);
+                        img_el.src = uri;
+                        candidate = img_el;
+                        console.log('size', img_el.style.width, img_el.style.height);  
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+            
+            // build html structure
+            tn = document.createElement('span');
+            tn.className = "thumbnail-container"
+            tn.style.position = "relative";
+            tn.style.width="100%";
+            tn.style.height="100%";
+            tn.style.display="block";
+            tn.style.background="#000";
+            caption = document.createElement('div');
+            caption.className = "thumbnail-text-centered";
+            caption.innerHTML = `<strong style="font-size: 2rem">${url.replace("https://", "")}</strong><br><p>${extractedTitle}</p>`
+
+            // format style
+            const opacity = 0.4;
+            candidate.style.opacity = `${opacity}`;
+            candidate.style.filter  = 'alpha(opacity=90)'; // IE fallback
+            
+            // assemble and append to anchor
+            anchor.appendChild(tn);
+            tn.appendChild(caption);
+
+            /* if a candidate was picked append the fetched image*/
+            if (candidate) {
+                tn.appendChild(candidate);
+            }
+        }    
     }
 });

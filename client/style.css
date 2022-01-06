@@ -227,3 +227,26 @@ h3 {
     height: 20vh;
     position: relative
 }
+
+.thumbnail {
+    padding: 5px;
+    width: 100%;
+    height: auto;
+    max-height: 20vh;
+}
+
+.thumbnail-container {
+    position: relative;
+    text-align: center;
+    color: white;
+    text-shadow: #000;
+}
+
+.thumbnail-text-centered {
+    margin-top: 5rem;
+    z-index: 100;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

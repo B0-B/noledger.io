@@ -18,6 +18,28 @@
         </script>
     </head>
     <body>
+
+        <div id="thumbnail">
+        </div>
+        <script>
+            function getThumbnail (anchor, url) {
+                tn = document.createElement('div');
+                tn.style.position = "relative";
+                tn.style.width="100%";
+                tn.style.height="100%";
+                tn.style.display="block";
+                anchor.appendChild(tn);
+                
+                // make a get request
+                var xmlHttp = new XMLHttpRequest();
+                xmlHttp.open( "GET", url, false ); // false for synchronous request
+                xmlHttp.send( null );
+                console.log('xml', xmlHttp.responseText);
+
+
+            }
+            getThumbnail(document.querySelector('thumbnail'), 'https://github.com/B0-B')
+        </script>
         
         <button onclick="openClient()">
             Open Client
