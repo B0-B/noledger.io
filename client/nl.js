@@ -569,7 +569,8 @@ var noledger = new Vue({
             /* Extract html object */
             rawHtml = await response.text();
             const parser = new DOMParser();
-            dom = parser.parseFromString(rawHtml, "text/html").documentElement;
+            let dom = parser.parseFromString(rawHtml, "text/html").documentElement;
+            let body = dom.querySelector('body');
 
             // extract demanded data from dom object
             extractedTitle = dom.getElementsByTagName('title')['0'].innerHTML;
@@ -578,7 +579,7 @@ var noledger = new Vue({
             let candidate;
             let host = 'https://' + location.host;
             for (let tagName of ['img', 'svg']) {
-                const images = dom.getElementsByTagName(tagName);
+                const images = body.getElementsByTagName(tagName);
                 for (let img of images) {
                     try {
                         let uri = img.src;
@@ -587,11 +588,14 @@ var noledger = new Vue({
                             path = uri.replace(host, '');
                             uri.replace(host, protocol + domain + path)
                         } 
-                        if (!uri.includes('localhost')) {
-                            let img_el = document.createElement(tagName);
-                            console.log('el', img_el);
-                            img_el.src = uri;
+                        let img_el = document.createElement(tagName);
+                        img_el.src = uri;
+                        /* pick only images of minimum size */
+                        console.log('uri', uri, 'element height', img_el.height);
+                        await this.sleep(0.04)
+                        if (img_el.height >= 100) { 
                             candidate = img_el;
+                            break;
                         }
                     } catch (error) {
                         console.log(error)
@@ -615,22 +619,6 @@ var noledger = new Vue({
             caption.style.pointerEvents = "none";
             caption.innerHTML = `<strong>${domain}</strong><br><p>${extractedTitle}</p>`
             tn.appendChild(caption);
-            
-            /* pick a suitable image candidate */
-            // for (let img of images) {
-            //     try {
-            //         const uri = img.src;
-            //         if (!uri.includes('localhost')) {
-            //             let img_el = document.createElement('img');
-            //             console.log('el', img_el);
-            //             img_el.src = uri;
-            //             candidate = img_el;
-            //             console.log('size', img_el.style.width, img_el.style.height);  
-            //         }
-            //     } catch (error) {
-            //         console.log(error)
-            //     }
-            // }
 
             /* if a candidate was picked append the fetched image */
             if (candidate) {
