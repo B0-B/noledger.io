@@ -6,13 +6,13 @@
 
 
 /* Base64URL encoding/decoding */
-function unescape (str) {
+function b64Unescape (str) {
     return (str + '==='.slice((str.length + 3) % 4))
         .replace(/-/g, '+')
         .replace(/_/g, '/')
 }
 
-function escape (str) {
+function b64Escape (str) {
     return str.replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=/g, '')
@@ -217,6 +217,7 @@ var noledger = new Vue({
             }
 
             this.scrollToBottom()
+            return span
         },
         encrypt: async function (data, key) {
             const dataEncoded = await this.encryption.encoder.encode(data);
@@ -258,8 +259,9 @@ var noledger = new Vue({
             // initializes entry in contacts database
             if (!(address in this.contacts)) {
                 console.log('initialize contact -', address.slice(0,7), '...')
+                _key = await this.keyImport(address)
                 this.contacts[address] = {
-                    key: this.keyImport(address),
+                    key: _key,
                     stack: []
                 }
             }
@@ -286,9 +288,9 @@ var noledger = new Vue({
         },
         keyImport: async function (key, usage="encrypt") {
             // encode the key to base64url
-            // key_enc = window.btoa(unescape(encodeURIComponent( key )));
+            // key_enc = window.btoa(unb64unescape(encodeURIComponent( key )));
             // key_enc = key_enc.slice(0,key_enc.length-1)
-            //key_enc = escape(key_enc)
+            //key_enc = b64Escape(key_enc)
             key_enc = key;
             //console.log(key, '\n\n', key_enc)
             const imported = await crypto.subtle.importKey(
@@ -303,21 +305,10 @@ var noledger = new Vue({
                 this.encryption.algorithm,
                 false,
                 [usage]
-            )
-
-            // rewrite key to new object
-            const obj = new Object();
-            obj.algorithm = imported.algorithm;
-            obj.extractable = imported.extractable;
-            obj.type = imported.type;
-            obj.usages = imported.usages;
-
-            console.log('imported', imported)
-            console.log('object import', obj)
-            return obj
+            );
+            return imported
         },
         loadChat: async function (address) {
-            await this.initContact(address);
             this.toAddress = address;
             this.chatVisible = true;
             this.wrapperVisible = false;
@@ -328,7 +319,6 @@ var noledger = new Vue({
             for (let i = 0; i < stack.length; i++) {
                 await this.blob(stack[i], false)
             }
-            
         },
         loadContactsPage: async function () {
             let wrapper = document.getElementById('wrapper');
@@ -402,6 +392,7 @@ var noledger = new Vue({
                             address = await noledger.getAddress();  
                             test = true  
                             if (this.value != address || test) {
+                                await noledger.initContact(address);
                                 noledger.loadChat(this.value);
                                 noledger.loadNewContactThread(document.getElementById('contacts-wrapper'), this.value);
                             } else {
@@ -414,18 +405,18 @@ var noledger = new Vue({
                     }
                 }
             }
-
             //el.className = "new-contact";
             el.appendChild(el_payload);
             parent.appendChild(el);
         },
         loadNewContactThread: async function (el, address) {
+            
             let thread_box = document.createElement('span');
             thread_box.innerHTML = `${address.slice(0,9)}...`;
             thread_box.className = 'contact-box clickable';
             thread_box.value = address; // stack address in element value
             thread_box.onmousedown = function () {noledger.loadChat(address)}
-            el.appendChild(thread_box)
+            el.appendChild(thread_box);
         },
         receive: async function (address, pkg={}) {
             await this.initContact(address);
@@ -529,20 +520,34 @@ var noledger = new Vue({
             // encrypt msg
             pkg = {}
             try {
-                pkg.check = await this.encrypt(this.checkString, key);
-                pkg.cipher = await this.encrypt(msg, key);
-                pkg.from = await this.encrypt(this.getAddress(), key);
+                check = await this.encrypt(this.checkString, key);
+                cipher = await this.encrypt(msg, key);
+                from = await this.encrypt(this.getAddress(), key);
             } catch (error) {
-                console.log(error)
+                console.log("encryption error", error)
+            } finally {
+                // remove key from variable
+                delete key;
             }
-            pkg.time = new Date().getTime();
+            
+            // build package
+            pkg = {
+                "time": new Date().getTime(),
+                "from": escape(from).toString(),
+                "cipher": escape(cipher).toString()
+            }
 
-            // append plain msg to UI chat
+            // append another pkg suited for client chat window
             internal = {msg: msg, time: pkg.time, type: 'to' };
             this.contacts[address].stack.push(internal);
 
-            // build blob msg window
-            this.blob(internal, fresh=true)
+            // build & load blob msg window
+            let msgBox = this.blob(internal, fresh=true);
+
+            // finally send pkg to api
+            console.log('pkg for send', pkg)
+            let response = await this.request(pkg, '/submit');
+            console.log(response)
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {
@@ -583,7 +588,7 @@ var noledger = new Vue({
                 for (let img of images) {
                     try {
                         let uri = img.src;
-                        console.log('uri', uri);
+                        //console.log('uri', uri);
                         if (uri.includes(host)) {
                             path = uri.replace(host, '');
                             uri.replace(host, protocol + domain + path)
@@ -591,7 +596,7 @@ var noledger = new Vue({
                         let img_el = document.createElement(tagName);
                         img_el.src = uri;
                         /* pick only images of minimum size */
-                        console.log('uri', uri, 'element height', img_el.height);
+                        //console.log('uri', uri, 'element height', img_el.height);
                         await this.sleep(0.04)
                         if (img_el.height >= 100) { 
                             candidate = img_el;

@@ -21,28 +21,43 @@ node.prototype.build = function () {
         /* FIREWALL */
         response.sendFile('index.html');
     });
-    api.get('/client',function(request, response){
+    api.get('/client', async function(request, response){
 
         /* FIREWALL */
         console.log('client request ...')
-        result = firewall(request);
-        
+        result = await firewall(request);
         if (result) {
+            /* -- code here */
             response.redirect('./client');
             response.send('./client/index.html')
         }
     });
-    api.get('/ledger',function(request, response){
+    api.get('/ledger', async function(request, response){
 
         /* FIREWALL */
         console.log('client request ...')
-        result = firewall(request);
-        
+        result = await firewall(request);
         if (result) {
+            /* -- code here */
             response.redirect('./client');
             response.send('./client/index.html')
         }
     });
+    api.use(bodyParser.json());
+    api.post('/submit', async function (request, response) {
+
+        /* FIREWALL */
+        let response_pkg = {data: [], errors: []}
+        console.log('client request ...')
+        result = await firewall(request);
+        if (result) {
+            /* -- code here */
+            const json = request.body;
+            console.log('request', json)
+            res.send(response_pkg)
+        }
+    });
+
 
     // wrap https server
     let privateKey  = fs.readFileSync('./cert/ssl.key', 'utf8'),
@@ -81,7 +96,7 @@ node.prototype.sleep = function (seconds) {
 
 async function start () {
     const srv = new node();
-    //await srv.sleep(1);
+    await srv.sleep(1);
     srv.run(3000)
 }
 
