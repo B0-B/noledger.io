@@ -573,24 +573,31 @@ var noledger = new Vue({
 
             // extract demanded data from dom object
             extractedTitle = dom.getElementsByTagName('title')['0'].innerHTML;
-            images = dom.getElementsByTagName('img');
-
+            
             /* pick a suitable image candidate */
             let candidate;
-            for (let img of images) {
-                try {
-                    const uri = img.src;
-                    console.log('uri', uri);
-                    if (!uri.includes('localhost')) {
-                        let img_el = document.createElement('img');
-                        console.log('el', img_el);
-                        img_el.src = uri;
-                        candidate = img_el;
-                        console.log('size', img_el.style.width, img_el.style.height);  
+            let host = 'https://' + location.host;
+            for (let tagName of ['img', 'svg']) {
+                const images = dom.getElementsByTagName(tagName);
+                for (let img of images) {
+                    try {
+                        let uri = img.src;
+                        console.log('uri', uri);
+                        if (uri.includes(host)) {
+                            path = uri.replace(host, '');
+                            uri.replace(host, protocol + domain + path)
+                        } 
+                        if (!uri.includes('localhost')) {
+                            let img_el = document.createElement(tagName);
+                            console.log('el', img_el);
+                            img_el.src = uri;
+                            candidate = img_el;
+                        }
+                    } catch (error) {
+                        console.log(error)
                     }
-                } catch (error) {
-                    console.log(error)
                 }
+                if (candidate) {break}
             }
 
             // build thumbnail object
@@ -610,33 +617,38 @@ var noledger = new Vue({
             tn.appendChild(caption);
             
             /* pick a suitable image candidate */
-            for (let img of images) {
-                try {
-                    const uri = img.src;
-                    if (!uri.includes('localhost')) {
-                        let img_el = document.createElement('img');
-                        console.log('el', img_el);
-                        img_el.src = uri;
-                        candidate = img_el;
-                        console.log('size', img_el.style.width, img_el.style.height);  
-                    }
-                } catch (error) {
-                    console.log(error)
-                }
-            }
+            // for (let img of images) {
+            //     try {
+            //         const uri = img.src;
+            //         if (!uri.includes('localhost')) {
+            //             let img_el = document.createElement('img');
+            //             console.log('el', img_el);
+            //             img_el.src = uri;
+            //             candidate = img_el;
+            //             console.log('size', img_el.style.width, img_el.style.height);  
+            //         }
+            //     } catch (error) {
+            //         console.log(error)
+            //     }
+            // }
 
             /* if a candidate was picked append the fetched image */
             if (candidate) {
                 candidate.className = "thumbnail";
                 tn.appendChild(candidate);
             } else {
-                // --- try to draw the favicon instead ---
-                
+                /* try to draw the favicon instead */
+                tn.style.minHeight = "200px";
+                tn.style.height = "200px";
+                let favicon = document.createElement('img');
+                favicon.className = "thumbnail";
+                favicon.src = protocol + domain + '/favicon.ico';
+                console.log('favicon url', favicon.src)
+                tn.appendChild(favicon);
             }
             if (anchor) {
                 anchor.appendChild(tn);
             }
-
             this.scrollToBottom()
             return tn
         }    

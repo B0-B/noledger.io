@@ -239,6 +239,7 @@ h3 {
     margin-top: -30%;
     opacity: 0.4;
     filter: 40;
+    transition: ease-in-out 0.5s all;
 }
 
 .thumbnail:hover {
@@ -255,6 +256,7 @@ h3 {
     text-shadow: #000;
     max-height: 200px;
     overflow: hidden;
+    text-overflow: none;
     width: 96%;
     height: 100%;
     display: block;
@@ -269,4 +271,7 @@ h3 {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    text-shadow: 0 0 3px #000000;
+    text-decoration: none;
+    color: #ddd;
 }
