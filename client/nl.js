@@ -19,6 +19,20 @@ function b64Escape (str) {
 }
 /**/
 
+/* Buffer covnersions */
+function buf2str(buf) {
+    return String.fromCharCode.apply(null, new Uint16Array(buf));
+  }
+function str2buf(str) {
+    var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+    var bufView = new Uint16Array(buf);
+    for (var i=0, strLen=str.length; i < strLen; i++) {
+      bufView[i] = str.charCodeAt(i);
+    }
+    return buf;
+}
+/**/
+
 /* noledger main object */
 var noledger = new Vue({
 
@@ -467,14 +481,15 @@ var noledger = new Vue({
             }
             return {'output': output, 'thumbnail': thumbnail}
         },
-        request: function (options, path) {
+        request: function (options, path, json=true) {
       
             return new Promise(function (resolve, reject) {
                 // setup HTTP request 
                 var xhr = new XMLHttpRequest(); 
-                console.log('req-json', options)
                 xhr.open("POST", path, true); 
-                xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8"); 
+                if (json) {
+                    xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8"); 
+                }
                 
                 // log response
                 xhr.onreadystatechange = function () {  
@@ -489,7 +504,8 @@ var noledger = new Vue({
                 }
         
                 // handle errors
-                xhr.onerror = function() {
+                xhr.onerror = function(e) {
+                    console.log(e)
                     reject({'errors': ['error during request: no connection']})
                 }
         
@@ -514,16 +530,19 @@ var noledger = new Vue({
             // export the contact public key
             const key = this.contacts[address].key;
 
+            // get current timestamp
+            const timestamp = new Date().getTime();
+
             // reset entry
             entry.value = '';
 
             // encrypt msg
-            pkg = {}
             try {
                 check = await this.encrypt(this.checkString, key);
                 cipher = await this.encrypt(msg, key);
                 from = await this.encrypt(this.getAddress(), key);
             } catch (error) {
+                throw error
                 console.log("encryption error", error)
             } finally {
                 // remove key from variable
@@ -533,12 +552,13 @@ var noledger = new Vue({
             // build package
             pkg = {
                 "time": new Date().getTime(),
-                "from": escape(from).toString(),
-                "cipher": escape(cipher).toString()
+                "check": buf2str(check),
+                "from": buf2str(from),
+                "cipher": buf2str(cipher)
             }
 
             // append another pkg suited for client chat window
-            internal = {msg: msg, time: pkg.time, type: 'to' };
+            internal = {msg: msg, time: timestamp, type: 'to' };
             this.contacts[address].stack.push(internal);
 
             // build & load blob msg window
@@ -546,6 +566,10 @@ var noledger = new Vue({
 
             // finally send pkg to api
             console.log('pkg for send', pkg)
+            // let response = await fetch('/submit', {
+            //     method: 'POST',
+            //     body: fd
+            // })
             let response = await this.request(pkg, '/submit');
             console.log(response)
         },
