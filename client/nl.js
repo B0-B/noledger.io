@@ -216,8 +216,7 @@ var noledger = new Vue({
                 }
             }
 
-            // scroll to bottom
-            frame.scrollTop = frame.scrollHeight;
+            this.scrollToBottom()
         },
         encrypt: async function (data, key) {
             const dataEncoded = await this.encryption.encoder.encode(data);
@@ -507,6 +506,13 @@ var noledger = new Vue({
                 xhr.send(JSON.stringify(options)); 
             });
         },
+        scrollToBottom: function () {
+            // scrolls current chat to bottom
+            if (this.chatVisible) {
+                const frame = document.getElementById('messageFrame')
+                frame.scrollTop = frame.scrollHeight;
+            }
+        },
         send: async function () {
 
             // draw current address and msg
@@ -546,6 +552,8 @@ var noledger = new Vue({
             });
         },
         thumbnail: async function (url, anchor=null) {
+
+            /* This function builds an interactive thumbnail element for showcasing websites */
 
             /* fetch the url provided */
             var response = await fetch(url);
@@ -597,6 +605,7 @@ var noledger = new Vue({
             // add a caption
             caption = document.createElement('div');
             caption.className = "thumbnail-text-centered";
+            caption.style.pointerEvents = "none";
             caption.innerHTML = `<strong>${domain}</strong><br><p>${extractedTitle}</p>`
             tn.appendChild(caption);
             
@@ -618,9 +627,6 @@ var noledger = new Vue({
 
             /* if a candidate was picked append the fetched image */
             if (candidate) {
-                const opacity = 0.4;
-                candidate.style.opacity = `${opacity}`;
-                candidate.style.filter  = 'alpha(opacity=90)'; // IE fallback
                 candidate.className = "thumbnail";
                 tn.appendChild(candidate);
             } else {
@@ -630,6 +636,8 @@ var noledger = new Vue({
             if (anchor) {
                 anchor.appendChild(tn);
             }
+
+            this.scrollToBottom()
             return tn
         }    
     }
