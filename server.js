@@ -8,7 +8,9 @@ const { errorMonitor } = require('stream');
 
 var node = function () {
     this.dir = path.join(__dirname, '/');
-    this.ledger = [];
+    this.id_high = 0;
+    this.id_low = 0;
+    this.ledger = {};
     this.lifetime = .2;
     this.port = null;
     this.server = this.build();
@@ -57,13 +59,16 @@ node.prototype.build = function () {
             if (result) {
                 /* -- code here */
                 const json = request.body;
-                console.log('request', json);
+                //console.log('request', json);
 
                 // override the timestep
                 json.time = new Date().getTime();
 
                 // append to ledger
-                _node.ledger.push(json)
+                _node.id_high += 1;
+                _node.ledger[`${_node.id_high}`] = json;
+                
+                //_node.ledger.push(json)
             }
         } catch (error) {
             console.log('submit error:', error)
@@ -71,9 +76,7 @@ node.prototype.build = function () {
         } finally {
             response.send(response_pkg)
         }
-        
     });
-
 
     // wrap https server
     let privateKey  = fs.readFileSync('./cert/ssl.key', 'utf8'),
@@ -91,22 +94,25 @@ node.prototype.cleaner = async function () {
     console.log('start cleaner ...')
     const ms2min = 1/60000;
     while (this.server) {
+        console.log(this.ledger)
         let changes = false,
-            currentTime = new Date().getTime();
-        if (this.ledger.length > 0) {
-            const timeDiffInMin = (currentTime - this.ledger[0].time)*ms2min;
-            console.log('delta t', timeDiffInMin, '/', this.lifetime, this.ledger)
-            let delta = timeDiffInMin-this.lifetime;
-            console.log('delta', delta)
-            if (timeDiffInMin-this.lifetime > 0) {
-                console.log('delete message')
+            currentTime = new Date().getTime(),
+            keys = Object.keys(this.ledger).sort((a, b) => a - b);
+        if (keys.length > 0) {
+            console.log(keys)
+            const firstKey = keys[0];
+            const firstVal = this.ledger[firstKey];
+            const timeDiffInMin = (currentTime - firstVal.time)*ms2min;
+            if (timeDiffInMin - this.lifetime > 0) {
+                console.log(`delete message [id ${firstKey}]`)
                 // delete the message if exceeds allowed lifetime
-                delete this.ledger[0];
-                this.ledger = this.ledger.slice(1);
+                delete this.ledger[firstKey];
                 changes = true;
             }
         }
         if (!changes) {
+            // define new bottom id
+            this.id_low = this.id_high - Object.keys(this.ledger).length;
             await this.sleep(5);
         }
     }

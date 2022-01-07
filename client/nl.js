@@ -22,7 +22,8 @@ function b64Escape (str) {
 /* Buffer covnersions */
 function buf2str(buf) {
     return String.fromCharCode.apply(null, new Uint16Array(buf));
-  }
+}
+
 function str2buf(str) {
     var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
     var bufView = new Uint16Array(buf);
@@ -276,7 +277,9 @@ var noledger = new Vue({
                 _key = await this.keyImport(address)
                 this.contacts[address] = {
                     key: _key,
-                    stack: []
+                    stack: [],
+                    lastID: 1,
+                    unread: 0
                 }
             }
         },
@@ -566,10 +569,6 @@ var noledger = new Vue({
 
             // finally send pkg to api
             console.log('pkg for send', pkg)
-            // let response = await fetch('/submit', {
-            //     method: 'POST',
-            //     body: fd
-            // })
             let response = await this.request(pkg, '/submit');
             console.log(response)
         },
