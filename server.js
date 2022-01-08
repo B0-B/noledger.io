@@ -38,30 +38,32 @@ node.prototype.build = function () {
         }
     });
     api.use(bodyParser.json());
-    api.get('/ledger', async function(request, response){
+    api.post('/ledger', async function(request, response){
+        //console.log('received json', request.body)
         let response_pkg = {collection: [], id_high: null, errors: []}
-        console.log('client request ...')
         try {
             /* FIREWALL */
             let result = await firewall(request),
-                upperBound = this.id_high;
+                upperBound = _node.id_high;
             if (result) {
-                if (Object.keys(this.ledger).length > 0) {
+                _keys = Object.keys(_node.ledger)
+                if (Object.keys(_node.ledger).length > 0) {
                     /* -- code here */
                     let collected = [],
 
                     // define iteration bounds based on request
                         lowerBound;
                     const json = request.body;
-                    if (json.id < this.id_low) {
-                        lowerBound = this.id_low;
+                    
+                    if (json.id < _node.id_low) {
+                        lowerBound = _node.id_low;
                     } else {
                         lowerBound = json.id;
                     }
 
                     // collect all ledger entries between decided bounds
                     for (let i = lowerBound; i <= upperBound; i++) {
-                        const msg = this.ledger[`${i}`];
+                        const msg = _node.ledger[`${i}`];
                         collected.push(msg);
                     }
 
@@ -85,9 +87,7 @@ node.prototype.build = function () {
     api.use(bodyParser.json());
     api.post('/submit', async function (request, response) {
 
-        
         let response_pkg = {data: [], errors: []}
-        console.log('client request ...')
         try {
             /* FIREWALL */
             result = await firewall(request);

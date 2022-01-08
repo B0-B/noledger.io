@@ -77,6 +77,7 @@ var noledger = new Vue({
         },
         id: 0,
         keyPair: {},
+        sounds: {},
         toAddress: '',
         wrapperVisible: true,
     },
@@ -89,7 +90,8 @@ var noledger = new Vue({
         // console.log(enc)
         // console.log(dec)
         this.initKeyBindings();
-        this.listener()
+        this.initSounds();
+        this.listener();
     },
 
     methods: {
@@ -294,6 +296,9 @@ var noledger = new Vue({
                 }
             }
         },
+        initSounds: async function () {
+            this.sounds.send = new Audio('./send.mp3')
+        },
         keyExport: async function (key) {
             
             const exported = window.crypto.subtle.exportKey(
@@ -329,10 +334,59 @@ var noledger = new Vue({
         listener: async function () {
             console.log('start listener ...')
             while (true) {
+
                 try {
+                    
                     if (Object.keys(this.keyPair).length > 0) {
-                        response = await this.request({id: this.id})
-                        console.log('new pkg', response)
+                        response = await this.request({id: this.id}, '/ledger')
+
+                        // iterate through packages in returned collection
+                        for (let pkg of response.collection) {
+                            console.log('pkg', pkg)
+                            console.log('pkg check', pkg.check)
+                            /* check if the message was meant for this client */
+                            try {
+                                let check_decrypted = await this.decrypt(str2buf(pkg.check));
+                                if (check_decrypted == this.checkString) {
+    
+                                    // decrypt pkg
+                                    
+                                    let msg = await this.decrypt(str2buf(pkg.cipher)),
+                                        from = await this.decrypt(str2buf(pkg.from));
+                                        console.log('new msg from',from, '\n', msg)
+    
+                                    // check if contact already exists
+                                    if (!(from in this.contacts)) {
+                                        // add new contact first
+                                        let address = await noledger.getAddress(); 
+                                        if (from != address) {
+                                            await this.initContact(from);
+                                            this.loadNewContactThread(document.getElementById('contacts-wrapper'), from);
+                                        }
+                                    }
+    
+                                    // append new internal message
+                                    let internal = {
+                                        time: new Date().getTime(),
+                                        type: 'from',
+                                        msg: msg
+                                    }; this.contacts[from].stack.push(internal);
+    
+                                    // decide if to build a blob, otherwise increment the unread tag
+                                    if (this.chatVisible && this.toAddress == from) {
+                                        this.blob(internal, true);
+                                    } else {
+                                        this.contacts[from].unread += 1;
+                                    }
+                                }
+
+                                // if everything worked without errors raise the ledger id
+                                this.id = response.id_high;
+                            } catch (error) {
+                                console.log(error)
+                            }
+
+                        }
                     }
                 } catch (error) {
                     console.log(error)
@@ -514,10 +568,8 @@ var noledger = new Vue({
                 xhr.onreadystatechange = function () {  
                     if (xhr.readyState == 4 && xhr.status == 200) {
                         var json = JSON.parse(xhr.responseText);
-                        if (Object.keys(json).includes('error') && json['error'].length != 0) { // if errors occur
-                            console.log('server:', json['error'])
-                        } else if (json['info'] != '') { // if an info was left
-                            console.log('server:', json['info'])
+                        if (Object.keys(json).includes('errors') && json['errors'].length != 0) { // if errors occur
+                            console.log('server:', json['errors'])
                         } resolve(json);
                     }
                 }
@@ -576,6 +628,9 @@ var noledger = new Vue({
                 "cipher": buf2str(cipher)
             }
 
+            // play a send sound
+            this.sounds.send.play()
+
             // append another pkg suited for client chat window
             internal = {msg: msg, time: timestamp, type: 'to' };
             this.contacts[address].stack.push(internal);
@@ -587,6 +642,8 @@ var noledger = new Vue({
             console.log('pkg for send', pkg)
             let response = await this.request(pkg, '/submit');
             console.log(response)
+
+            
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {
