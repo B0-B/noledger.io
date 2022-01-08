@@ -75,19 +75,21 @@ var noledger = new Vue({
             length: 4096,
             hash: 'SHA-256'
         },
+        id: 0,
         keyPair: {},
         toAddress: '',
         wrapperVisible: true,
     },
 
     mounted: async function () {
-        this.keyPair = await this.generateKeyPair();
-        testphrase = 'Hello 123 !'
-        enc = await this.encrypt(testphrase, this.keyPair.publicKey)
-        dec = await this.decrypt(enc)
-        console.log(enc)
-        console.log(dec)
+        // this.keyPair = await this.generateKeyPair();
+        // testphrase = 'Hello 123 !'
+        // enc = await this.encrypt(testphrase, this.keyPair.publicKey)
+        // dec = await this.decrypt(enc)
+        // console.log(enc)
+        // console.log(dec)
         this.initKeyBindings();
+        this.listener()
     },
 
     methods: {
@@ -278,7 +280,6 @@ var noledger = new Vue({
                 this.contacts[address] = {
                     key: _key,
                     stack: [],
-                    lastID: 1,
                     unread: 0
                 }
             }
@@ -324,6 +325,21 @@ var noledger = new Vue({
                 [usage]
             );
             return imported
+        },
+        listener: async function () {
+            console.log('start listener ...')
+            while (true) {
+                try {
+                    if (Object.keys(this.keyPair).length > 0) {
+                        response = await this.request({id: this.id})
+                        console.log('new pkg', response)
+                    }
+                } catch (error) {
+                    console.log(error)
+                } finally {
+                    await this.sleep(1);
+                }
+            }
         },
         loadChat: async function (address) {
             this.toAddress = address;
@@ -407,9 +423,9 @@ var noledger = new Vue({
                     switch (e.keyCode) {
                         case 13 : //Your Code Here (13 is ascii code for 'ENTER')
                             address = await noledger.getAddress();  
-                            test = true  
+                            test = false
                             if (this.value != address || test) {
-                                await noledger.initContact(address);
+                                await noledger.initContact(this.value);
                                 noledger.loadChat(this.value);
                                 noledger.loadNewContactThread(document.getElementById('contacts-wrapper'), this.value);
                             } else {

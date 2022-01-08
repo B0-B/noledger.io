@@ -37,24 +37,59 @@ node.prototype.build = function () {
             response.send('./client/index.html')
         }
     });
+    api.use(bodyParser.json());
     api.get('/ledger', async function(request, response){
-
-        /* FIREWALL */
+        let response_pkg = {collection: [], id_high: null, errors: []}
         console.log('client request ...')
-        result = await firewall(request);
-        if (result) {
-            /* -- code here */
-            response.redirect('./client');
-            response.send('./client/index.html')
+        try {
+            /* FIREWALL */
+            let result = await firewall(request),
+                upperBound = this.id_high;
+            if (result) {
+                if (Object.keys(this.ledger).length > 0) {
+                    /* -- code here */
+                    let collected = [],
+
+                    // define iteration bounds based on request
+                        lowerBound;
+                    const json = request.body;
+                    if (json.id < this.id_low) {
+                        lowerBound = this.id_low;
+                    } else {
+                        lowerBound = json.id;
+                    }
+
+                    // collect all ledger entries between decided bounds
+                    for (let i = lowerBound; i <= upperBound; i++) {
+                        const msg = this.ledger[`${i}`];
+                        collected.push(msg);
+                    }
+
+                    // append to pkg
+                    response_pkg.id_high = upperBound + 1;
+                    response_pkg.collection = collected;
+                } else {
+                    response_pkg.id_high = upperBound;
+                }
+            } else {
+                response_pkg.errors.push('Your request was blocked by the server.')
+            }
+        } catch (error) {
+            console.log('submit error:', error)
+            response_pkg.errors.push(error)
+        } finally {
+            response.send(response_pkg)
         }
+        
     });
     api.use(bodyParser.json());
     api.post('/submit', async function (request, response) {
 
-        /* FIREWALL */
+        
         let response_pkg = {data: [], errors: []}
+        console.log('client request ...')
         try {
-            console.log('client request ...')
+            /* FIREWALL */
             result = await firewall(request);
             if (result) {
                 /* -- code here */
@@ -72,7 +107,7 @@ node.prototype.build = function () {
             }
         } catch (error) {
             console.log('submit error:', error)
-            response_pkg.errors
+            response_pkg.errors.push(error)
         } finally {
             response.send(response_pkg)
         }
