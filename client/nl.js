@@ -338,10 +338,12 @@ var noledger = new Vue({
                 try {
                     
                     if (Object.keys(this.keyPair).length > 0) {
-                        response = await this.request({id: this.id}, '/ledger')
+                        
+                        let response = await this.request({id: this.id}, '/ledger');
+                        let collection = Array.from(response.collection);
 
                         // iterate through packages in returned collection
-                        for (let pkg of response.collection) {
+                        for (let pkg of collection) {
                             console.log('pkg', pkg)
                             console.log('pkg check', pkg.check)
                             /* check if the message was meant for this client */
@@ -372,18 +374,21 @@ var noledger = new Vue({
                                         msg: msg
                                     }; this.contacts[from].stack.push(internal);
     
-                                    // decide if to build a blob, otherwise increment the unread tag
+                                    // decide wether to build a blob, otherwise increment the unread tag
                                     if (this.chatVisible && this.toAddress == from) {
                                         this.blob(internal, true);
                                     } else {
-                                        this.contacts[from].unread += 1;
+                                        this.newUnreadMessage(from);
                                     }
                                 }
 
                                 // if everything worked without errors raise the ledger id
                                 this.id = response.id_high;
+
                             } catch (error) {
+
                                 console.log(error)
+
                             }
 
                         }
@@ -497,25 +502,30 @@ var noledger = new Vue({
             parent.appendChild(el);
         },
         loadNewContactThread: async function (el, address) {
-            
             let thread_box = document.createElement('span');
-            thread_box.innerHTML = `${address.slice(0,9)}...`;
+            thread_box.innerHTML = `<div>${address.slice(0,9)}...</div>   <div class="unread"></div>`;
             thread_box.className = 'contact-box clickable';
-            thread_box.value = address; // stack address in element value
             thread_box.onmousedown = function () {noledger.loadChat(address)}
             el.appendChild(thread_box);
+            thread_box.name = address; // stack address in element value
+            //console.log('tb value', thread_box.value)
         },
-        receive: async function (address, pkg={}) {
-            await this.initContact(address);
-            x = "Hello World! https://github.com/B0-B";
-            pkg.cipher = x;
-            pkg.time = new Date().getTime()
-            let message = pkg.cipher,
-                time = pkg.time,
-                type = 'from';
-            internal = {msg: message, time: time, type: type };
-            this.contacts[address].stack.push(internal)
-            this.blob(internal, fresh=true)
+        newUnreadMessage: async function (address) {
+            /* Increments the unread variable of the contact. The contact needs to exist already. */
+            this.contacts[address].unread += 1
+            let threadBox = document.querySelector(`name="${address}"`);
+            console.log('threadbox', threadBox)
+            let unreadTag = threadBox.querySelector('div');
+            console.log('unread tag', unreadTag)
+            unreadTag.innerHTML = this.contacts[address].unread;
+        },
+        noUnreadMessages: async function (address) {
+            /* resets the unread counter for the provided address */
+            this.contacts[address].unread = 0;
+
+        },
+        ping: async function () {
+            this.send('🏓')
         },
         renderMessage: async function (sentence) {
             let output = '';
@@ -591,12 +601,17 @@ var noledger = new Vue({
                 frame.scrollTop = frame.scrollHeight;
             }
         },
-        send: async function () {
+        send: async function (msg=null) {
+
+            // prevent sending if chat is not visible
+            if (!this.chatVisible) {return}
 
             // draw current address and msg
             const entry = document.getElementById('entryInput');
-            const msg = `${entry.value}`;
             const address = this.toAddress;
+            if (!msg) {
+                msg = `${entry.value}`;
+            }
 
             // export the contact public key
             const key = this.contacts[address].key;
@@ -613,8 +628,8 @@ var noledger = new Vue({
                 cipher = await this.encrypt(msg, key);
                 from = await this.encrypt(this.getAddress(), key);
             } catch (error) {
+                console.log("encryption error")
                 throw error
-                console.log("encryption error", error)
             } finally {
                 // remove key from variable
                 delete key;
@@ -641,9 +656,7 @@ var noledger = new Vue({
             // finally send pkg to api
             console.log('pkg for send', pkg)
             let response = await this.request(pkg, '/submit');
-            console.log(response)
-
-            
+            console.log('api resonse', response)
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {
