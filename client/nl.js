@@ -158,6 +158,7 @@ var noledger = new Vue({
             frame = document.getElementById('messageFrame');
             span = document.createElement('span');
             p = document.createElement('p');
+            p.style.direction = 'ltr';
             span.className = 'row no-gutters'
              
             let msg_pkg = await this.renderMessage(pkg.msg);
@@ -664,6 +665,9 @@ var noledger = new Vue({
                     resolve(0);
                 }, 1000*seconds);
             });
+        },
+        starDust: function () {
+            document.getElementsByTagName('a')
         },
         thumbnail: async function (url, anchor=null) {
 

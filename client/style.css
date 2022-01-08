@@ -69,6 +69,7 @@ h3 {
     right: 0;
     
 }
+
 #chatNavi {
     width: 100%;
     height: 5vh;
@@ -80,6 +81,7 @@ h3 {
     box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
     z-index: 100;
 }
+
 #chatWindow {
     width: 100%;
     height: 100%;
@@ -121,22 +123,24 @@ h3 {
 }
 
 #entryInput {
-    width: 80%;
+    width: 100%;
     text-align: left;
     margin: 5px;
     line-height: 300%;
 }
 
 #pingField {
-    height: 100%;
-    line-height: 100%;
-    width: 15%;
+    height: 100px;
+    line-height: 100px;
+    width: 90%;
     color:#ddd;
     background-color: rgb(51, 77, 148);
     cursor: pointer;
     display: inline-block;
-    margin: 5px;
-    margin-left: 0;
+    margin-top: 5px;
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
 }
 
 #head {
