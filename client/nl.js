@@ -32,6 +32,12 @@ function str2buf(str) {
     }
     return buf;
 }
+
+async function testBuffer () {
+    _key = await noledger.keyPair.publicKey
+    console.log('key', _key)
+    console.log('output', noledger.decrypt(str2buf(buf2str(await noledger.encrypt('hello world !', _key)))))
+} 
 /**/
 
 /* noledger main object */
@@ -298,7 +304,8 @@ var noledger = new Vue({
             }
         },
         initSounds: async function () {
-            this.sounds.send = new Audio('./send.mp3')
+            this.sounds.inbox = new Audio('./inbox.mp3');
+            this.sounds.send = new Audio('./send.mp3');
         },
         keyExport: async function (key) {
             
@@ -344,58 +351,72 @@ var noledger = new Vue({
                         let collection = Array.from(response.collection);
 
                         // iterate through packages in returned collection
+                        console.log('response', response)
+                        // console.log('collection', collection)
+                        // console.log('collection_sub', collection[1])
                         for (let pkg of collection) {
-                            console.log('pkg', pkg)
-                            console.log('pkg check', pkg.check)
+                            
                             /* check if the message was meant for this client */
-                            try {
-                                let check_decrypted = await this.decrypt(str2buf(pkg.check));
-                                if (check_decrypted == this.checkString) {
-    
-                                    // decrypt pkg
+                            if (pkg) {
+                                console.log('pkg', pkg)
+                                console.log('pkg check', pkg.check)
+                                try {
+                                    console.log('pkgBuf', str2buf(pkg.check))
+                                    let check_decrypted;
+                                    try {
+                                        check_decrypted = await this.decrypt(str2buf(pkg.check));
+                                    } catch (error) {
+                                        console.log('skip pkg error')
+                                        console.log(error)
+                                        check_decrypted = null
+                                    }
                                     
-                                    let msg = await this.decrypt(str2buf(pkg.cipher)),
-                                        from = await this.decrypt(str2buf(pkg.from));
-                                        console.log('new msg from',from, '\n', msg)
+                                    if (check_decrypted == this.checkString) {
+        
+                                        // new message
+                                        this.sounds.inbox.play();
     
-                                    // check if contact already exists
-                                    if (!(from in this.contacts)) {
-                                        // add new contact first
-                                        let address = await noledger.getAddress(); 
-                                        if (from != address) {
-                                            await this.initContact(from);
-                                            this.loadNewContactThread(document.getElementById('contacts-wrapper'), from);
+                                        // decrypt pkg
+                                        let msg = await this.decrypt(str2buf(pkg.cipher)),
+                                            from = await this.decrypt(str2buf(pkg.from));
+                                            console.log('new msg from',from, '\n', msg)
+        
+                                        // check if contact already exists
+                                        if (!(from in this.contacts)) {
+                                            // add new contact first
+                                            let address = await noledger.getAddress(); 
+                                            if (from != address) {
+                                                await this.initContact(from);
+                                                this.loadNewContactThread(document.getElementById('contacts-wrapper'), from);
+                                            }
+                                        }
+        
+                                        // append new internal message
+                                        let internal = {
+                                            time: new Date().getTime(),
+                                            type: 'from',
+                                            msg: msg
+                                        }; this.contacts[from].stack.push(internal);
+        
+                                        // decide wether to build a blob, otherwise increment the unread tag
+                                        if (this.chatVisible && this.toAddress == from) {
+                                            this.blob(internal, true);
+                                        } else {
+                                            this.newUnreadMessage(from);
                                         }
                                     }
-    
-                                    // append new internal message
-                                    let internal = {
-                                        time: new Date().getTime(),
-                                        type: 'from',
-                                        msg: msg
-                                    }; this.contacts[from].stack.push(internal);
-    
-                                    // decide wether to build a blob, otherwise increment the unread tag
-                                    if (this.chatVisible && this.toAddress == from) {
-                                        this.blob(internal, true);
-                                    } else {
-                                        this.newUnreadMessage(from);
-                                    }
+                                } catch (error) {
+                                    console.log('decryption error')
+                                    console.log(error)
                                 }
-
-                                // if everything worked without errors raise the ledger id
-                                this.id = response.id_high;
-
-                            } catch (error) {
-
-                                console.log(error)
-
                             }
-
                         }
+
+                        // if everything worked without errors raise the ledger id
+                        this.id = response.id_high;
                     }
                 } catch (error) {
-                    console.log(error)
+                    console.log('request error', error)
                 } finally {
                     await this.sleep(1);
                 }
@@ -660,6 +681,7 @@ var noledger = new Vue({
                 // remove key from variable
                 delete key;
             }
+            console.log('cipher', cipher)
             
             // build package
             pkg = {
