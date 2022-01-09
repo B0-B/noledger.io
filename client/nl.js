@@ -412,6 +412,8 @@ var noledger = new Vue({
             for (let i = 0; i < stack.length; i++) {
                 await this.blob(stack[i], false)
             }
+            this.scrollToBottom();
+            this.noUnreadMessages(address);
         },
         loadContactsPage: async function () {
             let wrapper = document.getElementById('wrapper');
@@ -484,6 +486,7 @@ var noledger = new Vue({
                         case 13 : //Your Code Here (13 is ascii code for 'ENTER')
                             address = await noledger.getAddress();  
                             test = false
+                            console.log('this.value', this.value)
                             if (this.value != address || test) {
                                 await noledger.initContact(this.value);
                                 noledger.loadChat(this.value);
@@ -508,22 +511,44 @@ var noledger = new Vue({
             thread_box.className = 'contact-box clickable';
             thread_box.onmousedown = function () {noledger.loadChat(address)}
             el.appendChild(thread_box);
-            thread_box.name = address; // stack address in element value
-            //console.log('tb value', thread_box.value)
+
+            // store address
+            let addTag = document.createElement('address');
+            addTag.style.display = 'none';
+            addTag.innerHTML = address;
+            thread_box.appendChild(addTag)
+            //thread_box.value = address; // stack address in element value
+
         },
         newUnreadMessage: async function (address) {
             /* Increments the unread variable of the contact. The contact needs to exist already. */
-            this.contacts[address].unread += 1
-            let threadBox = document.querySelector(`name="${address}"`);
-            console.log('threadbox', threadBox)
-            let unreadTag = threadBox.querySelector('div');
-            console.log('unread tag', unreadTag)
-            unreadTag.innerHTML = this.contacts[address].unread;
+            // find the correct unread tag from threadBox
+            let threadBox = Array.from(document.querySelectorAll('address')).filter(function (el) {
+                return el.innerHTML === address
+            })[0].parentElement;
+            let unreadTag = threadBox.querySelector('div[class="unread"]');
+            console.log('unread', unreadTag);
+            if (unreadTag) {
+                this.contacts[address].unread += 1;
+                unreadTag.innerHTML = this.contacts[address].unread;
+                unreadTag.style.paddingLeft = "5px";
+                unreadTag.style.paddingRight = "5px";
+            }
         },
         noUnreadMessages: async function (address) {
-            /* resets the unread counter for the provided address */
-            this.contacts[address].unread = 0;
-
+            /* Increments the unread variable of the contact. The contact needs to exist already. */
+            // find the correct unread tag from threadBox
+            let threadBox = Array.from(document.querySelectorAll('address')).filter(function (el) {
+                return el.innerHTML === address
+            })[0].parentElement;
+            let unreadTag = threadBox.querySelector('div[class="unread"]');
+            console.log('unread', unreadTag);
+            if (unreadTag) {
+                this.contacts[address].unread = 0;
+                unreadTag.innerHTML = '';
+                unreadTag.style.paddingLeft = "0px";
+                unreadTag.style.paddingRight = "0px";
+            }
         },
         ping: async function () {
             this.send('🏓')
