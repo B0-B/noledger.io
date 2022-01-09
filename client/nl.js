@@ -20,23 +20,30 @@ function b64Escape (str) {
 /**/
 
 /* Buffer covnersions */
-function buf2str(buf) {
-    return String.fromCharCode.apply(null, new Uint16Array(buf));
+function buf2str(buffer) {
+    var binary = '';
+	var bytes = new Uint8Array( buffer );
+	var len = bytes.byteLength;
+	for (var i = 0; i < len; i++) {
+		binary += String.fromCharCode( bytes[ i ] );
+	}
+	return window.btoa( binary );
 }
 
-function str2buf(str) {
-    var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
-    var bufView = new Uint16Array(buf);
-    for (var i=0, strLen=str.length; i < strLen; i++) {
-      bufView[i] = str.charCodeAt(i);
+function str2buf(base64) {
+    var binary_string =  window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array( len );
+    for (var i = 0; i < len; i++)        {
+        bytes[i] = binary_string.charCodeAt(i);
     }
-    return buf;
+    return bytes.buffer;
 }
 
 async function testBuffer () {
     _key = await noledger.keyPair.publicKey
     console.log('key', _key)
-    console.log('output', noledger.decrypt(str2buf(buf2str(await noledger.encrypt('hello world !', _key)))))
+    console.log('output', await noledger.decrypt(str2buf(JSON.parse(JSON.stringify({x:buf2str(await noledger.encrypt('hello world !', _key))})).x) ))
 } 
 /**/
 
