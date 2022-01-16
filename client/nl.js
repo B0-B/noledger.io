@@ -148,6 +148,8 @@ var noledger = new Vue({
 
     methods: {
         aesDecrypt: async function (encrypted) {
+            encrypted.encrypted = str2buf(encrypted.encrypted);
+            encrypted.iv = str2buf(encrypted.iv);
             const algo = { name: this.encryption.aes.algorithm, iv: encrypted.iv };
             const key = this.encryption.aes.currentAESkey;
             const encodedBuffer = await crypto.subtle.decrypt(algo, key, encrypted.encrypted);
@@ -161,8 +163,10 @@ var noledger = new Vue({
             const iv = crypto.getRandomValues(new Uint8Array(byteLength));                               // generate a random 4096 bit or 16 byte vector
             const algo = { name: this.encryption.aes.algorithm, iv: iv };
             const key = this.encryption.aes.currentAESkey;
-            let encrypted = await crypto.subtle.encrypt(algo, key, encodedText);                    // buffered cipher text in bytes    
-            return encrypted = {"encrypted": encrypted, "iv": iv}
+            let encrypted = await crypto.subtle.encrypt(algo, key, encodedText);  
+            encrypted_b64 = buf2str(encrypted);       
+            iv_b64 = buf2str(iv);         
+            return encrypted = {"encrypted": encrypted_b64, "iv": iv_b64}
         },
         animate: async function (el, type) {
             /* Global UI Animation Tool */
@@ -318,6 +322,16 @@ var noledger = new Vue({
             let decoded = await this.encryption.decoder.decode(dataEncoded);
             return decoded
         },
+        generateAESkeyFromPhrase: async function (phrase=null) {
+            if (!phrase) {
+                phrase = await this.generateRandomBytes(16);
+            }
+            const pwEncoded = this.encryption.encoder.encode(phrase);                                       // utf8 encode phrase string as seed for AES key
+            const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                // Hash the encoded seed
+            const algo = { name: this.encryption.aes.algorithm };
+            const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);          // construct a CryptoKey from phrase
+            return aesKey;
+        },
         generateKeyPair: async function () {
             return window.crypto.subtle.generateKey(
                 {
@@ -360,10 +374,7 @@ var noledger = new Vue({
                 let _key = await this.keyImport(address);                                                       // construct RSA key from address
 
                 const phrase = await this.generateRandomBytes(16);
-                const pwEncoded = this.encryption.encoder.encode(phrase);                                       // utf8 encode phrase string as seed for AES key
-                const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                // Hash the encoded seed
-                const algo = { name: this.encryption.aes.algorithm };
-                const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);          // construct a CryptoKey from phrase
+                const aesKey = this.generateAESkeyFromPhrase(phrase);
 
                 this.contacts[address] = {                                                                      // append to contacts object
                     aesBuffer: aesKey,
@@ -392,58 +403,50 @@ var noledger = new Vue({
                     
                     if (Object.keys(this.keyPair).length > 0) {
                         
-                        let response = await this.request({id: this.id}, '/ledger');
-                        let collection = Array.from(response.collection);
+                        const response = await this.request({id: this.id}, '/ledger');
+                        const collection = Array.from(response.collection);                                     // get collected messages from API
 
-                        // iterate through packages in returned collection
-                        for (let pkg of collection) {
-                            
-                            /* check if the message was meant for this client */
+                        for (let pkg of collection) {                                                           // iterate through packages in returned collection
                             if (pkg) {
                                 try {
-                                    let check_decrypted;
+
+                                    let check_decrypted;                                                        // try to decrypt the check
                                     try {
                                         check_decrypted = await this.decrypt(str2buf(pkg.check));
                                     } catch (error) {
                                         console.log('skip pkg ...')
-                                        console.log(error)
                                         check_decrypted = null
                                     }
                                     
-                                    if (check_decrypted == this.checkString) {
+                                    if (check_decrypted == this.checkString) {                                  // on success
         
-                                        // draw the aes key
-                                        _key = await this.decrypt(str2buf(pkg.key));
-    
-                                        // decrypt pkg
-                                        let msg = await this.aesDecrypt(str2buf(pkg.cipher), _key);
-
-                                        //let from = 'someAddress';
-                                        let from = await this.aesDecrypt(str2buf(pkg.from), _key);
+                                        let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
+                                        let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
+                                        console.log('aesKey', aesKey)
+                                        
+                                        let msg = await this.aesDecrypt(pkg.cipher);                            // decrypt body and senders address
+                                        let from = await this.aesDecrypt(pkg.from);
 
                                         console.log('from', from);
                                         console.log('new msg from', from, '\n', msg);
         
-                                        // check if contact already exists
-                                        if (!(from in this.contacts)) {
+                                        if (!(from in this.contacts)) {                                         // initialize new contact if it doesn't exist
                                             console.log('load new contact ...')
                                             let wrapper = document.getElementById('contacts-wrapper');
                                             await this.initContact(from);
-                                            await this.loadNewContactThread(wrapper, from);
+                                            await this.loadNewContactThread(wrapper, from);                     // add a new chat in contacts page
                                         }
-        
-                                        // append new internal message
-                                        let internal = {
+                                        
+                                        let internal = {                                                        // append new internal message
                                             time: new Date().getTime(),
                                             type: 'from',
                                             msg: msg
                                         }; this.contacts[from].stack.push(internal);
 
-                                        // new message sound
-                                        this.sounds.inbox.play();
+                                        
+                                        if (!this.sounds.mute){this.sounds.inbox.play()}                        // new message sound
         
-                                        // decide wether to build a blob, otherwise increment the unread tag
-                                        if (this.chatVisible && this.toAddress == from) {
+                                        if (this.chatVisible && this.toAddress == from) {                       // decide wether to build a blob in chat or increment the unread tag
                                             this.blob(internal, true);
                                         } else {
                                             this.newUnreadMessage(from);
@@ -455,9 +458,9 @@ var noledger = new Vue({
                                 }
                             }
                         }
-
-                        // if everything worked without errors raise the ledger id
-                        this.id = response.id_high;
+                        this.id = response.id_high;                                                             // if everything worked without errors raise the ledger id
+                                                                                                                // to the latest id observed on the ledger to avoid 
+                                                                                                                // old packages and thus redundant downloads                                                                       
                     }
                 } catch (error) {
                     console.log('request error', error)
@@ -734,40 +737,33 @@ var noledger = new Vue({
         },
         send: async function (msg=null) {
 
-            // prevent sending if chat is not visible
-            if (!this.chatVisible) {return}
-
-            // draw current address and msg
-            const entry = document.getElementById('entryInput');
-            const address = this.toAddress;
-            // awaiting getAddress() raises dom exception
-            const fromAddress = await this.keyExport(this.keyPair.publicKey);
-            console.log('fromAddress binary', fromAddress)
-            if (!msg) {
+            if (!this.chatVisible) {return}                                             // prevent sending if chat is not visible
+            
+            const address = this.toAddress;                                             // determine to address
+            const fromAddress = await this.keyExport(this.keyPair.publicKey);           // determine from address
+            
+            if (!msg) {                                                                 // if no message was provided draw from input field
+                const entry = document.getElementById('entryInput');
                 msg = `${entry.value}`;
+                entry.value = '';                                                       // reset entry field
             }
 
-            // export the contact public key
-            const key = this.contacts[address].key;
+            const key = this.contacts[address].key;                                     // extract credentials for crypto
+            const aesPhrase = this.contacts[address].aesPhrase;
 
-            // get current timestamp
             const timestamp = new Date().getTime();
 
-            // reset entry
-            entry.value = '';
-
-            // encrypt msg pkg
             try {
-                check = await this.encrypt(this.checkString, key);                              // asymmetrically encoded for tracking
-                _key = await this.encrypt(this.encryption.aes.currentAESkey, key)
-                cipher = await this.aesEncrypt(msg, this.encryption.aes.currentAESkey);         // rest payload is encoded with AES for higher capacity 
-                from = await this.aesEncrypt(fromAddress, this.encryption.aes.currentAESkey);
+                check = await this.encrypt(this.checkString, key);                      // asymmetrically encode check string and credentials for tracking
+                phrase = await this.encrypt(aesPhrase, key);
+                cipher = await this.aesEncrypt(msg);                                    // aes for heavy payloads
+                from = await this.aesEncrypt(fromAddress);
             } catch (error) {
                 console.log("encryption error")
                 throw error
             } finally {
-                // remove key from variable
-                delete key;
+                delete key;                                                             // delete credential pointers for safety
+                delete aesPhrase;
             }
             console.log('cipher', cipher)
             console.log('from', from)
@@ -777,13 +773,13 @@ var noledger = new Vue({
             pkg = {
                 time: new Date().getTime(),
                 check: buf2str(check),
-                from: buf2str(from),
-                cipher: buf2str(cipher),
-                key: _key
+                from: from,
+                cipher: cipher,
+                phrase: buf2str(phrase)
             }
 
             // play a send sound
-            if (!mute) {this.sounds.send.play()}
+            if (!this.sounds.mute) {this.sounds.send.play()}
 
             // append another pkg suited for client chat window
             internal = {msg: msg, time: timestamp, type: 'to' };
