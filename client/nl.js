@@ -96,7 +96,7 @@ var noledger = new Vue({
     data: {
         address: null,
         chatVisible: false,
-        checkString: 'noledger-checksum-plaintext', // very mighty for custom encryption
+        checkString: 'noledger-checksum-plaintext',
         contacts: {},
         encryption: {
             /*  
@@ -107,7 +107,7 @@ var noledger = new Vue({
             encoder: new TextEncoder(),
             decoder: new TextDecoder(),
             aes: {
-                algorithm: 'AES-GCM', // symmetric encryption
+                algorithm: 'AES-GCM',
                 ascii: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"§$%&/()=?`+*~#-_.:,;€@^°\\{]öäüÖÜÄß`' + "'",
                 currentAESkey: null,
                 length: 256,
@@ -135,24 +135,18 @@ var noledger = new Vue({
     },
 
     mounted: async function () {
-        // this.keyPair = await this.generateKeyPair();
-        // testphrase = 'Hello 123 !'
-        // enc = await this.encrypt(testphrase, this.keyPair.publicKey)
-        // dec = await this.decrypt(enc)
-        // console.log(enc)
-        // console.log(dec)
         this.initKeyBindings();
         this.initSounds();
         this.initListener();
     },
 
     methods: {
-        aesDecrypt: async function (encrypted) {
+        aesDecrypt: async function (encrypted, cryptoKey=null) {
+            if (!cryptoKey) {cryptoKey = await this.encryption.aes.currentAESkey}
             encrypted.encrypted = str2buf(encrypted.encrypted);
             encrypted.iv = str2buf(encrypted.iv);
             const algo = { name: this.encryption.aes.algorithm, iv: encrypted.iv };
-            const key = this.encryption.aes.currentAESkey;
-            const encodedBuffer = await crypto.subtle.decrypt(algo, key, encrypted.encrypted);
+            const encodedBuffer = await crypto.subtle.decrypt(algo, cryptoKey, encrypted.encrypted);
             console.log('encoded buffer', encodedBuffer)
             const decoded = await this.encryption.decoder.decode(encodedBuffer);
             return decoded
@@ -162,7 +156,8 @@ var noledger = new Vue({
             const byteLength = this.encryption.aes.ivLength;    
             const iv = crypto.getRandomValues(new Uint8Array(byteLength));                               // generate a random 4096 bit or 16 byte vector
             const algo = { name: this.encryption.aes.algorithm, iv: iv };
-            const key = this.encryption.aes.currentAESkey;
+            const key = await this.encryption.aes.currentAESkey;
+            console.log('key show', key)
             let encrypted = await crypto.subtle.encrypt(algo, key, encodedText);  
             encrypted_b64 = buf2str(encrypted);       
             iv_b64 = buf2str(iv);         
@@ -373,8 +368,8 @@ var noledger = new Vue({
                 console.log('initialize contact -', address.slice(0,7), '...');
                 let _key = await this.keyImport(address);                                                       // construct RSA key from address
 
-                const phrase = await this.generateRandomBytes(16);
-                const aesKey = this.generateAESkeyFromPhrase(phrase);
+                const phrase = await this.generateRandomBytes(16);                                              // remember construction phrase 
+                const aesKey = await this.generateAESkeyFromPhrase(phrase);                                     // construct AES key from phrase
 
                 this.contacts[address] = {                                                                      // append to contacts object
                     aesBuffer: aesKey,
@@ -398,9 +393,7 @@ var noledger = new Vue({
         initListener: async function () {
             console.log('start listener ...')
             while (true) {
-
                 try {
-                    
                     if (Object.keys(this.keyPair).length > 0) {
                         
                         const response = await this.request({id: this.id}, '/ledger');
@@ -423,9 +416,9 @@ var noledger = new Vue({
                                         let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
                                         let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
                                         console.log('aesKey', aesKey)
-                                        
-                                        let msg = await this.aesDecrypt(pkg.cipher);                            // decrypt body and senders address
-                                        let from = await this.aesDecrypt(pkg.from);
+                                        console.log('cipher', pkg.cipher)
+                                        let msg = await this.aesDecrypt(pkg.cipher, aesKey);                    // decrypt body and senders address
+                                        let from = await this.aesDecrypt(pkg.from, aesKey);
 
                                         console.log('from', from);
                                         console.log('new msg from', from, '\n', msg);
@@ -740,7 +733,7 @@ var noledger = new Vue({
             if (!this.chatVisible) {return}                                             // prevent sending if chat is not visible
             
             const address = this.toAddress;                                             // determine to address
-            const fromAddress = await this.keyExport(this.keyPair.publicKey);           // determine from address
+            const fromAddress = await this.getAddress();//this.keyExport(this.keyPair.publicKey);           // determine from address
             
             if (!msg) {                                                                 // if no message was provided draw from input field
                 const entry = document.getElementById('entryInput');
