@@ -1,25 +1,18 @@
 /*
-            NOLEDGER
+           © NOLEDGER
 
         Client-Side Code
+
+This code is served by the noledger 
+node and connects all users to the 
+ledger. The API sends JSON requests
+with correct encoding back to the node
+and listens to ledger entries for
+incoming messages.
 */
 
 
-/* Base64URL encoding/decoding */
-function b64Unescape (str) {
-    return (str + '==='.slice((str.length + 3) % 4))
-        .replace(/-/g, '+')
-        .replace(/_/g, '/')
-}
-
-function b64Escape (str) {
-    return str.replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '')
-}
-/**/
-
-/* Buffer covnersions */
+// ======= Buffer covnersions =======
 function buf2str(buffer) {
     var binary = '';
 	var bytes = new Uint8Array( buffer );
@@ -45,30 +38,7 @@ async function testBuffer () {
     console.log('key', _key)
     console.log('output', await noledger.decrypt(str2buf(JSON.parse(JSON.stringify({x:buf2str(await noledger.encrypt('hello world !', _key))})).x) ))
 } 
-/**/
-
-
-// ABC - a generic, native JS (A)scii(B)inary(C)onverter.
-// (c) 2013 Stephan Schmitz <eyecatchup@gmail.com>
-// License: MIT, http://eyecatchup.mit-license.org
-// URL: https://gist.github.com/eyecatchup/6742657
-var ABC = {
-    toAscii: function(bin) {
-      return bin.replace(/\s*[01]{8}\s*/g, function(bin) {
-        return String.fromCharCode(parseInt(bin, 2))
-      })
-    },
-    toBinary: function(str, spaceSeparatedOctets) {
-      return str.replace(/[\s\S]/g, function(str) {
-        str = ABC.zeroPad(str.charCodeAt().toString(2));
-        return !1 == spaceSeparatedOctets ? str : str + " "
-      })
-    },
-    zeroPad: function(num) {
-      return "00000000".slice(String(num).length) + num
-    }
-};
-/**/
+// ==================================
 
 
 /* noledger main object */
@@ -321,10 +291,10 @@ var noledger = new Vue({
             if (!phrase) {
                 phrase = await this.generateRandomBytes(16);
             }
-            const pwEncoded = this.encryption.encoder.encode(phrase);                                       // utf8 encode phrase string as seed for AES key
-            const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                // Hash the encoded seed
+            const pwEncoded = this.encryption.encoder.encode(phrase);                                           // utf8 encode phrase string as seed for AES key
+            const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                    // Hash the encoded seed
             const algo = { name: this.encryption.aes.algorithm };
-            const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);          // construct a CryptoKey from phrase
+            const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);   // construct a CryptoKey from phrase
             return aesKey;
         },
         generateKeyPair: async function () {
@@ -415,16 +385,11 @@ var noledger = new Vue({
         
                                         let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
                                         let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
-                                        console.log('aesKey', aesKey)
-                                        console.log('cipher', pkg.cipher)
+                                        
                                         let msg = await this.aesDecrypt(pkg.cipher, aesKey);                    // decrypt body and senders address
                                         let from = await this.aesDecrypt(pkg.from, aesKey);
-
-                                        console.log('from', from);
-                                        console.log('new msg from', from, '\n', msg);
         
                                         if (!(from in this.contacts)) {                                         // initialize new contact if it doesn't exist
-                                            console.log('load new contact ...')
                                             let wrapper = document.getElementById('contacts-wrapper');
                                             await this.initContact(from);
                                             await this.loadNewContactThread(wrapper, from);                     // add a new chat in contacts page
@@ -435,7 +400,6 @@ var noledger = new Vue({
                                             type: 'from',
                                             msg: msg
                                         }; this.contacts[from].stack.push(internal);
-
                                         
                                         if (!this.sounds.mute){this.sounds.inbox.play()}                        // new message sound
         
@@ -655,6 +619,7 @@ var noledger = new Vue({
             this.send('🏓')
         },
         renderMessage: async function (sentence) {
+            /* Message string renders to html compliant output */
             let output = '';
             words = sentence.split(' ');
             let thumbnail = false,
@@ -685,23 +650,18 @@ var noledger = new Vue({
                     console.log(error);
                     thumbnail = null
                 }
-                
             } else {
                 thumbnail = null
             }
             return {'output': output, 'thumbnail': thumbnail}
         },
         request: function (options, path, json=true) {
-      
             return new Promise(function (resolve, reject) {
-                // setup HTTP request 
                 var xhr = new XMLHttpRequest(); 
                 xhr.open("POST", path, true); 
                 if (json) {
                     xhr.setRequestHeader("Content-type", "application/json;charset=UTF-8"); 
                 }
-                
-                // log response
                 xhr.onreadystatechange = function () {  
                     if (xhr.readyState == 4 && xhr.status == 200) {
                         var json = JSON.parse(xhr.responseText);
@@ -710,19 +670,14 @@ var noledger = new Vue({
                         } resolve(json);
                     }
                 }
-        
-                // handle errors
                 xhr.onerror = function(e) {
                     console.log(e)
                     reject({'errors': ['error during request: no connection']})
                 }
-        
-                // send stringed options
                 xhr.send(JSON.stringify(options)); 
             });
         },
         scrollToBottom: function () {
-            // scrolls current chat to bottom
             if (this.chatVisible) {
                 const frame = document.getElementById('messageFrame')
                 frame.scrollTop = frame.scrollHeight;
@@ -733,7 +688,7 @@ var noledger = new Vue({
             if (!this.chatVisible) {return}                                             // prevent sending if chat is not visible
             
             const address = this.toAddress;                                             // determine to address
-            const fromAddress = await this.getAddress();//this.keyExport(this.keyPair.publicKey);           // determine from address
+            const fromAddress = await this.getAddress();                                // determine from address
             
             if (!msg) {                                                                 // if no message was provided draw from input field
                 const entry = document.getElementById('entryInput');
@@ -758,12 +713,8 @@ var noledger = new Vue({
                 delete key;                                                             // delete credential pointers for safety
                 delete aesPhrase;
             }
-            console.log('cipher', cipher)
-            console.log('from', from)
-            console.log('check', check)
             
-            // build package
-            pkg = {
+            pkg = {                                                                     // build package for request
                 time: new Date().getTime(),
                 check: buf2str(check),
                 from: from,
@@ -771,20 +722,15 @@ var noledger = new Vue({
                 phrase: buf2str(phrase)
             }
 
-            // play a send sound
-            if (!this.sounds.mute) {this.sounds.send.play()}
+            if (!this.sounds.mute) {this.sounds.send.play()}                            // play a send sound
 
-            // append another pkg suited for client chat window
-            internal = {msg: msg, time: timestamp, type: 'to' };
+            internal = {msg: msg, time: timestamp, type: 'to' };                        // append another pkg suited for client chat window
             this.contacts[address].stack.push(internal);
 
-            // build & load blob msg window
-            let msgBox = this.blob(internal, fresh=true);
+            this.blob(internal, fresh=true);                                            // build & load blob msg window
 
-            // finally send pkg to api
-            console.log('pkg for send', pkg)
-            let response = await this.request(pkg, '/submit');
-            console.log('api resonse', response)
+            let response = await this.request(pkg, '/submit');                          
+            console.log('API', response)
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {
@@ -792,16 +738,6 @@ var noledger = new Vue({
                     resolve(0);
                 }, 1000*seconds);
             });
-        },
-        starDust: function () {
-            document.getElementsByTagName('a')
-        },
-        test: async function () {
-            let testPhrase = 'Hello World!';
-            let enc = await this.aesEncrypt(testPhrase);
-            console.log('encrypted', enc);
-            await this.sleep(1)
-            console.log('decrypted', await this.aesDecrypt(enc));
         },
         thumbnail: async function (url, anchor=null) {
 
