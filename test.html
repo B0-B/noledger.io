@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    </head>
+    <body>
+        <script>
+            async function test () {
+                
+                const keyPair = await window.crypto.subtle.generateKey(
+                    {
+                        name: "RSA-OAEP",
+                        modulusLength: 4096,
+                        publicExponent: new Uint8Array([1, 0, 1]),
+                        hash: 'SHA-256'
+                    },
+                    true,
+                    ["encrypt", "decrypt"]
+                );
+
+                const payload = await window.crypto.subtle.exportKey(
+                    "jwk",
+                    keyPair.publicKey
+                );
+                
+                let encoder = new TextEncoder();
+                const dataEncoded = await encoder.encode(payload);
+                let encrypted = await crypto.subtle.encrypt({
+                    name: "RSA-OAEP",
+                    hash: {
+                        name: 'SHA-256'
+                    }
+                }, keyPair.publicKey, dataEncoded);
+
+                const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
+                let decoded = await this.encryption.decoder.decode(dataEncoded);
+                
+
+            }
+        </script>
+    </body>
+</html>

@@ -4,7 +4,10 @@ var path = require('path');
 var https = require('https');
 const firewall = require('./modules/firewall.js')
 const bodyParser = require('body-parser'); 
-const { errorMonitor } = require('stream');
+const { exec } = require('child_process');
+
+
+
 
 var node = function () {
     this.dir = path.join(__dirname, '/');
@@ -179,10 +182,26 @@ node.prototype.sleep = function (seconds) {
 }
 
 
-async function start () {
-    const srv = new node();
-    await srv.sleep(1);
-    srv.run(3000)
+function CommandLineInterpreter (port) {
+    const args = process.argv.slice(2);
+    if ( args.length == 0 ) {
+        const srv = new node();
+        //await srv.sleep(1);
+        srv.run(port)   
+    } else {
+        if ( args[0] == 'kill' ) {
+            exec('sudo kill -9 `sudo lsof -t -i:'+port+'`', (error, stdout, stderr) => {
+                if (error) {
+                    console.log(`error: ${error.message}`);
+                    return;
+                }
+                if (stderr) {
+                    console.log(`stderr: ${stderr}`);
+                    return;
+                }
+            });
+        }
+    }
 }
 
-start()
+CommandLineInterpreter(3000)

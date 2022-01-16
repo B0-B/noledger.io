@@ -47,6 +47,30 @@ async function testBuffer () {
 } 
 /**/
 
+
+// ABC - a generic, native JS (A)scii(B)inary(C)onverter.
+// (c) 2013 Stephan Schmitz <eyecatchup@gmail.com>
+// License: MIT, http://eyecatchup.mit-license.org
+// URL: https://gist.github.com/eyecatchup/6742657
+var ABC = {
+    toAscii: function(bin) {
+      return bin.replace(/\s*[01]{8}\s*/g, function(bin) {
+        return String.fromCharCode(parseInt(bin, 2))
+      })
+    },
+    toBinary: function(str, spaceSeparatedOctets) {
+      return str.replace(/[\s\S]/g, function(str) {
+        str = ABC.zeroPad(str.charCodeAt().toString(2));
+        return !1 == spaceSeparatedOctets ? str : str + " "
+      })
+    },
+    zeroPad: function(num) {
+      return "00000000".slice(String(num).length) + num
+    }
+};
+/**/
+
+
 /* noledger main object */
 var noledger = new Vue({
 
@@ -70,12 +94,25 @@ var noledger = new Vue({
                 ...
     */
     data: {
+        address: null,
         chatVisible: false,
         checkString: 'noledger-checksum-plaintext', // very mighty for custom encryption
         contacts: {},
         encryption: {
+            /*  
+                A 2048 bit RSA key allows for 256 bytes of which the OAEP padding takes 42 bytes, 
+                leaving around 214 bytes for encrypted data. An AES-256 key is 256 bits (32 bytes) 
+                long, so there is plenty of space for it.
+            */
             encoder: new TextEncoder(),
             decoder: new TextDecoder(),
+            aes: {
+                algorithm: 'AES-GCM', // symmetric encryption
+                ascii: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"§$%&/()=?`+*~#-_.:,;€@^°\\{]öäüÖÜÄß`' + "'",
+                currentAESkey: null,
+                length: 256,
+                ivLength: 16
+            },    
             rsa: {
                 algorithm: "RSA-OAEP-256"
             },
@@ -90,7 +127,9 @@ var noledger = new Vue({
         },
         id: 0,
         keyPair: {},
-        sounds: {},
+        sounds: {
+            mute: false
+        },
         toAddress: '',
         wrapperVisible: true,
     },
@@ -104,10 +143,27 @@ var noledger = new Vue({
         // console.log(dec)
         this.initKeyBindings();
         this.initSounds();
-        this.listener();
+        this.initListener();
     },
 
     methods: {
+        aesDecrypt: async function (encrypted) {
+            const algo = { name: this.encryption.aes.algorithm, iv: encrypted.iv };
+            const key = this.encryption.aes.currentAESkey;
+            const encodedBuffer = await crypto.subtle.decrypt(algo, key, encrypted.encrypted);
+            console.log('encoded buffer', encodedBuffer)
+            const decoded = await this.encryption.decoder.decode(encodedBuffer);
+            return decoded
+        },
+        aesEncrypt: async function (plainText) {
+            const encodedText = this.encryption.encoder.encode(plainText);
+            const byteLength = this.encryption.aes.ivLength;    
+            const iv = crypto.getRandomValues(new Uint8Array(byteLength));                               // generate a random 4096 bit or 16 byte vector
+            const algo = { name: this.encryption.aes.algorithm, iv: iv };
+            const key = this.encryption.aes.currentAESkey;
+            let encrypted = await crypto.subtle.encrypt(algo, key, encodedText);                    // buffered cipher text in bytes    
+            return encrypted = {"encrypted": encrypted, "iv": iv}
+        },
         animate: async function (el, type) {
             /* Global UI Animation Tool */
             if          (type == 'poke left') {
@@ -280,8 +336,16 @@ var noledger = new Vue({
             // flush wrapper content
             let wrapper = document.getElementById('wrapper');
             wrapper.innerHTML = "";
+            this.address = await this.getAddress();
             // build contacts page
             await this.loadContactsPage();
+        },
+        generateRandomBytes: async function (length) {
+            let pad = '';
+            for (let i = 0; i < length; i++) {
+                pad += this.encryption.aes.ascii[Math.floor(Math.random()*this.encryption.aes.ascii.length)]
+            }
+            return pad
         },
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
@@ -289,11 +353,21 @@ var noledger = new Vue({
             return pub.n;
         },
         initContact: async function (address) {
-            // initializes entry in contacts database
-            if (!(address in this.contacts)) {
-                console.log('initialize contact -', address.slice(0,7), '...')
-                _key = await this.keyImport(address)
-                this.contacts[address] = {
+            
+            if (!(address in this.contacts)) {                                                                  // if contact was not initialized yet
+                                                                  
+                console.log('initialize contact -', address.slice(0,7), '...');
+                let _key = await this.keyImport(address);                                                       // construct RSA key from address
+
+                const phrase = await this.generateRandomBytes(16);
+                const pwEncoded = this.encryption.encoder.encode(phrase);                                       // utf8 encode phrase string as seed for AES key
+                const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                // Hash the encoded seed
+                const algo = { name: this.encryption.aes.algorithm };
+                const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);          // construct a CryptoKey from phrase
+
+                this.contacts[address] = {                                                                      // append to contacts object
+                    aesBuffer: aesKey,
+                    aesPhrase: phrase,
                     key: _key,
                     stack: [],
                     unread: 0
@@ -310,43 +384,7 @@ var noledger = new Vue({
                 }
             }
         },
-        initSounds: async function () {
-            this.sounds.inbox = new Audio('./inbox.mp3');
-            this.sounds.send = new Audio('./send.mp3');
-        },
-        keyExport: async function (key) {
-            
-            const exported = window.crypto.subtle.exportKey(
-              "jwk",
-              key
-            );
-            console.log('exported', exported)
-            return exported
-        
-        },
-        keyImport: async function (key, usage="encrypt") {
-            // encode the key to base64url
-            // key_enc = window.btoa(unb64unescape(encodeURIComponent( key )));
-            // key_enc = key_enc.slice(0,key_enc.length-1)
-            //key_enc = b64Escape(key_enc)
-            key_enc = key;
-            //console.log(key, '\n\n', key_enc)
-            const imported = await crypto.subtle.importKey(
-                "jwk",
-                { 
-                    kty: "RSA", 
-                    e: "AQAB", 
-                    n: key_enc,
-                    alg: this.encryption.rsa.algorithm,
-                    ext: true,
-                },
-                this.encryption.algorithm,
-                false,
-                [usage]
-            );
-            return imported
-        },
-        listener: async function () {
+        initListener: async function () {
             console.log('start listener ...')
             while (true) {
 
@@ -358,44 +396,40 @@ var noledger = new Vue({
                         let collection = Array.from(response.collection);
 
                         // iterate through packages in returned collection
-                        console.log('response', response)
-                        // console.log('collection', collection)
-                        // console.log('collection_sub', collection[1])
                         for (let pkg of collection) {
                             
                             /* check if the message was meant for this client */
                             if (pkg) {
-                                console.log('pkg', pkg)
-                                console.log('pkg check', pkg.check)
                                 try {
-                                    console.log('pkgBuf', str2buf(pkg.check))
                                     let check_decrypted;
                                     try {
                                         check_decrypted = await this.decrypt(str2buf(pkg.check));
                                     } catch (error) {
-                                        console.log('skip pkg error')
+                                        console.log('skip pkg ...')
                                         console.log(error)
                                         check_decrypted = null
                                     }
                                     
                                     if (check_decrypted == this.checkString) {
         
-                                        // new message
-                                        this.sounds.inbox.play();
+                                        // draw the aes key
+                                        _key = await this.decrypt(str2buf(pkg.key));
     
                                         // decrypt pkg
-                                        let msg = await this.decrypt(str2buf(pkg.cipher)),
-                                            from = await this.decrypt(str2buf(pkg.from));
-                                            console.log('new msg from',from, '\n', msg)
+                                        let msg = await this.aesDecrypt(str2buf(pkg.cipher), _key);
+
+                                        //let from = 'someAddress';
+                                        let from = await this.aesDecrypt(str2buf(pkg.from), _key);
+
+                                        console.log('from', from);
+                                        console.log('new msg from', from, '\n', msg);
         
                                         // check if contact already exists
                                         if (!(from in this.contacts)) {
-                                            // add new contact first
-                                            let address = await noledger.getAddress(); 
-                                            if (from != address) {
-                                                await this.initContact(from);
-                                                this.loadNewContactThread(document.getElementById('contacts-wrapper'), from);
-                                            }
+                                            console.log('load new contact ...')
+                                            let wrapper = document.getElementById('contacts-wrapper');
+                                            await this.initContact(from);
+                                            await this.loadNewContactThread(wrapper, from);
                                         }
         
                                         // append new internal message
@@ -404,6 +438,9 @@ var noledger = new Vue({
                                             type: 'from',
                                             msg: msg
                                         }; this.contacts[from].stack.push(internal);
+
+                                        // new message sound
+                                        this.sounds.inbox.play();
         
                                         // decide wether to build a blob, otherwise increment the unread tag
                                         if (this.chatVisible && this.toAddress == from) {
@@ -429,13 +466,48 @@ var noledger = new Vue({
                 }
             }
         },
+        initSounds: async function () {
+            this.sounds.inbox = new Audio('./inbox.mp3');
+            this.sounds.send = new Audio('./send.mp3');
+        },
+        keyExport: async function (cryptoKey) {
+            
+            const exported = window.crypto.subtle.exportKey(
+              "jwk",
+              cryptoKey
+            );
+            console.log('exported', exported)
+            return exported
+        
+        },
+        keyImport: async function (key, usage=['encrypt']) {
+            // encode the key to base64url
+            const imported = await crypto.subtle.importKey(
+                "jwk",
+                { 
+                    kty: "RSA", 
+                    e: "AQAB", 
+                    n: key,
+                    alg: this.encryption.rsa.algorithm,
+                    ext: true,
+                },
+                this.encryption.algorithm,
+                false,
+                usage
+            );
+            return imported
+        },
         loadChat: async function (address) {
             this.toAddress = address;
             this.chatVisible = true;
             this.wrapperVisible = false;
             let frame = document.getElementById('messageFrame');
             frame.innerHTML = "" // flush
-            // load messages from stack
+
+            // draw current aes key for this session
+            this.encryption.aes.currentAESkey = this.contacts[address].aesBuffer; //await this.decrypt(this.contacts[address].aesBuffer);
+
+            // load messages from the current stack
             let stack = this.contacts[address].stack;
             for (let i = 0; i < stack.length; i++) {
                 await this.blob(stack[i], false)
@@ -483,6 +555,9 @@ var noledger = new Vue({
                 this.loadNewContactThread(contactsWrapper, address)
             }
             this.loadNewContactButton(contactsWrapper)
+
+            // set aes key back to null
+            this.encryption.aes.currentAESkey = null;
             
         },
         loadNewContactButton: async function (parent) {
@@ -492,6 +567,7 @@ var noledger = new Vue({
             el_payload = document.createElement('p');
             el_payload.innerHTML = "+ add contact";
             el.onmousedown = function () {
+
                 // create address input
                 this.remove();
                 let el = document.createElement('span');
@@ -501,6 +577,7 @@ var noledger = new Vue({
                 input_field.placeholder = 'enter address';
                 el.appendChild(input_field);
                 parent.appendChild(el);
+
                 // reload contact button on out focus
                 input_field.onfocusout = function () {
                     el.remove();
@@ -511,7 +588,8 @@ var noledger = new Vue({
                 input_field.onkeydown = async function (e) {
                     e = e || window.event;
                     switch (e.keyCode) {
-                        case 13 : //Your Code Here (13 is ascii code for 'ENTER')
+                        case 13 : 
+                            // Code for enter input
                             address = await noledger.getAddress();  
                             test = false
                             console.log('this.value', this.value)
@@ -529,7 +607,6 @@ var noledger = new Vue({
                     }
                 }
             }
-            //el.className = "new-contact";
             el.appendChild(el_payload);
             parent.appendChild(el);
         },
@@ -663,6 +740,9 @@ var noledger = new Vue({
             // draw current address and msg
             const entry = document.getElementById('entryInput');
             const address = this.toAddress;
+            // awaiting getAddress() raises dom exception
+            const fromAddress = await this.keyExport(this.keyPair.publicKey);
+            console.log('fromAddress binary', fromAddress)
             if (!msg) {
                 msg = `${entry.value}`;
             }
@@ -676,11 +756,12 @@ var noledger = new Vue({
             // reset entry
             entry.value = '';
 
-            // encrypt msg
+            // encrypt msg pkg
             try {
-                check = await this.encrypt(this.checkString, key);
-                cipher = await this.encrypt(msg, key);
-                from = await this.encrypt(this.getAddress(), key);
+                check = await this.encrypt(this.checkString, key);                              // asymmetrically encoded for tracking
+                _key = await this.encrypt(this.encryption.aes.currentAESkey, key)
+                cipher = await this.aesEncrypt(msg, this.encryption.aes.currentAESkey);         // rest payload is encoded with AES for higher capacity 
+                from = await this.aesEncrypt(fromAddress, this.encryption.aes.currentAESkey);
             } catch (error) {
                 console.log("encryption error")
                 throw error
@@ -689,17 +770,20 @@ var noledger = new Vue({
                 delete key;
             }
             console.log('cipher', cipher)
+            console.log('from', from)
+            console.log('check', check)
             
             // build package
             pkg = {
-                "time": new Date().getTime(),
-                "check": buf2str(check),
-                "from": buf2str(from),
-                "cipher": buf2str(cipher)
+                time: new Date().getTime(),
+                check: buf2str(check),
+                from: buf2str(from),
+                cipher: buf2str(cipher),
+                key: _key
             }
 
             // play a send sound
-            this.sounds.send.play()
+            if (!mute) {this.sounds.send.play()}
 
             // append another pkg suited for client chat window
             internal = {msg: msg, time: timestamp, type: 'to' };
@@ -722,6 +806,13 @@ var noledger = new Vue({
         },
         starDust: function () {
             document.getElementsByTagName('a')
+        },
+        test: async function () {
+            let testPhrase = 'Hello World!';
+            let enc = await this.aesEncrypt(testPhrase);
+            console.log('encrypted', enc);
+            await this.sleep(1)
+            console.log('decrypted', await this.aesDecrypt(enc));
         },
         thumbnail: async function (url, anchor=null) {
 
