@@ -427,8 +427,8 @@ var noledger = new Vue({
             }
         },
         initSounds: async function () {
-            this.sounds.inbox = new Audio('./inbox.mp3');
-            this.sounds.send = new Audio('./send.mp3');
+            this.sounds.inbox = new Audio('./media/inbox.mp3');
+            this.sounds.send = new Audio('./media/send.mp3');
         },
         keyExport: async function (cryptoKey) {
             

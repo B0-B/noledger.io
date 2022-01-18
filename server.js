@@ -6,15 +6,12 @@ const firewall = require('./modules/firewall.js')
 const bodyParser = require('body-parser'); 
 const { exec } = require('child_process');
 
-
-
-
 var node = function () {
     this.dir = path.join(__dirname, '/');
     this.id_high = 0;
     this.id_low = 0;
     this.ledger = {};
-    this.lifetime = .2; // in minutes
+    this.lifetime = 60; // in minutes
     this.port = null;
     this.server = this.build();
 }
@@ -27,7 +24,7 @@ node.prototype.build = function () {
     api.use(express.static(this.dir));
     api.get('/', function(request, response){
         /* FIREWALL */
-        response.sendFile('index.html');
+        response.sendFile('./landing/index.html');
     });
     api.get('/client', async function(request, response){
 
@@ -132,7 +129,6 @@ node.prototype.cleaner = async function () {
     console.log('start cleaner ...')
     const ms2min = 1/60000;
     while (this.server) {
-        console.log(this.ledger)
         let changes = false,
             currentTime = new Date().getTime(),
             keys = Object.keys(this.ledger).sort((a, b) => a - b);
