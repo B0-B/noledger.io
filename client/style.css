@@ -115,6 +115,34 @@ h3 {
     cursor: pointer;
 }
 
+.emoji {
+    width: 5vh;
+    height: 5vh;
+    line-height: 5vh;
+    vertical-align: middle;
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    float: left;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: ease-in-out 0.1s all;
+}
+
+.emoji:hover {
+    font-size: 2rem;
+    transition: ease-in-out 0.1s all;
+}
+
+#emojiFrame {
+    width: 100%;
+    height: 20%;
+    overflow-y: scroll;
+    position: absolute;
+    bottom: 20vh;
+    background-color: rgba(214, 208, 200, 0.726);
+}
+
 #entryFrame {
     background-color: #383838;;
     width: 100%;
