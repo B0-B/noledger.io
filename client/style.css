@@ -80,6 +80,11 @@ h3 {
     -webkit-box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
     box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
     z-index: 100;
+    line-height: 5vh;
+}
+
+#chatNavi div {
+    height: 100%;
 }
 
 #chatWindow {
@@ -140,7 +145,8 @@ h3 {
     overflow-y: scroll;
     position: absolute;
     bottom: 20vh;
-    background-color: rgba(214, 208, 200, 0.726);
+    background-color: rgba(209, 204, 197, 0.746);
+    z-index: 100;
 }
 
 #entryFrame {
@@ -155,6 +161,8 @@ h3 {
     text-align: left;
     margin: 5px;
     line-height: 300%;
+    overflow-y: scroll;
+    word-wrap: break-word;
 }
 
 #pingField {
@@ -237,7 +245,11 @@ h3 {
 }
 
 .symbol {
-    font-size: 1.5rem;
+    height: 100%;
+    vertical-align: middle;
+    font-size: 1rem;
+    font-weight: bold;
+    padding-left: 1rem;
     margin: 0;
 }
 

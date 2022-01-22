@@ -176,6 +176,8 @@ var noledger = new Vue({
         backToContacts: async function () {
             this.wrapperVisible = true;
             this.chatVisible = false;
+            this.emojiVisible = false;
+            document.getElementById('emojiFrame').scrollTop = 0;
         },
         blob: async function (pkg, fresh=true) {
             /*
@@ -202,9 +204,14 @@ var noledger = new Vue({
             p = document.createElement('p');
             p.style.direction = 'ltr';
             span.className = 'row no-gutters'
-             
+            
+            console.log('message length', pkg.msg)
             let msg_pkg = await this.renderMessage(pkg.msg);
             p.innerHTML = msg_pkg.output;
+            if (this.emojiString.includes(pkg.msg) && !pkg.msg.includes(' ')) {
+                console.log('single')
+                p.style.fontSize = "5rem"
+            }
             let div = document.createElement('div');
                 div.className = "container-fluid p-0";
             let row = document.createElement('div');
@@ -363,14 +370,19 @@ var noledger = new Vue({
             for(let set of emojiSets) {
                 const emojiSetArray = set.split(" ");
                 for (let emoji of emojiSetArray) {
-                    emojiEl = document.createElement('p');
-                    emojiEl.innerHTML = emoji;
-                    emojiEl.className = 'emoji';
-                    console.log('element', emojiEl)
-                    emojiEl.onmousedown = function () {
-                        console.log('pressed')
-                        noledger.loadEmoji(emoji)}
-                    emojiFrame.appendChild(emojiEl);
+
+                    emojiFrame.innerHTML += `<span class="emoji" onclick=noledger.loadEmoji('${emoji}')>${emoji}</span>`
+
+                    // let emojiEl = document.createElement('a');
+                    // emojiFrame.appendChild(emojiEl);
+                    // emojiEl.innerHTML = emoji;
+                    // emojiEl.className = 'emoji';
+                    // emojiEl.addEventListener('click', function(e){   
+                    //     console.log('pressed')
+                    //     noledger.loadEmoji(emoji)
+                    // });
+                    // console.log('element', emojiEl)
+                    
                     //this.emojiHtml += `<p class="emoji" v-on:click="loadEmoji('${emoji}')">${emoji}</p>`
                 } emojiFrame.innerHTML += '<br><br><br>'
             }
@@ -547,6 +559,7 @@ var noledger = new Vue({
         },
         loadEmoji: async function (string) {
             this.writeInput(string);
+            document.getElementById('emojiFrame').scrollTop = 0;
             this.emojiVisible = false;
         },
         loadNewContactButton: async function (parent) {
@@ -657,6 +670,7 @@ var noledger = new Vue({
             let thumbnail = false,
                 el,
                 url;
+
             for (let i = 0; i < words.length; i++) {
                 const word = words[i];
                 if (word.includes('https://') || word.includes('http://')) {
@@ -764,7 +778,8 @@ var noledger = new Vue({
             let response = await this.request(pkg, '/submit');                          
             console.log('API', response)
 
-            this.emojiVisible = false                                                   // toggle off emoji frame
+            this.emojiVisible = false;                                                  // toggle off emoji frame and scroll back
+            document.getElementById('emojiFrame').scrollTop = 0;
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {
