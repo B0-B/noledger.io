@@ -24,7 +24,10 @@ node.prototype.build = function () {
     api.use(express.static(this.dir));
     api.get('/', function(request, response){
         /* FIREWALL */
-        response.sendFile('./landing/index.html');
+        result = await firewall(request);
+        if (result) {
+            response.sendFile(__dirname + '/landing/index.html');
+        }
     });
     api.get('/client', async function(request, response){
 
@@ -78,7 +81,6 @@ node.prototype.build = function () {
             }
         } catch (error) {
             console.log('submit error:', error)
-            response_pkg.errors.push(error)
         } finally {
             response.send(response_pkg)
         }
@@ -200,4 +202,4 @@ function CommandLineInterpreter (port) {
     }
 }
 
-CommandLineInterpreter(3000)
+CommandLineInterpreter(443)
