@@ -22,7 +22,7 @@ node.prototype.build = function () {
     var api = express();
     var _node = this;
     api.use(express.static(this.dir));
-    api.get('/', function(request, response){
+    api.get('/', async function(request, response){
         /* FIREWALL */
         result = await firewall(request);
         if (result) {
