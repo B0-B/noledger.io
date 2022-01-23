@@ -438,7 +438,18 @@ var noledger = new Vue({
                                             msg: msg
                                         }; this.contacts[from].stack.push(internal);
                                         
-                                        if (!this.sounds.mute){this.sounds.inbox.play()}                        // new message sound
+                                        if (!this.sounds.mute){                                                // decide on new message sound
+                                            if (msg.includes('#skrr')) {
+                                                let pool = this.sounds.sk;
+                                                pool[Math.floor(Math.random()*pool.length)].play()
+                                            } else if (msg.includes('#boom')) {
+                                                this.sounds.boom.play()
+                                            } else if (msg.includes('#quick') || msg.includes('#math')) {
+                                                this.sounds.quick.play()
+                                            }else {
+                                                this.sounds.inbox.play()
+                                            }
+                                        }                        
         
                                         if (this.chatVisible && this.toAddress == from) {                       // decide wether to build a blob in chat or increment the unread tag
                                             this.blob(internal, true);
@@ -466,6 +477,15 @@ var noledger = new Vue({
         initSounds: async function () {
             this.sounds.inbox = new Audio('./media/inbox.mp3');
             this.sounds.send = new Audio('./media/send.mp3');
+            this.sounds.boom = new Audio('./media/boom.mp3')
+            this.sounds.quick = new Audio('./media/quick.mp3')
+            this.sounds.sk = [
+                new Audio('./media/sk/sk_1.mp3'),
+                new Audio('./media/sk/sk_2.mp3'),
+                new Audio('./media/sk/sk_3.mp3'),
+                new Audio('./media/sk/sk_4.mp3'),
+                new Audio('./media/sk/sk_5.mp3')  
+            ];
         },
         keyExport: async function (cryptoKey) {
             
