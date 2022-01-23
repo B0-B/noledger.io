@@ -157,7 +157,7 @@ h3 {
 }
 
 #entryInput {
-    width: 100%;
+    width: 70vw;
     text-align: left;
     margin: 5px;
     line-height: 300%;
@@ -165,15 +165,29 @@ h3 {
     word-wrap: break-word;
 }
 
+#emojiToggle {
+    font-size: 2rem;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    height: 10vh;
+    width: 10vw;
+    min-height: 2.1rem;
+    min-width: 2.1rem;
+    line-height: 10vh;
+    color: #fff
+}
+
 #pingField {
-    height: 100px;
-    line-height: 100px;
-    width: 90%;
+    height: 10vh;
+    width: 20vw;
+    min-height: 2.1rem;
+    line-height: 10vh;
+    width: 20vw;
     color:#ddd;
     background-color: rgb(51, 77, 148);
     cursor: pointer;
     display: inline-block;
-    margin-top: 5px;
     text-align: center;
     vertical-align: middle;
     font-weight: bold;

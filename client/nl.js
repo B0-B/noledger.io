@@ -788,6 +788,9 @@ var noledger = new Vue({
                 }, 1000*seconds);
             });
         },
+        toggleEmojiFrame: function () {
+            this.emojiVisible = !this.emojiVisible
+        },
         thumbnail: async function (url, anchor=null) {
 
             /* This function builds an interactive thumbnail element for showcasing websites */
