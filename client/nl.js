@@ -702,9 +702,13 @@ var noledger = new Vue({
                         el.className = 'container-fluid p-0 thumbnail'
                         url = word;
                     }
+                } else if (word.includes('#skrr') || word.includes('#boom') || word.includes('#quick') || word.includes('#math')) {
+                    let slicedWord = word.slice(1)
+                    output += `<p style="color: #ebd03b; font-weight:bold;" target="_blank">${slicedWord}!</a>`;
                 } else {
                     output += word
                 }
+                
                 if (i != words.length-1) {
                     output += ' ';
                 }
