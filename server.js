@@ -179,27 +179,13 @@ node.prototype.sleep = function (seconds) {
     });
 }
 
-
-function CommandLineInterpreter (port) {
-    const args = process.argv.slice(2);
-    if ( args.length == 0 ) {
-        const srv = new node();
-        //await srv.sleep(1);
-        srv.run(port)   
-    } else {
-        if ( args[0] == 'kill' ) {
-            exec('sudo kill -9 `sudo lsof -t -i:'+port+'`', (error, stdout, stderr) => {
-                if (error) {
-                    console.log(`error: ${error.message}`);
-                    return;
-                }
-                if (stderr) {
-                    console.log(`stderr: ${stderr}`);
-                    return;
-                }
-            });
-        }
-    }
+// ------------------------------------
+// Instantiate the node
+// ------------------------------------
+const args = process.argv.slice(2);
+const srv = new node();
+if (args.length == 0) {
+    srv.run(443)
+} else {
+    srv.run(args[0])
 }
-
-CommandLineInterpreter(443)
