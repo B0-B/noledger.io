@@ -439,16 +439,7 @@ var noledger = new Vue({
                                         }; this.contacts[from].stack.push(internal);
                                         
                                         if (!this.sounds.mute){                                                // decide on new message sound
-                                            if (msg.includes('#skrr')) {
-                                                let pool = this.sounds.sk;
-                                                pool[Math.floor(Math.random()*pool.length)].play()
-                                            } else if (msg.includes('#boom')) {
-                                                this.sounds.boom.play()
-                                            } else if (msg.includes('#quick') || msg.includes('#math')) {
-                                                this.sounds.quick.play()
-                                            }else {
-                                                this.sounds.inbox.play()
-                                            }
+                                            this.playSoundFor(msg)
                                         }                        
         
                                         if (this.chatVisible && this.toAddress == from) {                       // decide wether to build a blob in chat or increment the unread tag
@@ -479,6 +470,7 @@ var noledger = new Vue({
             this.sounds.send = new Audio('./media/send.mp3');
             this.sounds.boom = new Audio('./media/boom.mp3')
             this.sounds.quick = new Audio('./media/quick.mp3')
+            this.sounds.haha = new Audio('./media/haha.mp3')
             this.sounds.sk = [
                 new Audio('./media/sk/sk_1.mp3'),
                 new Audio('./media/sk/sk_2.mp3'),
@@ -682,6 +674,20 @@ var noledger = new Vue({
         },
         ping: async function () {
             this.send('🏓')
+        },
+        playSoundFor: async function (msg) {
+            if (msg.includes('#skrr')) {
+                let pool = this.sounds.sk;
+                pool[Math.floor(Math.random()*pool.length)].play()
+            } else if (msg.includes('#boom')) {
+                this.sounds.boom.play()
+            } else if (msg.includes('#quick') || msg.includes('#math')) {
+                this.sounds.quick.play()
+            } else if (msg.includes('#haha')) {
+                this.sounds.haha.play()
+            } else {
+                this.sounds.inbox.play()
+            }
         },
         renderMessage: async function (sentence) {
             /* Message string renders to html compliant output */
