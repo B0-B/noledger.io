@@ -9,10 +9,6 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-#head {
-    max-height: 5vh;
-}
-
 a {
     color: aquamarine;
     font-style: bold;
@@ -151,16 +147,17 @@ h3 {
 
 #entryFrame {
     background-color: #383838;;
-    width: 100%;
+    width: 100vw;
     height: 20vh;
     display: inline-block;
 }
 
 #entryInput {
+    height: 10vw;
+    min-height: 2.1rem;
     width: 70vw;
     text-align: left;
-    margin: 5px;
-    line-height: 300%;
+    line-height: 1rem;
     overflow-y: scroll;
     word-wrap: break-word;
 }
@@ -170,19 +167,19 @@ h3 {
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
-    height: 10vh;
+    height: 10vw;
     width: 10vw;
     min-height: 2.1rem;
     min-width: 2.1rem;
-    line-height: 10vh;
+    line-height: 10vw;
     color: #fff
 }
 
 #pingField {
-    height: 10vh;
+    height: 10vw;
     width: 20vw;
     min-height: 2.1rem;
-    line-height: 10vh;
+    line-height: 10vw;
     width: 20vw;
     color:#ddd;
     background-color: rgb(51, 77, 148);

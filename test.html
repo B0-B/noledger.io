@@ -1,41 +1,51 @@
 <!DOCTYPE html>
 <html>
     <head>
-    </head>
-    <body>
+        <style>
+            body {
+                margin: 0;
+                /* Permalink - use to edit and share this gradient: https://colorzilla.com/gradient-editor/#f7f1de+0,c9c7b3+100 */
+                background: #f7f1de; /* Old browsers */
+                background: -moz-radial-gradient(center, ellipse cover,  #f7f1de 0%, #c9c7b3 100%); /* FF3.6-15 */
+                background: -webkit-radial-gradient(center, ellipse cover,  #f7f1de 0%,#c9c7b3 100%); /* Chrome10-25,Safari5.1-6 */
+                background: radial-gradient(ellipse at center,  #f7f1de 0%,#c9c7b3 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+                filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f7f1de', endColorstr='#c9c7b3',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+                text-shadow: 0 25px 14px rgb(13, 13, 13, 0.2);
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            div {
+                color: rgb(10, 10, 10);
+                height: 100vh;
+                margin: 0;
+                width: 100vw;
+                line-height: 100vh;
+                vertical-align: middle;
+                text-align: center;
+                font-size: 2rem;
+                font-weight: bold;
+            }
+        </style>
         <script>
-            async function test () {
-                
-                const keyPair = await window.crypto.subtle.generateKey(
-                    {
-                        name: "RSA-OAEP",
-                        modulusLength: 4096,
-                        publicExponent: new Uint8Array([1, 0, 1]),
-                        hash: 'SHA-256'
-                    },
-                    true,
-                    ["encrypt", "decrypt"]
-                );
-
-                const payload = await window.crypto.subtle.exportKey(
-                    "jwk",
-                    keyPair.publicKey
-                );
-                
-                let encoder = new TextEncoder();
-                const dataEncoded = await encoder.encode(payload);
-                let encrypted = await crypto.subtle.encrypt({
-                    name: "RSA-OAEP",
-                    hash: {
-                        name: 'SHA-256'
-                    }
-                }, keyPair.publicKey, dataEncoded);
-
-                const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
-                let decoded = await this.encryption.decoder.decode(dataEncoded);
-                
-
+            async function globeLoader(e) {
+                const el = e.target;
+                console.log('el',el)
+                let seq = ['🌎','🌍','🌏'], i = 0;
+                function sleep (seconds) {
+                    return new Promise(function(resolve) {
+                        setTimeout(function() {
+                            resolve(0);
+                        }, 1000*seconds);
+                    });
+                }
+                while (true) {
+                    i = (i+1) % 3;
+                    el.innerHTML = `${seq[i]} noledger`;
+                    await sleep(.3)
+                }
             }
         </script>
+    </head>
+    <body>
+        <div onload="globeLoader()"></div>
     </body>
 </html>
