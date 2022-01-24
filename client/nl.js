@@ -227,6 +227,8 @@ var noledger = new Vue({
             span.appendChild(div);
             row_2.appendChild(dt);
 
+            frame.appendChild(span);
+
             this.scrollToBottom()
             return span
         },
