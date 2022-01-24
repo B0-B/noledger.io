@@ -1,18 +1,17 @@
 /*
-           © NOLEDGER
+==================================================================
+NOLEDGER: A Publicly Ledgered and Secure Messaging Protocol 
+Client-Side Code Copyright © 2022 noledger
+Author: B0-B (alch3mist94@protonmail.com)
+------------------------------------------------------------------
 
-        Client-Side Code
+This code is licensed under
 
-This code is served by the noledger 
-node and connects all users to the 
-ledger. The API sends JSON requests
-with correct encoding back to the node
-and listens to ledger entries for
-incoming messages.
+==================================================================
 */
 
 
-// ======= Buffer covnersions =======
+/* ---- Buffer covnersions ---- */
 function buf2str(buffer) {
     var binary = '';
 	var bytes = new Uint8Array( buffer );
@@ -38,15 +37,15 @@ async function testBuffer () {
     console.log('key', _key)
     console.log('output', await noledger.decrypt(str2buf(JSON.parse(JSON.stringify({x:buf2str(await noledger.encrypt('hello world !', _key))})).x) ))
 } 
-// ==================================
+/* ---------------------------- */
 
 
-/* noledger main object */
+/* --- noledger main object --- */
 var noledger = new Vue({
 
     el: '#noledger',
 
-    /* ---- Object architecture ----
+    /* Object architecture 
     contacts
         contact public-key
             in
@@ -106,14 +105,12 @@ var noledger = new Vue({
         toAddress: '',
         wrapperVisible: true,
     },
-
     mounted: async function () {
         this.initKeyBindings();
         this.initSounds();
         this.initEmojis();
         this.initListener();
     },
-
     methods: {
         aesDecrypt: async function (encrypted, cryptoKey=null) {
             if (!cryptoKey) {cryptoKey = await this.encryption.aes.currentAESkey}
@@ -121,7 +118,6 @@ var noledger = new Vue({
             encrypted.iv = str2buf(encrypted.iv);
             const algo = { name: this.encryption.aes.algorithm, iv: encrypted.iv };
             const encodedBuffer = await crypto.subtle.decrypt(algo, cryptoKey, encrypted.encrypted);
-            console.log('encoded buffer', encodedBuffer)
             const decoded = await this.encryption.decoder.decode(encodedBuffer);
             return decoded
         },
@@ -131,47 +127,10 @@ var noledger = new Vue({
             const iv = crypto.getRandomValues(new Uint8Array(byteLength));                               // generate a random 4096 bit or 16 byte vector
             const algo = { name: this.encryption.aes.algorithm, iv: iv };
             const key = await this.encryption.aes.currentAESkey;
-            console.log('key show', key)
             let encrypted = await crypto.subtle.encrypt(algo, key, encodedText);  
             encrypted_b64 = buf2str(encrypted);       
             iv_b64 = buf2str(iv);         
             return encrypted = {"encrypted": encrypted_b64, "iv": iv_b64}
-        },
-        animate: async function (el, type) {
-            /* Global UI Animation Tool */
-            if          (type == 'poke left') {
-                backup = String(el.style.marginRight)
-                m = 0
-                for (let i = 0; i < 1000; i++) {
-                    m += 0.01;
-                    att = `${m}vw`;
-                    el.style.marginRight = att;
-                    this.sleep(.01)
-                }
-                for (let i = 0; i < 1000; i++) {
-                    m -= 0.01;
-                    att = `${m}vw`;
-                    el.style.marginRight = att
-                    this.sleep(.01)
-                }
-                el.style.marginRight = backup;
-            } else if   (type == 'poke right') {
-                backup = String(el.style.marginLeft)
-                m = 0
-                for (let i = 0; i < 1000; i++) {
-                    m += 0.01;
-                    att = `${m}vw`;
-                    el.style.marginLeft= att;
-                    this.sleep(.01)
-                }
-                for (let i = 0; i < 1000; i++) {
-                    m -= 0.01;
-                    att = `${m}vw`;
-                    el.style.marginLeft = att
-                    this.sleep(.01)
-                }
-                el.style.marginLeft = backup;
-            }
         },
         backToContacts: async function () {
             this.wrapperVisible = true;
@@ -204,12 +163,9 @@ var noledger = new Vue({
             p = document.createElement('p');
             p.style.direction = 'ltr';
             span.className = 'row no-gutters'
-            
-            console.log('message length', pkg.msg)
             let msg_pkg = await this.renderMessage(pkg.msg);
             p.innerHTML = msg_pkg.output;
             if (this.emojiString.includes(pkg.msg) && !pkg.msg.includes(' ')) {
-                console.log('single')
                 p.style.fontSize = "5rem"
             }
             let div = document.createElement('div');
@@ -237,16 +193,12 @@ var noledger = new Vue({
             dots.innerHTML = '•••';
             dots.onmousedown = function () {
                 this.style.color = 'aquamarine';
-                noledger.animate()
             }
                 // listen to simulated outside focus events
             document.addEventListener('click', function(e){   
                 if (document.contains(e.target) && !dots.contains(e.target) ){
-                    console.log('outside')
                     dots.style.color = '#ddd';
                     menu.remove()
-                } else{
-                    console.log('inside')
                 }
             });
 
@@ -274,16 +226,6 @@ var noledger = new Vue({
             div.appendChild(row_2);
             span.appendChild(div);
             row_2.appendChild(dt);
-
-            // decide whether to animate
-            frame.appendChild(span);
-            if (fresh) {
-                if (pkg.type == 'to') {
-                    this.animate(span, 'poke left')
-                } else {
-                    this.animate(span, 'poke right')
-                }
-            }
 
             this.scrollToBottom()
             return span
@@ -339,7 +281,6 @@ var noledger = new Vue({
         },
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
-            console.log('public',pub)
             return pub.n;
         },
         initContact: async function (address) {
@@ -364,26 +305,11 @@ var noledger = new Vue({
         initEmojis: async function () {
             /* initialize emoji frame in chat by breaking up the emoji string */
             const emojiFrame = document.getElementById('emojiFrame');
-            console.log('init emojis', emojiFrame)
             const emojiSets = this.emojiString.split("\n\n");
-            console.log('emoji sets', emojiSets)
             for(let set of emojiSets) {
                 const emojiSetArray = set.split(" ");
                 for (let emoji of emojiSetArray) {
-
                     emojiFrame.innerHTML += `<span class="emoji" onclick=noledger.loadEmoji('${emoji}')>${emoji}</span>`
-
-                    // let emojiEl = document.createElement('a');
-                    // emojiFrame.appendChild(emojiEl);
-                    // emojiEl.innerHTML = emoji;
-                    // emojiEl.className = 'emoji';
-                    // emojiEl.addEventListener('click', function(e){   
-                    //     console.log('pressed')
-                    //     noledger.loadEmoji(emoji)
-                    // });
-                    // console.log('element', emojiEl)
-                    
-                    //this.emojiHtml += `<p class="emoji" v-on:click="loadEmoji('${emoji}')">${emoji}</p>`
                 } emojiFrame.innerHTML += '<br><br><br>'
             }
         },
@@ -414,7 +340,6 @@ var noledger = new Vue({
                                     try {
                                         check_decrypted = await this.decrypt(str2buf(pkg.check));
                                     } catch (error) {
-                                        console.log('skip pkg ...')
                                         check_decrypted = null
                                     }
                                     
@@ -480,14 +405,11 @@ var noledger = new Vue({
             ];
         },
         keyExport: async function (cryptoKey) {
-            
             const exported = window.crypto.subtle.exportKey(
               "jwk",
               cryptoKey
             );
-            console.log('exported', exported)
             return exported
-        
         },
         keyImport: async function (key, usage=['encrypt']) {
             // encode the key to base64url
@@ -595,7 +517,6 @@ var noledger = new Vue({
                 // reload contact button on out focus
                 input_field.onfocusout = function () {
                     el.remove();
-                    console.log('blur');
                     noledger.loadNewContactButton(parent);
                 }
                 // trigger when address is confirmed via enter
@@ -606,7 +527,6 @@ var noledger = new Vue({
                             // Code for enter input
                             address = await noledger.getAddress();  
                             test = false
-                            console.log('this.value', this.value)
                             if (this.value != address || test) {
                                 await noledger.initContact(this.value);
                                 noledger.loadChat(this.value);
@@ -616,7 +536,6 @@ var noledger = new Vue({
                                 this.placeholder = 'cannot add your own address.'
                                 await noledger.sleep(3);
                                 this.placeholder = 'enter address';
-                                console.log('ERROR: you cannot add your own address.')
                             }
                     }
                 }
@@ -636,8 +555,6 @@ var noledger = new Vue({
             addTag.style.display = 'none';
             addTag.innerHTML = address;
             thread_box.appendChild(addTag)
-            //thread_box.value = address; // stack address in element value
-
         },
         newUnreadMessage: async function (address) {
             /* Increments the unread variable of the contact. The contact needs to exist already. */
@@ -646,7 +563,6 @@ var noledger = new Vue({
                 return el.innerHTML === address
             })[0].parentElement;
             let unreadTag = threadBox.querySelector('div[class="unread"]');
-            console.log('unread', unreadTag);
             if (unreadTag) {
                 this.contacts[address].unread += 1;
                 unreadTag.innerHTML = this.contacts[address].unread;
@@ -663,7 +579,6 @@ var noledger = new Vue({
             if (threadBox.length > 0) {
                 threadBox = threadBox[0].parentElement;
                 let unreadTag = threadBox.querySelector('div[class="unread"]');
-                console.log('unread', unreadTag);
                 if (unreadTag) {
                     this.contacts[address].unread = 0;
                     unreadTag.innerHTML = '';
@@ -747,7 +662,6 @@ var noledger = new Vue({
                     }
                 }
                 xhr.onerror = function(e) {
-                    console.log(e)
                     reject({'errors': ['error during request: no connection']})
                 }
                 xhr.send(JSON.stringify(options)); 
@@ -805,8 +719,7 @@ var noledger = new Vue({
 
             this.blob(internal, fresh=true);                                            // build & load blob msg window
 
-            let response = await this.request(pkg, '/submit');                          
-            console.log('API', response)
+            let response = await this.request(pkg, '/submit');                          // send pkg to API
 
             this.emojiVisible = false;                                                  // toggle off emoji frame and scroll back
             document.getElementById('emojiFrame').scrollTop = 0;
@@ -861,7 +774,6 @@ var noledger = new Vue({
                         let img_el = document.createElement(tagName);
                         img_el.src = uri;
                         /* pick only images of minimum size */
-                        //console.log('uri', uri, 'element height', img_el.height);
                         await this.sleep(0.04)
                         if (img_el.height >= 100) { 
                             candidate = img_el;
@@ -901,7 +813,6 @@ var noledger = new Vue({
                 let favicon = document.createElement('img');
                 favicon.className = "thumbnail";
                 favicon.src = protocol + domain + '/favicon.ico';
-                console.log('favicon url', favicon.src)
                 tn.appendChild(favicon);
             }
             if (anchor) {
@@ -912,9 +823,9 @@ var noledger = new Vue({
         },
         writeInput: async function (string) {
             /* writes a string into entry input field */
-            console.log(string)
             const el = document.getElementById('entryInput');
             el.value = el.value + string;
         }, 
     }
 });
+/* ---------------------------- */
