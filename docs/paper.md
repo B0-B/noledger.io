@@ -1,9 +1,9 @@
 # Public Messaging Protocol
 
 # Protocol
-As the server and its clients form a star topology, the central node can quickly become a target for various kinds of attacks. Sniffing and data mining become more attractive nowadays, especially for companies which for instance host host services collect plenty of information throughout end-to-end encrypted conversations. Meta data help an attacker to traceback the times when messages are sent, received, how often messages are being read but most importantly who talks to whom. This chunk of information is enough to reconstruct the whole network with all it's bond activities which represent conversations between the nodes, and nodes represent the clients. This allows to extract a relational model to devide clients into social bins. A classic peer-2-peer protocol enables clients to connect mutually without a third party - this has proven to be a successful model for trusted non-centralized finance. Such distributed networks protect from manipulation but actually do not protect from tracking and routing except for protocols which utilize ring signatures for instance - to overcome pseudonymity. Chain analysis tools allow to map a pseudo anonymous address and can access the whole history since creation, as anyone else. Since the modern concept of secure messaging demands a buffer for messages while a client is disconnected, a third party seems inevitable. This concept however can be constructed in a distributed manner: namely where the chain itself would serve as a buffer and clients are filing messages on to the ledger and read from the ledger. But this comes with a cost: Every node in the network would have to save and serve the ledger which is nothing but junk data as nothing has to be proven, furthermore the end-to-end latency would be massively higher compared to a centralized system. 
+As the server and its clients form a star topology, the central node can quickly become a target for various kinds of attacks. Sniffing and data mining become more attractive nowadays - companies which host services may collect plenty of information throughout end-to-end encrypted conversations. Meta data help an attacker to traceback the times when messages are sent, received, how often messages are being read but most importantly who talks to whom. This chunk of information is enough to reconstruct the whole network with all it's bond activities which represent conversations between the nodes, and nodes represent the clients. This allows to extract a relational model by classification of clients. A classic peer-2-peer protocol enables clients to connect mutually without a third party - this has proven to be a successful model for trusted non-centralized finance. Such distributed networks protect from manipulation but actually do not protect from tracking and routing except for some protocols which utilize ring signatures to overcome pseudonymity. Chain analysis tools allow to map a pseudo anonymous address and can access the whole history since creation, as anyone else. Since the modern concept of secure messaging demands a buffer for messages while a client is disconnected, a third party seems inevitable. This concept however can be constructed in a distributed manner: namely where the chain itself would serve as a buffer and clients are filing messages on to the ledger and read from the ledger. But this comes with a cost: Every node in the network would have to save and serve the ledger which is nothing but junk data as nothing has to be proven, furthermore the end-to-end latency would be massively higher compared to a centralized system. 
 
-For a secure messaging system whose protocol prohibits hosts from saving meta data, a star topology becomes more attractive than the distributed one, but recall that in a centralized system manipulations become easy while tracking hard - if the following protocol is obeyed
+For a secure messaging system whose protocol prohibits hosts from saving meta data, a star topology becomes more attractive over a distributed one, since the message encryption is not enhanced through further decentralization but instead brings drawbacks but recall that in a centralized system manipulations become easier to achieve. The outlined security capabilities can be met by a service if the following protocol if it obeys the following protocol
 
 <br>
 
@@ -40,16 +40,18 @@ To releave the system from high traffic the lifetime can be adjusted such that h
 Entries are child objects of the ledger described in III and contain the exchanged information in encrypted form.
 
 ### IV.1) Format
-Most of the secured exchange and routing between clients is enabled by the entry format, the rest is handled by the exchange mechanics outlined in V.
+Most of the secured exchange and hidden routing between clients is enabled by the entry format, the rest is handled by the exchange mechanics outlined in V. Entries are filed to the ledger in the format below. 
     
-    Entry {
-        header      Check string which was encrypted with receivers address
-
-
-    }    
+| Entry  | Content | Type | Description |
+|---|---|---|---|
+|   | header | String | Check string encrypted with receivers address  |
+|   | from | String | The senders public address sym. encrypted with AES key |
+|   | cypher | String | The senders message encrypted with AES key |
+|   | key | String | Symmetric AES key for the entry (contact specific) encrypted with receivers address |
+|   | time | Integer | Ledger entrance timestamp in plain text |   
 
 
 ## V) Clients
 
 ### V.1) Route Obfuscation
-    Message routes can only be reconstructed and linked to clients if there is a small amount of active clients in the network. Thus, every active participant (client) needs to download each ledger entry in its encrypted form and try to decrypt on the client side. This increases the relational entropy and prevents routing.
+Every active participant (client) needs to download each ledger entry in its encrypted form and try to decrypt exclusively on the client side. This maximizes the relational entropy between clients.
