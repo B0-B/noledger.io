@@ -54,4 +54,13 @@ Most of the secured exchange and hidden routing between clients is enabled by th
 ## V) Clients
 
 ### V.1) Route Obfuscation
-Every active participant (client) needs to download each ledger entry in its encrypted form and try to decrypt exclusively on the client side. This maximizes the relational entropy between clients.
+Every active participant (client) needs to request each ledger entry in its encrypted form and try to decrypt exclusively on the client side. This maximizes the relational entropy between clients and prevents any feedback on the decryption success.
+
+### V.2) Ledger Reading
+Entries are requested by the client by sending the last observed ledger id to the central node. The returned package will contain all entries between the last id observed by the client and the last id received by the ledger. The last observed id is updated by the highest id in the returned set.
+
+### V.3) Entry Decryption
+Every entry contained in the node response is tried to be decrypted with the requester's private key. The success is determined from decrypting the header and comparing to the check string to upon which all clients or a subset of them have agreed to. On inequality the entry is discarded while on success the rest of the entry is decrypted in order 
+1. Decrypt the provided AES key using the private key
+2. Use the decrypted AES key to further decrypt the sender's address
+3. Use the AES key to decrypt the cypher with the message yield
