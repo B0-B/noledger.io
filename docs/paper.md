@@ -1,15 +1,24 @@
-# Public Messaging Protocol
+# Peer-to-Peer
+A physical peer-to-peer network would require data to flow directly between arbitrary node pairs without the need of a third party. But in central public ledger protocols this is broadly misunderstood as there is not a real transfer between nodes, instead a central instance takes transfer orders as input and subsqeuently adjusts the balances linked to receiver and sender addresses within the ledger. The final balance whihc may be reconstructed publicly emits the illusion of an end-to-end flow. The third party concept persists throughout different topologies which all involve server communication but may vary in their consesus in order to offer unique security standards. The most popular approach to avoid ledger manipulations utilizes the strength and variety of the network through distribution. The electronic cash system proposal by Satoshi Nakamoto is also often misinterpreted in regards of peer-to-peer as there are no tokens which are exchanged between nodes. Instead, oders are broadcasted to validator and miner nodes to confirm and prove transactions, respectively. Once the network agrees to the longest chain which resembles the proven ledger history the transactional accounting however applies in similar fashion as described in a centralized system. This system is another peer-to-peer illusion, but with the difference that the consesus does not rely on trust towards a single party but on proof-of-work which is distributed democratically across the network. 
 
-# Protocol
-In a star topology the central node can quickly become a target for various kinds of attacks. Sniffing and data mining become more attractive nowadays - companies which host services may collect plenty of information throughout end-to-end encrypted conversations. Meta data help an attacker to traceback the times when messages are sent, received, how often messages are being read but most importantly who talks to whom. This chunk of information is enough to reconstruct the whole network with all it's bond activities which represent conversations between the clients. This allows to extract a relational model by classification of clients. 
 
-A classic peer-2-peer protocol enables clients to connect mutually without a third party - this has proven to be a successful model for trusted non-centralized finance. Such distributed networks protect from manipulation but actually do not protect from tracking and routing except for some protocols that like e.g. ring signatures. Chain analysis tools allow to map a pseudo anonymous address and can reconstruct the whole history since creation, like anyone else. The modern concept of secure messaging demands a buffer for messages while a client is disconnected, a third party seems inevitable. However, this concept can be constructed in a distributed manner: namely where the chain itself would serve as a buffer and clients are filing messages on to the ledger and read from the ledger. But this comes with the cost of increasing end-to-end latency would just increase massively compared to a centralized server. 
+# The Problem of Anonimity
+To reach consensus blockchains require a bijective mapping between each entry and the corresponding stakeholders, which is associated with the prove of identities using an asymmetric crypto system which elegantly removes byzantine fault. This creates a problem by design, in which anonimity can not pe guaranteed. Even without a map between user identities and wallet addresses the transactions can be classified and reconstructed to a relational net of wallets. Apparently, this prevents the anonimity between communicators as it promotes attackers to route every exchange. Although solutions were presented which successfully implement ring signatures to solve this issue, they are based on obfuscation and computational infeasability.    
 
-For a secure messaging system whose protocol prohibits hosts from saving meta data, a star topology becomes more attractive over a distributed one, since the message encryption is not enhanced through further decentralization but instead brings drawbacks but recall that in a centralized system manipulations become easier to achieve. The outlined security capabilities can be met by a service if it obeys the following protocol
+
+Distributed networks protect from manipulation but actually not conveniently (perfectly by design) from tracking and routing. Chain analysis tools allow to map a pseudo anonymous address and can reconstruct the whole history since creation, like anyone else since it is public. The modern concept of secure messaging demands a buffer for messages while a client is disconnected, a third party seems inevitable for this service. Although messages are managed by a central instance, this concept can be designed in a distributed manner: namely where the chain itself would serve as a buffer and clients are filing messages on to the ledger and read every entry from the ledger. This would prefer latency and conveniently hold the anonimity, but would need improvements in scaling as the entire traffic is handled by a single host.
+
+
+In a star topology the central node can quickly become a target for attacks. Sniffing and data mining have become very attractive - e.g. companies which host services may collect plenty of information throughout end-to-end encrypted conversations. Meta data help to reconstruct the whole network with all it's clients' activities. This allows to extract a relational model by classification. Anyway in a routing prohibited protocol, the vulnerability would include stability and service convenience but not the security in the sense that messages or routes would be exposed in any way.
+An attacker would thus expected to loose interest in his actions, as there are no information one could extract.
+
+Hence, for a secure messaging system whose protocol prohibits hosts from saving meta data, a star topology becomes more attractive over a distributed one, since the message encryption is not enhanced through further decentralization but instead brings drawbacks. Recall that in a centralized system manipulations become easier to achieve. 
+
+Still preservation of anonimity can be met by a service if it obeys the following protocol.
 
 <br>
 
- 
+# Protocol
 
 ## I) Trusted Identification
 Every client is identified by a unique RSA key pair where the public key serves as the client's address (the holder of the address) and is used for asymmetric encryption processes. No one in, nor outside the network knows that an address exists, except apparently the holder and his/her contacts. Clients with access to an address, other than their own, share the ability to contact the holder and subsequently vice versa.
@@ -55,13 +64,16 @@ Most of the secured exchange and hidden routing between clients is enabled by th
 
 ## V) Clients
 
-### V.1) Route Obfuscation
+### V.1) Initialization
+Clients are anonymous and do not share any activity with the host. The identification described in I) is performed locally. 
+
+### V.2) Route Obfuscation
 Every active participant (client) needs to request each ledger entry in its encrypted form and try to decrypt exclusively on the client side. This maximizes the relational entropy between clients and prevents any feedback about the decryption success.
 
-### V.2) Ledger Reading
+### V.3) Ledger Reading
 Entries are requested by the client by sending the last observed ledger id to the central node. The returned package will contain all entries between the last id observed by the client and the last id received by the ledger. The last observed id is updated by the highest id in the returned set.
 
-### V.3) Entry Decryption
+### V.4) Entry Decryption
 Every entry contained in the node response is tried to be decrypted with the requester's private key. The success is determined from decrypting the header and comparing to the check string to upon which all clients or a subset of them have agreed to. On inequality the entry is discarded while on success the rest of the entry is decrypted in the order 
 1. Decrypt the provided AES key using the private key
 2. Use the decrypted AES key to further decrypt the sender's address
