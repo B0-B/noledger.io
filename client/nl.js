@@ -1,6 +1,6 @@
 /*
 ==================================================================
-NOLEDGER: A Publicly Ledgered and Secure Messaging Protocol 
+noledger
 Client-Side Code Copyright © 2022 noledger
 Author: B0-B (alch3mist94@protonmail.com)
 ------------------------------------------------------------------
