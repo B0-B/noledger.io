@@ -1,6 +1,6 @@
 <h2 align=center><strong>noledger</strong></h2> 
 
-A secure messaging protocol influenced by public ledger technology. Chat clients connect through Diffie-Hellman key exchange and messages are broadcasted publicly in RSA cipher form and can be decrypted only by those who own a private key which corresponds to their address (public key). This improves standard e2e security protocols as there are no sender, nor receiver nodes to which encrpyted packages can be traced back. 
+A secure messaging protocol influenced by public ledger technology. Chat clients connect through Diffie-Hellman key exchange and messages are broadcasted publicly in RSA cipher form and are requested by every client but can be decrypted only by those who own a private key which corresponds to their address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. 
 
 Read the full [article](https://github.com/B0-B/noledger/blob/main/docs/paper.md).
 
