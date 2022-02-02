@@ -140,7 +140,7 @@ h3 {
     height: 20%;
     overflow-y: scroll;
     position: absolute;
-    bottom: 20vh;
+    bottom: 50px;
     background-color: rgba(209, 204, 197, 0.746);
     z-index: 100;
 }
@@ -217,6 +217,8 @@ h3 {
     height: auto;
     -webkit-border-radius: 5px 5px 5px 5px;
     border-radius: 5px 5px 5px 5px;
+    -webkit-box-shadow: 0 1px 5px 1px rgba(0,0,0,0.4);
+    box-shadow: 0 1px 5px 1px rgba(0,0,0,0.4);
     z-index: 100
 }
 

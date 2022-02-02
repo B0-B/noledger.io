@@ -495,6 +495,7 @@ var noledger = new Vue({
         },
         loadEmoji: async function (string) {
             this.writeInput(string);
+            document.getElementById('entryInput').focus()
             document.getElementById('emojiFrame').scrollTop = 0;
             this.emojiVisible = false;
         },
