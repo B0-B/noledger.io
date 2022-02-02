@@ -398,6 +398,7 @@ var noledger = new Vue({
             this.sounds.boom = new Audio('./media/boom.mp3')
             this.sounds.quick = new Audio('./media/quick.mp3')
             this.sounds.haha = new Audio('./media/haha.mp3')
+            this.sounds.thx = new Audio('./media/dm.mp3')
             this.sounds.sk = [
                 new Audio('./media/sk/sk_1.mp3'),
                 new Audio('./media/sk/sk_2.mp3'),
@@ -603,6 +604,8 @@ var noledger = new Vue({
                 this.sounds.quick.play()
             } else if (msg.includes('#haha')) {
                 this.sounds.haha.play()
+            } else if (msg.includes('#thx')) {
+                    this.sounds.thx.play()
             } else {
                 this.sounds.inbox.play()
             }
@@ -626,7 +629,8 @@ var noledger = new Vue({
                         el.className = 'container-fluid p-0 thumbnail'
                         url = word;
                     }
-                } else if (word.includes('#skrr') || word.includes('#boom') || word.includes('#quick') || word.includes('#math') || word.includes('#haha')) {
+                } else if (word.includes('#skrr') || word.includes('#boom') || word.includes('#quick') || word.includes('#math') || word.includes('#haha')
+                || word.includes('#thx')) {
                     let slicedWord = word.slice(1)
                     output += `<p style="color: #ebd03b; font-weight:bold;" target="_blank">${slicedWord}!</a>`;
                 } else {
