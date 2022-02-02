@@ -146,6 +146,8 @@ h3 {
 }
 
 #entryFrame {
+    position: absolute;
+    bottom: 0;
     background-color: #383838;;
     width: 100vw;
     display: inline-block;
@@ -173,7 +175,6 @@ h3 {
 }
 
 #pingField {
-    
     height: 50px;
     width: 80px;
     line-height: 50px;
@@ -231,8 +232,9 @@ h3 {
 #messageFrame {
     background-color: #ddd;
     width: 100%;
-    min-height: 70vh;
-    max-height: 70vh;
+    top: 10vh;
+    bottom: 50px;
+    position: absolute;
     display: block;
     overflow-y: scroll;
     -webkit-box-shadow:inset 0 0 6px 0 rgba(0,0,0,0.6);
