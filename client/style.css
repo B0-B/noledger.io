@@ -148,14 +148,13 @@ h3 {
 #entryFrame {
     background-color: #383838;;
     width: 100vw;
-    height: 20vh;
     display: inline-block;
 }
 
 #entryInput {
-    height: 10vw;
-    min-height: 2.1rem;
-    width: 70vw;
+    min-height: 50px;
+    width: 100%;
+    min-width: 60vw;
     text-align: left;
     line-height: 1rem;
     overflow-y: scroll;
@@ -167,19 +166,17 @@ h3 {
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
-    height: 10vw;
-    width: 10vw;
-    min-height: 2.1rem;
-    min-width: 2.1rem;
-    line-height: 10vw;
+    height: 50px;
+    width: 50px;
+    line-height: 50px;
     color: #fff
 }
 
 #pingField {
-    height: 10vw;
-    width: 20vw;
-    min-height: 2.1rem;
-    line-height: 10vw;
+    
+    height: 50px;
+    width: 80px;
+    line-height: 50px;
     width: 20vw;
     color:#ddd;
     cursor: pointer;
