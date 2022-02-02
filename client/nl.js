@@ -110,6 +110,7 @@ var noledger = new Vue({
         this.initSounds();
         this.initEmojis();
         this.initListener();
+        this.destroyLoadFrameDelayed();
     },
     methods: {
         aesDecrypt: async function (encrypted, cryptoKey=null) {
@@ -241,6 +242,10 @@ var noledger = new Vue({
             const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
             let decoded = await this.encryption.decoder.decode(dataEncoded);
             return decoded
+        },
+        destroyLoadFrameDelayed: async function () {
+            await this.sleep(1);
+            document.getElementById('load-frame').remove()
         },
         generateAESkeyFromPhrase: async function (phrase=null) {
             if (!phrase) {

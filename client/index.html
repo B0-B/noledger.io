@@ -10,8 +10,30 @@
         <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
         <title>noledger</title>
+        <script>
+            async function globeLoader() {
+                const el = document.getElementById("loader")
+                let seq = ['🌎','🌍','🌏'], i = 0;
+                function sleep (seconds) {
+                    return new Promise(function(resolve) {
+                        setTimeout(function() {
+                            resolve(0);
+                        }, 1000*seconds);
+                    });
+                }
+                while (true) {
+                    i = (i+1) % 3;
+                    el.innerHTML = `${seq[i]} noledger`;
+                    await sleep(.2)
+                }
+            }
+        </script>
     </head>
     <body>
+        <div id="load-frame">
+            <div id="loader"></div>
+            <script>globeLoader()</script>
+        </div>
         <div id="noledger" class="container-fluid p-0">
             <div id="head" class="container-fluid p-0">
                 <h1>noledger</h1>
