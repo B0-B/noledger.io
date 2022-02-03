@@ -57,12 +57,12 @@
 
 .slide-height-collapsed {
     transition: ease-in-out 0.1s all;
-    height: 56px;
+    height: 50px;
 }
 
 .slide-height-expanded {
     transition: ease-in-out 0.1s all;
-    height: 106px;
+    height: 100px;
 }
 
 .slide-padding-expanded {
@@ -214,16 +214,18 @@ h3 {
 
 #entryFrame {
     position: absolute;
+    
     bottom: 0;
-    background-color: #383838;;
-    width: 100vw;
+    background-color: #383838;
+    left:0;
+    right:0;
     display: inline-block;
 }
 
 #entryInput {
     min-height: 50px;
     width: 100%;
-    min-width: 60vw;
+    min-width: 40vw;
     text-align: left;
     line-height: 1rem;
     overflow-y: scroll;
@@ -334,7 +336,6 @@ h3 {
     background-color: #ddd;
     width: 100%;
     top: 10vh;
-    bottom: 50px;
     position: absolute;
     display: block;
     overflow-y: scroll;

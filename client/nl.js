@@ -138,6 +138,8 @@ var noledger = new Vue({
             this.chatVisible = false;
             this.emojiVisible = false;
             document.getElementById('emojiFrame').scrollTop = 0;
+            document.getElementById("entryInput").value = "";
+            this.entryCollapse(); // untoggle the entry
         },
         blob: async function (pkg, fresh=true) {
             /*
@@ -239,25 +241,28 @@ var noledger = new Vue({
             return encrypted
         },
         entryCollapse: async function () {
-            document.getElementById("entryFrame").classList.remove('slide-height-expanded');
-            document.getElementById("entryFrame").classList.add('slide-height-collapsed');
+            // document.getElementById("entryFrame").classList.remove('slide-height-expanded');
+            // document.getElementById("entryFrame").classList.add('slide-height-collapsed');
             document.getElementById("entryInput").classList.remove('slide-height-expanded');
             document.getElementById("entryInput").classList.add('slide-height-collapsed');
             document.getElementById("messageFrame").classList.remove('slide-padding-expanded');
             document.getElementById("messageFrame").classList.add('slide-padding-collapsed');
             document.getElementById("emojiFrame").classList.remove('slide-padding-expanded');
             document.getElementById("emojiFrame").classList.add('slide-padding-collapsed');
+            document.getElementById("entryInput").style.minWidth = "40vw";
             document.getElementById("entryInput").blur()
+
         },
         entryExpand: async function () {
-            document.getElementById("entryFrame").classList.remove('slide-height-collapsed');
-            document.getElementById("entryFrame").classList.add('slide-height-expanded');
+            // document.getElementById("entryFrame").classList.remove('slide-height-collapsed');
+            // document.getElementById("entryFrame").classList.add('slide-height-expanded');
             document.getElementById("entryInput").classList.remove('slide-height-collapsed');
             document.getElementById("entryInput").classList.add('slide-height-expanded');
             document.getElementById("messageFrame").classList.remove('slide-padding-collapsed');
             document.getElementById("messageFrame").classList.add('slide-padding-expanded');
             document.getElementById("emojiFrame").classList.remove('slide-padding-collapsed');
             document.getElementById("emojiFrame").classList.add('slide-padding-expanded');
+            document.getElementById("entryInput").style.minWidth = "60vw";
         },
         decrypt: async function (cipher) {
             const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
@@ -351,10 +356,10 @@ var noledger = new Vue({
                         noledger.send()
                 }
             }
-            document.getElementById("entryInput").onfocus = function (e) {
+            document.getElementById("entryInput").onfocus = async function (e) {
                 noledger.entryExpand()
             }
-            document.getElementById("messageFrame").onmousedown = function (e) {
+            document.getElementById("messageFrame").onmousedown = async function (e) {
                 noledger.entryCollapse()
             }
         },
@@ -480,7 +485,6 @@ var noledger = new Vue({
                 await this.blob(stack[i], false)
             }
             this.scrollToBottom();
-            this.entryCollapse();
             this.noUnreadMessages(address);
         },
         loadContactsPage: async function () {
@@ -527,6 +531,8 @@ var noledger = new Vue({
 
             // set aes key back to null
             this.encryption.aes.currentAESkey = null;
+
+            
             
         },
         loadEmoji: async function (string) {
