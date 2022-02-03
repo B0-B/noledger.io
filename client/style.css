@@ -54,6 +54,22 @@
 .slight-padding {
     padding: 3px;
 }
+
+.slide-height-collapsed {
+    height: 56px;
+}
+
+.slide-height-expanded {
+    height: 106px;
+}
+
+.slide-padding-expanded {
+    bottom: 106px;
+}
+
+.slide-padding-collapsed {
+    bottom: 56px;
+}
 /**/
 
 
