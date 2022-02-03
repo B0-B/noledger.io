@@ -247,6 +247,7 @@ var noledger = new Vue({
             document.getElementById("messageFrame").classList.add('slide-padding-collapsed');
             document.getElementById("emojiFrame").classList.remove('slide-padding-expanded');
             document.getElementById("emojiFrame").classList.add('slide-padding-collapsed');
+            document.getElementById("entryInput").blur()
         },
         entryExpand: async function () {
             document.getElementById("entryFrame").classList.remove('slide-height-collapsed');
@@ -763,6 +764,8 @@ var noledger = new Vue({
 
             this.emojiVisible = false;                                                  // toggle off emoji frame and scroll back
             document.getElementById('emojiFrame').scrollTop = 0;
+        
+            this.entryCollapse()                                                        // minimize the entry field again
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {
