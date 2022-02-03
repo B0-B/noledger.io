@@ -238,6 +238,26 @@ var noledger = new Vue({
             let encrypted = await crypto.subtle.encrypt(this.encryption.algorithm, key, dataEncoded);
             return encrypted
         },
+        entryCollapse: async function () {
+            document.getElementById("entryFrame").classList.remove('slide-height-expanded');
+            document.getElementById("entryFrame").classList.add('slide-height-collapsed');
+            document.getElementById("entryInput").classList.remove('slide-height-expanded');
+            document.getElementById("entryInput").classList.add('slide-height-collapsed');
+            document.getElementById("messageFrame").classList.remove('slide-padding-expanded');
+            document.getElementById("messageFrame").classList.add('slide-padding-collapsed');
+            document.getElementById("emojiFrame").classList.remove('slide-padding-expanded');
+            document.getElementById("emojiFrame").classList.add('slide-padding-collapsed');
+        },
+        entryExpand: async function () {
+            document.getElementById("entryFrame").classList.remove('slide-height-collapsed');
+            document.getElementById("entryFrame").classList.add('slide-height-expanded');
+            document.getElementById("entryInput").classList.remove('slide-height-collapsed');
+            document.getElementById("entryInput").classList.add('slide-height-expanded');
+            document.getElementById("messageFrame").classList.remove('slide-padding-collapsed');
+            document.getElementById("messageFrame").classList.add('slide-padding-expanded');
+            document.getElementById("emojiFrame").classList.remove('slide-padding-collapsed');
+            document.getElementById("emojiFrame").classList.add('slide-padding-expanded');
+        },
         decrypt: async function (cipher) {
             const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
             let decoded = await this.encryption.decoder.decode(dataEncoded);
@@ -312,7 +332,7 @@ var noledger = new Vue({
         initEmojis: async function () {
             /* initialize emoji frame in chat by breaking up the emoji string */
             const emojiFrame = document.getElementById('emojiFrame');
-            emojiFrame.className = 'burned-bisque-transparent-background';
+            emojiFrame.classList.add('burned-bisque-transparent-background');
             const emojiSets = this.emojiString.split("\n\n");
             for(let set of emojiSets) {
                 const emojiSetArray = set.split(" ");
@@ -329,6 +349,12 @@ var noledger = new Vue({
                     case 13 :
                         noledger.send()
                 }
+            }
+            document.getElementById("entryInput").onfocus = function (e) {
+                noledger.entryExpand()
+            }
+            document.getElementById("messageFrame").onmousedown = function (e) {
+                noledger.entryCollapse()
             }
         },
         initListener: async function () {
@@ -453,6 +479,7 @@ var noledger = new Vue({
                 await this.blob(stack[i], false)
             }
             this.scrollToBottom();
+            this.entryCollapse();
             this.noUnreadMessages(address);
         },
         loadContactsPage: async function () {

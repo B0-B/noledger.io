@@ -56,18 +56,24 @@
 }
 
 .slide-height-collapsed {
+    transition: ease-in-out 0.1s all;
     height: 56px;
 }
 
 .slide-height-expanded {
+    transition: ease-in-out 0.1s all;
     height: 106px;
 }
 
 .slide-padding-expanded {
+    transition: ease-in-out 0.1s all;
+    position: absolute;
     bottom: 106px;
 }
 
 .slide-padding-collapsed {
+    transition: ease-in-out 0.1s all;
+    position: absolute;
     bottom: 56px;
 }
 /**/
@@ -202,7 +208,6 @@ h3 {
     height: 20%;
     overflow-y: scroll;
     position: absolute;
-    bottom: 50px;
     background-color: rgba(209, 204, 197, 0.746);
     z-index: 100;
 }
@@ -223,6 +228,8 @@ h3 {
     line-height: 1rem;
     overflow-y: scroll;
     word-wrap: break-word;
+    -webkit-border-radius: 25px;
+    border-radius: 25px;
 }
 
 #emojiToggle {
