@@ -176,10 +176,10 @@ var noledger = new Vue({
             
             // color and align dependence on type
             if (pkg.type == 'to') {
-                div.className = 'messageBox green' 
+                div.className = 'messageBox message-green-background' 
                 span.style.direction = 'rtl'
             } else {
-                div.className = 'messageBox blue';
+                div.className = 'messageBox blue-background';
             }
 
             // --- menu row ---
@@ -312,6 +312,7 @@ var noledger = new Vue({
         initEmojis: async function () {
             /* initialize emoji frame in chat by breaking up the emoji string */
             const emojiFrame = document.getElementById('emojiFrame');
+            emojiFrame.className = 'burned-bisque-transparent-background';
             const emojiSets = this.emojiString.split("\n\n");
             for(let set of emojiSets) {
                 const emojiSetArray = set.split(" ");
@@ -461,7 +462,7 @@ var noledger = new Vue({
             let addressHeader = document.createElement('div');
             let address_raw = await this.getAddress();
             address = address_raw.slice(0,9);
-            addressHeader.innerHTML = `<div id="generate" class="row no-gutters">
+            addressHeader.innerHTML = `<div id="generate" class="row no-gutters dark-blue-foreground">
                 <h3 id="address">address: ${address}...</h3>
             </div>`;
             wrapper.appendChild(addressHeader);
@@ -471,14 +472,15 @@ var noledger = new Vue({
                 console.log('copied')
                 span = document.createElement('span');
                 span.id = 'address-tooltip';
-                span.innerHTML = 'copy'
-                span.zIndex = 100
-                this.appendChild(span)
-                this.style.outline = "1px solid rgb(51, 77, 148)"
+                span.className = 'blue-foreground dark-blue-background';
+                span.innerHTML = 'copy';
+                span.zIndex = 100;
+                this.appendChild(span);
+                this.className = "dark-blue-outline"
             }
             el.onmouseout = function () {
-                document.getElementById('address-tooltip').remove()
-                this.style.outline = "0px"
+                this.className = "";
+                document.getElementById('address-tooltip').remove();
             }
             el.onmousedown = function () {
                 navigator.clipboard.writeText(address_raw);
@@ -506,9 +508,8 @@ var noledger = new Vue({
             this.emojiVisible = false;
         },
         loadNewContactButton: async function (parent) {
-
             let el = document.createElement('span');
-            el.className = 'contact-box clickable';
+            el.className = 'contact-box highlight-foreground dark-blue-background clickable';
             el_payload = document.createElement('p');
             el_payload.innerHTML = "+ add contact";
             el.onmousedown = function () {
@@ -555,7 +556,7 @@ var noledger = new Vue({
         loadNewContactThread: async function (el, address) {
             let thread_box = document.createElement('span');
             thread_box.innerHTML = `<div>${address.slice(0,9)}...</div>   <div class="unread"></div>`;
-            thread_box.className = 'contact-box clickable';
+            thread_box.className = 'contact-box highlight-foreground dark-blue-background clickable';
             thread_box.onmousedown = function () {noledger.loadChat(address)}
             el.appendChild(thread_box);
 

@@ -29,14 +29,14 @@
             }
         </script>
     </head>
-    <body>
+    <body class="blue-background">
         <div id="load-frame">
             <div id="loader"></div>
             <script>globeLoader()</script>
         </div>
         <div id="noledger" class="container-fluid p-0">
             <div id="head" class="container-fluid p-0">
-                <h1>noledger</h1>
+                <h1 class="blue-foreground grey-background">noledger</h1>
             </div>
             <div id="wrapper" v-show="wrapperVisible" class="container-fluid p-0">
                 <div id="generate" class="row no-gutters">
@@ -61,7 +61,7 @@
                 </div>
                 <div id="emojiFrame" v-show="emojiVisible"></div>
                 <div id="entryFrame" class="container-fluid p-0">
-                    <div class="d-flex flex-row no-gutters">
+                    <div class="d-flex flex-row no-gutters slight-padding">
                         <div class="col-sm"><input id="entryInput"></div>
                         <div class="col-sm"><div id="emojiToggle" v-on:click="toggleEmojiFrame()">☺</div></div>
                         <div class="col-sm"><div id="pingField" v-on:click="ping()">PING</div></div>
