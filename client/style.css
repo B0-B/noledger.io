@@ -92,12 +92,11 @@ a {
 h1 {
     font-size: 1.5rem;
     margin:0;
-    color: rgb(51, 77, 148);
-    background-color: rgb(13, 24, 37);
     text-align: center;
-    height: 100%;
-    line-height: 5vh;
     font-weight: bold;
+    height: 50px;
+    min-height: 50px;
+    line-height: 50px;
 }
 
 h2 {
@@ -138,7 +137,7 @@ h3 {
 
 #chatNavi {
     width: 100%;
-    height: 5vh;
+    height: 30px;
     margin: 0;
     display: block;
     color:#ddd;
@@ -146,7 +145,7 @@ h3 {
     -webkit-box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
     box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
     z-index: 100;
-    line-height: 5vh;
+    line-height: 30px;
 }
 
 #chatNavi div {
@@ -167,13 +166,13 @@ h3 {
 
 .contact-box {
     width: 100%;
-    height: 10vh;
+    height: 100px;
     display: inline-block;
     font-size: 1.5rem;
     text-align: center;
     margin-top: 5px;
     margin-bottom: 5px;
-    line-height: 10vh;
+    line-height: 100px;
 }
 
 .contact-box div {
@@ -288,8 +287,9 @@ h3 {
 }
 
 #head {
-    height: 5vh;
-    line-height: 5vh;
+    height: 50px;
+    min-height: 50px;
+    line-height: 50px;
 }
 
 .input-box {
@@ -335,7 +335,7 @@ h3 {
 #messageFrame {
     background-color: #ddd;
     width: 100%;
-    top: 10vh;
+    top: 80px;
     position: absolute;
     display: block;
     overflow-y: scroll;
@@ -356,7 +356,7 @@ h3 {
 }
 
 .symbol {
-    height: 100%;
+    line-height: 30px;
     vertical-align: middle;
     font-size: 1rem;
     font-weight: bold;

@@ -771,7 +771,7 @@ var noledger = new Vue({
             this.emojiVisible = false;                                                  // toggle off emoji frame and scroll back
             document.getElementById('emojiFrame').scrollTop = 0;
         
-            this.entryCollapse()                                                        // minimize the entry field again
+            //this.entryCollapse()                                                        // minimize the entry field again
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {
