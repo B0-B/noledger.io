@@ -99,6 +99,7 @@ var noledger = new Vue({
         },
         id: 0,
         keyPair: {},
+        settingsVisible: false,
         sounds: {
             mute: false
         },
@@ -137,6 +138,7 @@ var noledger = new Vue({
             this.wrapperVisible = true;
             this.chatVisible = false;
             this.emojiVisible = false;
+            this.settingsVisible = false;
             document.getElementById('emojiFrame').scrollTop = 0;
             document.getElementById("entryInput").value = "";
             this.entryCollapse(); // untoggle the entry
