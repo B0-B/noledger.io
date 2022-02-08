@@ -500,7 +500,7 @@ var noledger = new Vue({
             let address_raw = await this.getAddress();
             address = address_raw.slice(0,9);
             addressHeader.innerHTML = `<div id="generate" class="row no-gutters dark-blue-foreground">
-                <h3 id="address">address: ${address}...</h3>
+                <h3 id="address" class="col-sm">address: ${address}...</h3><h3 id="settings-button" class="col-sm" onclick="noledger.openSettings()">⚙</h3>
             </div>`;
             wrapper.appendChild(addressHeader);
             el = document.getElementById('address');
@@ -512,7 +512,7 @@ var noledger = new Vue({
                 span.className = 'blue-foreground dark-blue-background';
                 span.innerHTML = 'copy';
                 span.zIndex = 100;
-                this.appendChild(span);
+                this.parentElement.appendChild(span);
                 this.className = "dark-blue-outline"
             }
             el.onmouseout = function () {
