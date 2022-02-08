@@ -99,11 +99,13 @@ var noledger = new Vue({
         },
         id: 0,
         keyPair: {},
+        lifetime: 60,
         settingsVisible: false,
         sounds: {
             mute: false
         },
         toAddress: '',
+        username: null,
         wrapperVisible: true,
     },
     mounted: async function () {
@@ -475,6 +477,7 @@ var noledger = new Vue({
             this.toAddress = address;
             this.chatVisible = true;
             this.wrapperVisible = false;
+            this.settingsVisible = false;
             let frame = document.getElementById('messageFrame');
             frame.innerHTML = "" // flush
 
@@ -632,6 +635,11 @@ var noledger = new Vue({
                     unreadTag.style.paddingRight = "0px";
                 }
             }
+        },
+        openSettings: async function () {
+            this.settingsVisible = true;
+            this.chatVisible = false;
+            this.wrapperVisible = false;
         },
         ping: async function () {
             this.send('🏓')

@@ -35,7 +35,10 @@
             <script>globeLoader()</script>
         </div>
         <div id="noledger" class="container-fluid p-0">
-            <div id="settings" class="blue-background" v-show="settingsVisible">
+            <div id="head" class="container-fluid p-0">
+                <h1 class="blue-foreground grey-background">noledger</h1>
+            </div>
+            <div id="settings" class="dark-blue-background" v-show="settingsVisible">
                 <div class="navi container-fluid p-0 grey-background highlight-foreground">
                     <div class="d-flex flex-row no-gutters">
                         <div class="col-sm-1">
@@ -48,14 +51,39 @@
                         </div>
                     </div>
                 </div>
-                <div id="settings-wrapper" v-show="settingsVisible">
-                    <table>
-
+                <div id="settings-wrapper" class="d-flex" v-show="settingsVisible">
+                    <table id="settings-table" class="highlight-foreground">
+                          <tr id="username-setting">
+                            <td>User Name</td>
+                            <td>
+                                <input 
+                                    v-model="username"
+                                    type="search" 
+                                    maxlength=16
+                                    placeholder="Pseudonym">
+                            </td>
+                          </tr>
+                          <tr id="lifetime-setting">
+                            <td>Delete Messages after</td>
+                            <td>
+                                <select 
+                                    id="interval"
+                                    v-model="lifetime">
+                                    <option disabled value="">Select lifetime</option>
+                                    <option>60 seconds</option>
+                                    <option>5 Minutes</option>
+                                    <option>15 Minutes</option>
+                                    <option>30 Minutes</option>
+                                    <option>1 Hour</option>
+                                    <option>3 Hours</option>
+                                    <option>6 Hours</option>
+                                    <option>Daily</option>
+                                    <option>Never (not recommended)</option>
+                                </select>
+                            </td>
+                          </tr>
                     </table>
                 </div>
-            </div>
-            <div id="head" class="container-fluid p-0">
-                <h1 class="blue-foreground grey-background">noledger</h1>
             </div>
             <div id="wrapper" v-show="wrapperVisible" class="container-fluid p-0">
                 <div id="generate" class="row no-gutters">
