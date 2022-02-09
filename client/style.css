@@ -1,4 +1,17 @@
 /* Colors */
+
+.bisque-background {
+    background-color: #ddd;
+}
+
+.bisque-foreground {
+    color: #ddd
+}
+
+.burned-bisque-transparent-background {
+    background-color: rgba(209, 204, 197, 0.746);
+}
+
 .blue-background {
     background-color: rgb(48, 65, 85);
 }
@@ -17,14 +30,6 @@
 
 .dark-blue-outline {
     outline: 1px solid rgb(13, 24, 37);;
-}
-
-.bisque-background {
-    background-color: #ddd;
-}
-
-.burned-bisque-transparent-background {
-    background-color: rgba(209, 204, 197, 0.746);
 }
 
 .highlight-background {
@@ -347,7 +352,7 @@ h3 {
 
 .navi {
     width: 100%;
-    height: 30px;
+    height: 50px;
     margin: 0;
     display: block;
     color:#ddd;
@@ -355,7 +360,7 @@ h3 {
     -webkit-box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
     box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
     z-index: 100;
-    line-height: 30px;
+    line-height: 50px;
 }
 
 .navi div {
@@ -364,7 +369,7 @@ h3 {
 
 .naviLabel {
     text-align: center;
-    height: 30px;
+    height: 50px;
     display: block;
     text-overflow: ellipsis;
 }
@@ -394,6 +399,7 @@ h3 {
     line-height: 50px;
     font-size: 3rem;
     cursor: pointer;
+    text-align: center;
 }
 
 #settings div {
@@ -409,7 +415,7 @@ h3 {
 }
 
 .symbol {
-    line-height: 30px;
+    line-height: 50px;
     vertical-align: middle;
     font-size: 1rem;
     font-weight: bold;
