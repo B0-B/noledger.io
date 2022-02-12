@@ -855,7 +855,7 @@ var noledger = new Vue({
                     if (candidate) {break}
                 }
 
-                console.log('candidate', ca)
+                console.log('candidate', candidate)
                 
                 // append link and make thumbnail clickable
                 tn.style.cursor = "pointer";
