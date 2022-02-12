@@ -504,7 +504,7 @@ var noledger = new Vue({
             </div>`;
             wrapper.appendChild(addressHeader);
             el = document.getElementById('address');
-            el.zIndex = 0
+            el.zIndex = 0;
             el.onmouseover = function () {
                 console.log('copied')
                 span = document.createElement('span');
@@ -796,84 +796,97 @@ var noledger = new Vue({
         thumbnail: async function (url, anchor=null) {
 
             /* This function builds an interactive thumbnail element for showcasing websites */
-
-            /* fetch the url provided */
-            var response = await fetch(url);
-
-            /* extract protocol and domain */
-            let protocol;
-            if (url.includes('https')) {
-                protocol = 'https://'
-            } else {
-                protocol = 'http://'
-            } let domain = url.replace(protocol,'').split('/')[0];
-
-            /* Extract html object */
-            rawHtml = await response.text();
-            const parser = new DOMParser();
-            let dom = parser.parseFromString(rawHtml, "text/html").documentElement;
-            let body = dom.querySelector('body');
-
-            // extract demanded data from dom object
-            extractedTitle = dom.getElementsByTagName('title')['0'].innerHTML;
-            
-            /* pick a suitable image candidate */
-            let candidate;
-            let host = 'https://' + location.host;
-            for (let tagName of ['img', 'svg']) {
-                const images = body.getElementsByTagName(tagName);
-                for (let img of images) {
-                    try {
-                        let uri = img.src;
-                        //console.log('uri', uri);
-                        if (uri.includes(host)) {
-                            path = uri.replace(host, '');
-                            uri.replace(host, protocol + domain + path)
-                        } 
-                        let img_el = document.createElement(tagName);
-                        img_el.src = uri;
-                        /* pick only images of minimum size */
-                        await this.sleep(0.04)
-                        if (img_el.height >= 100) { 
-                            candidate = img_el;
-                            break;
-                        }
-                    } catch (error) {
-                        console.log(error)
-                    }
-                }
-                if (candidate) {break}
-            }
-
-            // build thumbnail object
-            tn = document.createElement('a');
+            let candidate, domain, extractedTitle, protocol;
+                tn = document.createElement('div');
             tn.className = "thumbnail-container";
-            
-            // append link and make thumbnail clickable
-            tn.style.cursor = "pointer";
-            tn.href = url;
-            tn.target = "_blank";
-            
-            // add a caption
-            caption = document.createElement('div');
-            caption.className = "thumbnail-text-centered";
-            caption.style.pointerEvents = "none";
-            caption.innerHTML = `<strong>${domain}</strong><br><p>${extractedTitle}</p>`
-            tn.appendChild(caption);
-
-            /* if a candidate was picked append the fetched image */
-            if (candidate) {
-                candidate.className = "thumbnail";
+            if (url.includes('www.youtube.com/')) { // check for youtube link to embed
+                
+                candidate = await this.youtube(url);
+                candidate.className = "thumbnail-youtube";
                 tn.appendChild(candidate);
-            } else {
-                /* try to draw the favicon instead */
-                tn.style.minHeight = "200px";
-                tn.style.height = "200px";
-                let favicon = document.createElement('img');
-                favicon.className = "thumbnail";
-                favicon.src = protocol + domain + '/favicon.ico';
-                tn.appendChild(favicon);
+
+            } else { // otherwise search for reference picture
+
+                /* fetch the url provided */
+                var response = await fetch(url);
+
+                /* extract protocol and domain */
+                if (url.includes('https')) {
+                    protocol = 'https://'
+                } else {
+                    protocol = 'http://'
+                } domain = url.replace(protocol,'').split('/')[0];
+
+                /* Extract html object */
+                rawHtml = await response.text();
+                const parser = new DOMParser();
+                let dom = parser.parseFromString(rawHtml, "text/html").documentElement;
+                let body = dom.querySelector('body');
+
+                // extract demanded data from dom object
+                extractedTitle = dom.getElementsByTagName('title')['0'].innerHTML;
+                
+                /* pick a suitable image candidate */
+                
+                let host = 'https://' + location.host;
+                for (let tagName of ['img', 'svg']) {
+                    const images = body.getElementsByTagName(tagName);
+                    for (let img of images) {
+                        try {
+                            let uri = img.src;
+                            //console.log('uri', uri);
+                            if (uri.includes(host)) {
+                                path = uri.replace(host, '');
+                                uri.replace(host, protocol + domain + path)
+                            } 
+                            let img_el = document.createElement(tagName);
+                            img_el.src = uri;
+                            /* pick only images of minimum size */
+                            await this.sleep(0.04)
+                            if (img_el.height >= 100) { 
+                                candidate = img_el;
+                                candidate.className = "thumbnail";
+                                break;
+                            }
+                        } catch (error) {
+                            console.log(error)
+                        }
+                    }
+                    if (candidate) {break}
+                }
+
+                console.log('candidate', ca)
+                
+                // append link and make thumbnail clickable
+                tn.style.cursor = "pointer";
+                tn.href = url;
+                tn.target = "_blank";
+
+                // add a caption
+                caption = document.createElement('div');
+                caption.className = "thumbnail-text-centered";
+                caption.style.pointerEvents = "none";
+                caption.innerHTML = `<strong>${domain}</strong><br><p>${extractedTitle}</p>`
+                tn.appendChild(caption);
+                
+                /* if a candidate was picked append the fetched image */
+                console.log('candidate', candidate)
+                if (candidate) {
+                    candidate.className = "thumbnail";
+                    tn.appendChild(candidate);
+                } else {
+                    /* try to draw the favicon instead */
+                    tn.style.minHeight = "200px";
+                    tn.style.height = "200px";
+                    let favicon = document.createElement('img');
+                    favicon.className = "thumbnail";
+                    favicon.src = protocol + domain + '/favicon.ico';
+                    tn.appendChild(favicon);
+                }
             }
+
+
+            
             if (anchor) {
                 anchor.appendChild(tn);
             }
@@ -885,6 +898,16 @@ var noledger = new Vue({
             const el = document.getElementById('entryInput');
             el.value = el.value + string;
         }, 
+        youtube: async function (url) {
+            const embedUri = url.replace('watch?v=', 'embed/');
+            let dom = `<iframe src="${embedUri}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+            var doc = await new DOMParser().parseFromString(dom, "text/html");
+            console.log('doc', doc.body.firstChild)
+            console.log('uri', embedUri)
+            //let iframe = document.createElement('iframe');
+            //iframe.setAttribute("src", embedUri);
+            return doc.body.firstChild
+        },
     }
 });
 /* ---------------------------- */
