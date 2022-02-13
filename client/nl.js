@@ -884,8 +884,6 @@ var noledger = new Vue({
                     tn.appendChild(favicon);
                 }
             }
-
-
             
             if (anchor) {
                 anchor.appendChild(tn);
