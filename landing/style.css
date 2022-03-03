@@ -1,0 +1,126 @@
+@font-face {
+    font-family: "coolvetiva";
+    src: url("coolvetica.otf");
+}
+
+@font-face {
+    font-family: "coolvetiva-condensed";
+    src: url("coolvetica.otf");
+}
+
+@font-face {
+    font-family: "geo-sans-light";
+    src: url("geosanslight.ttf");
+}
+
+.active {
+    color: white !important;
+    text-shadow: 0 0 3px #000000;
+
+}
+
+#burger-menu {
+    position: absolute;
+    right: 0;
+    align-items: center;
+}
+
+.highlight {
+    color: #383838;
+    transition: 1s all ease-in-out;
+}
+
+.highlight:hover {
+    color: #757575;
+    transition: 1s all ease-in-out;
+}
+
+#home {
+    font-size: 3rem;
+    font-family: 'coolvetiva';
+    line-height: 100px;
+    height: 100px;
+    min-width: 250px;
+    text-align: left !important;
+    color: rgb(10, 10, 10);
+}
+
+.nav-position {
+    position: absolute;
+    height: 100px;
+    right: 10vw;
+}
+
+
+.navbar-wrapper {
+    font-family: 'geo-sans-light';
+    font-size: 2rem;
+    height: 100px;
+    width: 50vw !important;
+    margin: 0;
+}
+
+.navbar-wrapper > nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 100px;
+}
+
+.navbar-wrapper li {
+}
+
+.navi {
+    width: 100vw;
+    height: 100px;
+    position: absolute;
+    top: 0;
+    z-index: 100;
+    padding: 0;
+    margin: 0;
+    background-color: rgb(255, 255, 255);
+    -webkit-box-shadow: 0 0 3px 1px #7a7a7a;
+    box-shadow: 0 0 5px 1px #818181;
+}
+
+.navi-menu {
+    height: 100px;
+    padding-left: 10vw;
+    padding-right: 10vw;
+    font-size: 2rem;
+    font-family: 'coolvetiva-condensed';
+    line-height: 100px;
+}
+
+.navi-menu div {
+    text-align: center;
+    width: 10vw;
+    min-width: 150px;
+    text-decoration: none;
+    list-style-type: none;
+}
+
+.pad-h {
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 20px !important;
+    padding-right: 20px !important
+}
+
+.page {
+    padding-right: 10vw;
+    padding-left: 10vw;
+    padding-top: 150px;
+    padding-bottom: 50px;
+    height: 100vh;
+    width: 100vw;
+    display: block;
+}
+
+.wrapper {
+    padding: 0;
+    width: 100vw;
+    height: auto;
+    min-height: 100vh;
+    display: block;
+}

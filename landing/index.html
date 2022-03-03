@@ -24,17 +24,45 @@
         <div id="thumbnail">
         </div>
 
-        <div class="container-fluid p-0">
-            <page1 class="container-fluid">
+        <div class="container-fluid navi">
+            <div class="row no-gutters navi-menu">
+                <div id="home" >
+                    noledger.io
+                </div>
+                <div class="no-gutters navbar-wrapper nav-position">
+                    <nav class="navbar navbar-expand-lg navbar-light p-0 m-0">
+                        <button id="burger-menu" class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                          <span class="navbar-toggler-icon"></span>
+                        </button>
+                      
+                        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                          <ul class="navbar-nav mr-auto">
+                            <li class="nav-item active">
+                              <a class="nav-link pad-h m-0" href="#">about</a>
+                            </li>
+                            <li class="nav-item highlight">
+                                <a class="nav-link pad-h m-0" href="#">paper</a>
+                            </li>
+                            <li class="nav-item highlight">
+                                <a class="nav-link pad-h m-0" href="#">source</a>
+                            </li>
+                          </ul>
+                        </div>
+                      </nav>
+                </div>
+            </div>
+        </div>
 
+        <div class="container-fluid wrapper">
+            <page1 class="container-fluid page">
+                <button onclick="openClient()">
+                    Open Web Client
+                </button>
+        
             </page1>
-            
         </div>
         
-        <button onclick="openClient()">
-            Open Web Client
-        </button>
-
+        
         <!-- bootstrap -->
         <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
