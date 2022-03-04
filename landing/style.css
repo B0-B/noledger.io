@@ -45,6 +45,11 @@
     color: rgb(10, 10, 10);
 }
 
+#navbar-list {
+    position: absolute;
+    right: 0;
+}
+
 .nav-position {
     position: absolute;
     height: 100px;
