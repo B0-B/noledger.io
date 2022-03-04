@@ -89,3 +89,4 @@ Every entry contained in the node response is tried to be decrypted with the req
 1. Decrypt the provided AES key using the private key
 2. Use the decrypted AES key to further decrypt the sender's address
 3. Use the AES key to decrypt the cypher with the message yield
+Step 2 fulfills the key exchange outlined in II.2. 
