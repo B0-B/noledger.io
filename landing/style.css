@@ -30,6 +30,8 @@
     font-family: 'geo-sans-light';
     line-height: 3.5rem;
     text-align: right;
+    margin-top: 50px;
+    margin-bottom: 50px;
 }
 
 
@@ -172,9 +174,12 @@
     min-height: 200px;
 }
 
-#workflow-gfx {
-    width: 100%;
+#workflow {
+    width: 60%;
     height: auto;
+    text-align: center;
+    margin-left: 20%;
+    margin-right: 20%;
 }
 
 .wrapper {
