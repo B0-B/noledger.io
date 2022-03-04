@@ -26,7 +26,7 @@ node.prototype.build = function () {
         /* FIREWALL */
         result = await firewall(request);
         if (result) {
-            response.sendFile(__dirname + '/landing/index.html');
+            response.redirect('./landing');
         }
     });
     api.get('/client', async function(request, response){
@@ -36,8 +36,8 @@ node.prototype.build = function () {
         result = await firewall(request);
         if (result) {
             /* -- code here */
-            response.redirect('./client');
-            response.send('./client')
+            response.redirect('/client');
+            response.send('/client')
         }
     });
     api.use(bodyParser.json());
