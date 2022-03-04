@@ -37,7 +37,6 @@ node.prototype.build = function () {
         if (result) {
             /* -- code here */
             response.redirect('/client');
-            response.send('/client')
         }
     });
     api.use(bodyParser.json());
