@@ -1,2 +1,3 @@
-cert/ssl.key
+cert/self_signed/ssl.key
+cert/certbot/ssl.key
 node_modules/

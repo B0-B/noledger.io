@@ -116,8 +116,9 @@ node.prototype.build = function () {
     });
 
     // wrap https server
-    let privateKey  = fs.readFileSync('./cert/ssl.key', 'utf8'),
-        certificate = fs.readFileSync('./cert/ssl.crt', 'utf8');
+    let certPath = './cert/self_signed/'
+    let privateKey  = fs.readFileSync(certPath + 'ssl.key', 'utf8'),
+        certificate = fs.readFileSync(certPath + 'ssl.crt', 'utf8');
     let server = https.createServer({
         key: privateKey,
         cert: certificate
