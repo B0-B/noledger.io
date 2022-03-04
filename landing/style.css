@@ -4,7 +4,7 @@
 }
 
 @font-face {
-    font-family: "coolvetiva-condensed";
+    font-family: "coolvetica-condensed";
     src: url("coolvetica.otf");
 }
 
@@ -13,10 +13,32 @@
     src: url("geosanslight.ttf");
 }
 
+#about-description {
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
 .active {
     color: white !important;
     text-shadow: 0 0 3px #000000;
 
+}
+
+.big-text {
+    font-size: 3rem;
+    font-family: 'geo-sans-light';
+    line-height: 3.5rem
+}
+
+.block-2 {
+    display: block;
+    align-items: center;
+    width: 50% !important;
+    height: 100% !important
+}
+
+.block-text {
+    text-align: justify;
 }
 
 #burger-menu {
@@ -25,18 +47,27 @@
     align-items: center;
 }
 
+
 .highlight {
     color: #383838;
-    transition: 1s all ease-in-out;
+    -webkit-transition: color 1s ease;
+    -moz-transition: color 1s ease;
+    -ms-transition: color 1s ease;
+    -o-transition: color 1s ease;
+    transition: color 1s ease;
 }
 
 .highlight:hover {
     color: #757575;
-    transition: 1s all ease-in-out;
+    -webkit-transition: color 1s ease;
+    -moz-transition: color 1s ease;
+    -ms-transition: color 1s ease;
+    -o-transition: color 1s ease;
+    transition: color 1s ease;
 }
 
 #home {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-family: 'coolvetiva';
     line-height: 100px;
     height: 100px;
@@ -120,6 +151,13 @@
     height: 100vh;
     width: 100vw;
     display: block;
+}
+
+.section {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 200px;
 }
 
 .wrapper {
