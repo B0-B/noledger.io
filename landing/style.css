@@ -14,6 +14,7 @@
 }
 
 #about-description {
+
     padding-top: 50px;
     padding-bottom: 50px;
 }
@@ -27,14 +28,18 @@
 .big-text {
     font-size: 3rem;
     font-family: 'geo-sans-light';
-    line-height: 3.5rem
+    line-height: 3.5rem;
+    text-align: right;
 }
 
+
+
 .block-2 {
-    display: block;
+    display: inline-block;
     align-items: center;
     width: 50% !important;
-    height: 100% !important
+    height: 100% !important;
+    overflow: hidden;
 }
 
 .block-text {
@@ -47,6 +52,9 @@
     align-items: center;
 }
 
+.fit {
+    max-width: 100%;
+}
 
 .highlight {
     color: #383838;
@@ -74,6 +82,13 @@
     min-width: 250px;
     text-align: left !important;
     color: rgb(10, 10, 10);
+}
+
+.mid-text {
+    text-align: justify;
+    font-size: 1.5rem;
+    font-family: 'geo-sans-light';
+    line-height: 2rem
 }
 
 #navbar-list {
@@ -155,6 +170,11 @@
     width: 100%;
     height: auto;
     min-height: 200px;
+}
+
+#workflow-gfx {
+    width: 100%;
+    height: auto;
 }
 
 .wrapper {
