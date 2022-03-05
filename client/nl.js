@@ -554,19 +554,21 @@ var noledger = new Vue({
             el.onmousedown = function () {
 
                 // create address input
-                this.remove();
-                let el = document.createElement('span');
-                el.className = 'contact-box';
+                //this.remove();
+                //let el = document.createElement('span');
+                this.innerHTML = ''
+                this.className = 'contact-box';
                 input_field = document.createElement('input');
                 input_field.className = 'input-box';
                 input_field.placeholder = 'enter address';
-                el.appendChild(input_field);
-                parent.appendChild(el);
+                this.appendChild(input_field);
+                //parent.appendChild(el);
 
                 // focus input field
                 setTimeout(function () { input_field.focus(); }, 1)
 
                 // reload contact button on out focus
+                el = this;
                 input_field.onfocusout = function () {
                     el.remove();
                     noledger.loadNewContactButton(parent);
