@@ -563,11 +563,15 @@ var noledger = new Vue({
                 el.appendChild(input_field);
                 parent.appendChild(el);
 
+                // focus input field
+                setTimeout(function () { input_field.focus(); }, 1)
+
                 // reload contact button on out focus
                 input_field.onfocusout = function () {
                     el.remove();
                     noledger.loadNewContactButton(parent);
                 }
+
                 // trigger when address is confirmed via enter
                 input_field.onkeydown = async function (e) {
                     e = e || window.event;

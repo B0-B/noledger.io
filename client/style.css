@@ -33,11 +33,11 @@
 }
 
 .highlight-background {
-    background-color: aquamarine;
+    background-color: rgb(127, 255, 255);
 }
 
 .highlight-foreground {
-    color: aquamarine;
+    color: rgb(127, 255, 255);
 }
 
 .grey-background {
