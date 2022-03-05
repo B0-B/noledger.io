@@ -53,9 +53,17 @@
                 </div>
                 <div id="settings-wrapper" class="d-flex" v-show="settingsVisible">
                     <table id="settings-table" class="bisque-foreground">  
+                        <tr id="check-string">
+                            <td class="table-lab">Check String</td>
+                            <td class="table-val">
+                                <input 
+                                    id="interval"
+                                    v-model="checkString">
+                            </td>
+                        </tr>
                         <tr id="lifetime-setting">
-                            <td>Delete messages after</td>
-                            <td>
+                            <td class="table-lab">Delete messages after</td>
+                            <td class="table-val">
                                 <select 
                                     id="interval"
                                     v-model="lifetime">

@@ -423,10 +423,24 @@ h3 {
     margin: 0;
 }
 
+
+
 table td {
     padding: 25px;
-    width: 45%;
-    min-width: 250px;
+    width: 50vw;
+    min-width: 100px;
+}
+
+table input, select {
+    width: 100%;
+}
+
+.table-lab {
+    width: 40%;
+}
+
+.table-val {
+    width: 60%;
 }
 
 .timeLabel {
