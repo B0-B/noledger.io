@@ -62,7 +62,7 @@
                             </td>
                         </tr>
                         <tr id="lifetime-setting">
-                            <td class="table-lab">Delete messages after</td>
+                            <td class="table-lab">Self-desctruction for Messages</td>
                             <td class="table-val">
                                 <select 
                                     id="interval"
@@ -77,6 +77,12 @@
                                     <option>Daily</option>
                                     <option>Never (not recommended)</option>
                                 </select>
+                            </td>
+                        </tr>
+                        <tr id="reset-aes-setting">
+                            <td class="table-lab">Generate new AES keys</td>
+                            <td class="table-val">
+                                <button id="regenerate-AES-button" v-on:click="regenerateAES()">Generate</button>
                             </td>
                         </tr>
                     </table>

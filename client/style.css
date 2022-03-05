@@ -382,6 +382,10 @@ h3 {
     white-space: nowrap
 }
 
+#regenerate-AES-button {
+    width: 100%;
+}
+
 #settings {
     position: absolute;
     bottom: 0;
