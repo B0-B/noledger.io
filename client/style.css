@@ -1,3 +1,13 @@
+/* Fonts */
+@font-face {
+    font-family: "coolvetica";
+    src: url("coolvetica.otf");
+}
+.coolvetica {
+    font-family: 'coolvetica';
+}
+
+
 /* Colors */
 
 .bisque-background {
@@ -95,13 +105,14 @@ a {
 }
 
 h1 {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     margin:0;
     text-align: center;
     font-weight: bold;
     height: 50px;
     min-height: 50px;
     line-height: 50px;
+    font-family: 'coolvetica';
 }
 
 h2 {
