@@ -99,13 +99,12 @@ var noledger = new Vue({
         },
         id: 0,
         keyPair: {},
-        lifetime: 60,
+        lifetime: '1 Hour',
         settingsVisible: false,
         sounds: {
             mute: false
         },
         toAddress: '',
-        username: null,
         wrapperVisible: true,
     },
     mounted: async function () {
@@ -239,6 +238,79 @@ var noledger = new Vue({
             this.scrollToBottom()
             return span
         },
+        cleaner: async function () {
+            /* A loop which deletes expired messages */
+            while (true) {
+                try {
+                    if (this.lifetime.includes('Never')) {
+                        /* do nothing */
+                    } else {
+                        let now = new Date().getTime(), lt, changes = false;
+                        // determine lifetime in seconds
+                        if (this.lifetime.includes('1 Hour')) {
+                            lt = 3600
+                        } else if (this.lifetime.includes('60')) {
+                            lt = 60
+                        } else if (this.lifetime.includes('15')) {
+                            lt = 300
+                        } else if (this.lifetime.includes('5')) {
+                            lt = 900
+                        } else if (this.lifetime.includes('30')) {
+                            lt = 1800
+                        } else if (this.lifetime.includes('3')) {
+                            lt = 10800
+                        } else if (this.lifetime.includes('6')) {
+                            lt = 21600
+                        }
+                        for (let key in this.contacts) {
+                            for (let i = 0; i < this.contacts[key].stack.length; i++) {
+                                msg = this.contacts[key].stack[i]
+                                timestamp = msg.time;
+                                diff = (now - timestamp) * 0.001 
+                                if (diff > lt && i != this.contacts[key].stack.length-1) {
+                                    // leapfrog expired msg
+                                } else if (diff > lt && i == this.contacts[key].stack.length-1) {
+                                    this.contacts[key].stack = []
+                                    this.noUnreadMessages(key);
+                                    if (this.toAddress == key && i > 0) {
+                                        this.loadChat(key)
+                                    }
+                                } else {
+                                    this.contacts[key].stack = this.contacts[key].stack.slice(i)
+                                    if (this.toAddress == key && i > 0) {
+                                        this.loadChat(key)
+                                    }
+                                    break
+                                }
+                            }   
+                        }
+                    }
+                } catch (error) {
+                    console.log('cleaner', error)
+                } finally {
+                    await this.sleep(5)
+                }
+            }
+        },
+        decrypt: async function (cipher) {
+            const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
+            let decoded = await this.encryption.decoder.decode(dataEncoded);
+            return decoded
+        },
+        destroyLoadFrameDelayed: async function () {
+            await this.sleep(1);
+            document.getElementById('load-frame').remove()
+        },
+        generateAESkeyFromPhrase: async function (phrase=null) {
+            if (!phrase) {
+                phrase = await this.generateRandomBytes(16);
+            }
+            const pwEncoded = this.encryption.encoder.encode(phrase);                                           // utf8 encode phrase string as seed for AES key
+            const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                    // Hash the encoded seed
+            const algo = { name: this.encryption.aes.algorithm };
+            const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);   // construct a CryptoKey from phrase
+            return aesKey;
+        },
         encrypt: async function (data, key) {
             const dataEncoded = await this.encryption.encoder.encode(data);
             let encrypted = await crypto.subtle.encrypt(this.encryption.algorithm, key, dataEncoded);
@@ -268,25 +340,6 @@ var noledger = new Vue({
             document.getElementById("emojiFrame").classList.add('slide-padding-expanded');
             document.getElementById("entryInput").style.minWidth = "60vw";
         },
-        decrypt: async function (cipher) {
-            const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
-            let decoded = await this.encryption.decoder.decode(dataEncoded);
-            return decoded
-        },
-        destroyLoadFrameDelayed: async function () {
-            await this.sleep(1);
-            document.getElementById('load-frame').remove()
-        },
-        generateAESkeyFromPhrase: async function (phrase=null) {
-            if (!phrase) {
-                phrase = await this.generateRandomBytes(16);
-            }
-            const pwEncoded = this.encryption.encoder.encode(phrase);                                           // utf8 encode phrase string as seed for AES key
-            const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                    // Hash the encoded seed
-            const algo = { name: this.encryption.aes.algorithm };
-            const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);   // construct a CryptoKey from phrase
-            return aesKey;
-        },
         generateKeyPair: async function () {
             return window.crypto.subtle.generateKey(
                 {
@@ -308,6 +361,8 @@ var noledger = new Vue({
             this.address = await this.getAddress();
             // build contacts page
             await this.loadContactsPage();
+            // start cleaner once the account is available
+            this.cleaner();
         },
         generateRandomBytes: async function (length) {
             let pad = '';
