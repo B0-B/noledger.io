@@ -317,7 +317,7 @@ h3 {
     color: #ddd;
     width: 50vw;
     margin: 5px;
-    min-width: 400px;
+    min-width: 200px;
     max-width: 800px;
     min-height: 2rem;
     height: auto;
@@ -391,6 +391,46 @@ h3 {
     text-overflow: ellipsis;
     display: inline-block;
     white-space: nowrap
+}
+
+.notify-box {
+    position: absolute;
+    top: 40vh;
+    bottom: 40vh;
+    left: 30vw;
+    right: 30vw;
+    color: rgba(255, 255, 255, 0);
+    background-color: black;
+    opacity: .0;
+    border-radius: 50px;
+    text-align: center;
+    z-index: 101;
+    text-overflow: ellipsis;
+    -webkit-transition: all 1s ease;
+    -moz-transition: all 1s ease;
+    -ms-transition: all 1s ease;
+    -o-transition: all 1s ease;
+    transition: all 1s ease;
+    vertical-align: middle !important;
+}
+
+.notify-box p {
+    display: block;
+    height: 20vh;
+    text-align: center;
+    vertical-align: middle !important;
+
+}
+
+.notify-box-transparent {
+    color: rgb(255, 255, 255);
+    border-radius: 10px;
+    opacity: .8;
+    -webkit-transition: all 1s ease;
+    -moz-transition: all 1s ease;
+    -ms-transition: all 1s ease;
+    -o-transition: all 1s ease;
+    transition: all 1s ease;
 }
 
 #regenerate-AES-button {

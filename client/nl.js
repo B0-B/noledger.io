@@ -140,6 +140,7 @@ var noledger = new Vue({
             this.chatVisible = false;
             this.emojiVisible = false;
             this.settingsVisible = false;
+            this.toAddress = "";
             document.getElementById('emojiFrame').scrollTop = 0;
             document.getElementById("entryInput").value = "";
             this.entryCollapse(); // untoggle the entry
@@ -261,6 +262,8 @@ var noledger = new Vue({
                             lt = 10800
                         } else if (this.lifetime.includes('6')) {
                             lt = 21600
+                        } else if (this.lifetime.includes('Daily')) {
+                            lt = 86400
                         }
                         for (let key in this.contacts) {
                             for (let i = 0; i < this.contacts[key].stack.length; i++) {
@@ -680,6 +683,21 @@ var noledger = new Vue({
                 unreadTag.style.paddingRight = "5px";
             }
         },
+        notify: async function (message) {
+            /* Overlay notification window */
+            let span = document.createElement("span");
+            let p = document.createElement("p");
+            document.body.appendChild(span);
+            span.appendChild(p);
+            span.classList.add("notify-box");
+            p.innerHTML = message;
+            await this.sleep(.1);
+            span.classList.add("notify-box-transparent");
+            await this.sleep(30);
+            span.classList.remove("notify-box-transparent");
+            await this.sleep(1);
+            span.remove();
+        },
         noUnreadMessages: async function (address) {
             /* Increments the unread variable of the contact. The contact needs to exist already. */
             // find the correct unread tag from threadBox
@@ -733,6 +751,7 @@ var noledger = new Vue({
             btn.innerHTML = "done."
             await this.sleep(1);
             btn.innerHTML = "Generate"
+            this.notify('Successfully generated new AES keys for all contacts.')
         },
         renderMessage: async function (sentence) {
             /* Message string renders to html compliant output */
