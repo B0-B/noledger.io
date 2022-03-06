@@ -11,7 +11,7 @@ var node = function () {
     this.id_high = 0;
     this.id_low = 0;
     this.ledger = {};
-    this.lifetime = ''; // in minutes
+    this.lifetime = 60; // in minutes
     this.port = null;
     this.server = this.build();
 }
