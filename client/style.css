@@ -461,6 +461,26 @@ h3 {
     position: relative;
 }
 
+#settings-icon {
+    height: 90%;
+    width: 90%;
+    margin: 5%;
+    -webkit-transition: all .5s ease;
+    -moz-transition: all .5s ease;
+    -ms-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    transition: all .5s ease;
+}
+
+#settings-icon:hover {
+    filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(0deg) brightness(118%) contrast(100%);
+    -webkit-transition: all .5s ease;
+    -moz-transition: all .5s ease;
+    -ms-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    transition: all .5s ease;
+}
+
 #settings-wrapper {
     overflow-y: scroll;
 }
