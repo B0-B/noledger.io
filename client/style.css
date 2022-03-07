@@ -396,7 +396,6 @@ h3 {
 .notify-box {
     position: absolute;
     top: 40vh;
-    bottom: 40vh;
     left: 30vw;
     right: 30vw;
     color: rgba(255, 255, 255, 0);
@@ -416,9 +415,8 @@ h3 {
 
 .notify-box p {
     display: block;
-    height: 20vh;
+    padding: 20px;
     text-align: center;
-    vertical-align: middle !important;
 
 }
 

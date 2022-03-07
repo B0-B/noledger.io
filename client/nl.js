@@ -693,7 +693,7 @@ var noledger = new Vue({
             p.innerHTML = message;
             await this.sleep(.1);
             span.classList.add("notify-box-transparent");
-            await this.sleep(30);
+            await this.sleep(3);
             span.classList.remove("notify-box-transparent");
             await this.sleep(1);
             span.remove();
