@@ -40,6 +40,9 @@ async function testBuffer () {
 /* ---------------------------- */
 
 
+/* ------- Hash Algos --------- */
+/* ---------------------------- */
+
 /* --- noledger main object --- */
 var noledger = new Vue({
 
@@ -377,6 +380,10 @@ var noledger = new Vue({
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
             return pub.n;
+        },
+        hash: async function (algorithm) {
+            ''' 
+            '''
         },
         initContact: async function (address) {
             

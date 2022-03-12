@@ -23,3 +23,14 @@ sudo node server 3000 # start the node on port 3000
 ```
 
 For the default port open https://localhost in the browser.
+
+<br>
+
+## Project & Protocol Development Overview
+| Function | Description | Status | Protocol Version | Proposal ID |
+|---|---|---|---|---|
+| Spam Infeasability | A client-side PoW ansatz intended to protect the ledger from massive spam. | Testing | - | |
+| Random Padding | A randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Pending | nv-1.1.0 | |
+| Image Transfer | A secure image exchange ability using RGB reconstruction to avoid original meta data and self destruction. | Pending | nv-1.1.0 | |
+| Base Protocol | Noledger exchange protocol implementation. | Pending | nv-1.1.0 | |
+
