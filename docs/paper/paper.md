@@ -23,7 +23,7 @@ Although the ledger is served by a central instance it is still distributed acro
 The network can use entropy to hide the relations between nodes (route leaks). But this will not protect a sender, who apriori needs to connect to the ledger which inevitably leaves a trace (e.g. IP, DNS footprint, logged header information) and exposes him/her ID towards the central party. The party has access to the footprint and may potentially extract some information or point from an extracted package to a ledger entry - if still tracked by the ledger. The total route will not be exposed i.e. no relation exposure or privacy vulnerabilities, but still yields information about the activity of a client. To obfuscate the sender's footprint a DNS proxy or onion route should provide a proper service.
 
 
-# Protocol
+# Base Protocol Proposal [np-0]
 For a secure messaging system whose protocol obeys the stated properties, a star topology becomes naturally attractive over a decentralized one.
 These conditions can be met by a service if it obeys the following protocol.
 
