@@ -40,8 +40,36 @@ async function testBuffer () {
 /* ---------------------------- */
 
 
-/* ------- Hash Algos --------- */
-/* ---------------------------- */
+/* ------- Proof of Work Algo --------- */
+async function hash(input, algo='SHA-256') {
+    /*
+    A quick & dirty hashing function.
+    */
+    const msgUint8 = new TextEncoder().encode(input);                           // encode as (utf-8) Uint8Array
+    const hashBuffer = await crypto.subtle.digest(algo, msgUint8);           // hash the message
+    const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+    return hashHex;
+}
+
+async function mine(input, difficulty, algo='SHA-256', encoder=null) {
+    let nonce = 0;
+    check = ""
+    for (let i = 0; i < difficulty; i++) {
+        check += "0"
+    }
+    while (true) {
+        const h = await hash(input+nonce, algo, encoder)
+        //console.log(h)
+        //break
+        if (h.slice(0, difficulty) == check) {
+            return nonce
+        } else {
+            nonce += 1
+        }
+    }
+}
+/* ------------------------------------ */
 
 /* --- noledger main object --- */
 var noledger = new Vue({
@@ -380,10 +408,6 @@ var noledger = new Vue({
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
             return pub.n;
-        },
-        hash: async function (algorithm) {
-            ''' 
-            '''
         },
         initContact: async function (address) {
             
