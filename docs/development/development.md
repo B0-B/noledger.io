@@ -3,9 +3,9 @@ The following documentation outlines and archives all noledger proposals, their 
 
 | Function | Description | Status | Protocol Version | Proposal ID |
 |---|---|---|---|---|
-| Spam Infeasability | A client-side PoW ansatz intended to protect the ledger from massive spam. | Testing | - | |
-| Random Padding | A randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Pending | v-1.1.0 | |
-| Image Transfer | A secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 | |
+| Spam Infeasability | A client-side PoW ansatz intended to protect the ledger from massive spam. | Validation | - | |
+| Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Pending | v-1.1.0 | |
+| Image Transfer | Secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 | |
 | Base Protocol | A secure and anonymous ledger-based messaging protocol.  | Stable | v-1.0.0 | np-0 |
 
 <br><br>
