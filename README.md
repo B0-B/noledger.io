@@ -1,6 +1,8 @@
-<h2 align=center><strong>noledger</strong></h2> 
+<h2 align=center><strong><a ref="noledger.io">noledger.io</a></strong></h2> 
 
-A secure messaging service based on a public ledger protocol. Chat clients connect through Diffie-Hellman key exchange and messages are broadcasted publicly in RSA cipher form and are requested by every client but can be decrypted only by those who own a private key which corresponds to their address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. 
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20secure%20and%20anonymous%20messaging%20service%20based%20on%20a%20public%20ledger%20protocol.&url=https://github.com/B0-B/noledger.io&hashtags=noledger,secure,ledger,messenger)
+
+A secure and anonymous messaging service based on a public ledger protocol. Clients connect through ext. Diffie-Hellman key exchange and messages are broadcasted publicly in a central ledger (ciphered) and are requested by every client which syncronizes with the ledger, but can be decrypted only by those who own a private key which corresponds to their address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. 
 
 Read the full [article](https://github.com/B0-B/noledger/blob/main/docs/paper/paper.md).
 
