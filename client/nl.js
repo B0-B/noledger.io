@@ -327,8 +327,19 @@ var noledger = new Vue({
             }
         },
         decrypt: async function (cipher) {
-            const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, this.keyPair.privateKey, cipher);
+
+            /*
+            RSA asym. encrypt function
+            + added random padding for random cipher obfuscation [np-1]
+            */
+
+            const dataEncoded = await crypto.subtle.decrypt(this.encryption.algorithm, 
+                this.keyPair.privateKey, cipher);
             let decoded = await this.encryption.decoder.decode(dataEncoded);
+
+            const decodedWordArray = decoded.split(" ");                                                // remove the padding i.e. the last word
+            const slicedWordArray = decodedWordArray.slice(0, decodedWordArray.length-1)                // override decoded text and discard padding
+            decoded = slicedWordArray.join(" ")
             return decoded
         },
         destroyLoadFrameDelayed: async function () {
@@ -346,8 +357,16 @@ var noledger = new Vue({
             return aesKey;
         },
         encrypt: async function (data, key) {
-            const dataEncoded = await this.encryption.encoder.encode(data);
+
+            /*
+            RSA asym. encrypt function
+            + added random padding for random cipher obfuscation [np-1]
+            */
+
+            const pad = await this.generateRandomBytes(8);                                                      // random padding [np-1]
+            const dataEncoded = await this.encryption.encoder.encode(data + " " + pad);                         // encode data with padding appended
             let encrypted = await crypto.subtle.encrypt(this.encryption.algorithm, key, dataEncoded);
+            
             return encrypted
         },
         entryCollapse: async function () {
