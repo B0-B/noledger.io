@@ -904,6 +904,7 @@ var noledger = new Vue({
                 delete aesPhrase;
             }
             
+            console.log("check",buf2str(check))
             pkg = {                                                                     // build package for request
                 time: new Date().getTime(),
                 check: buf2str(check),
