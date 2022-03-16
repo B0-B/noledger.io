@@ -5,12 +5,13 @@ The following documentation outlines and archives all noledger proposals, their 
 |---|---|---|---|
 | Spam Infeasability | A client-side PoW ansatz intended to protect the ledger from massive spam. | Validation | - |
 | Image Transfer | Secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 |
+| Signatures | Replace check strings crypto signatures. | Pending | v-1.1.0 |
 | Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Stable | v-1.0.0 | 
 | Base Protocol | A secure and anonymous ledger-based messaging protocol.  | Stable | v-1.0.0 |
 
 <br><br>
 
-<h2><strong>Random Padding [np-1]</strong></h2>
+<h2><strong>Random Padding</strong></h2>
 <h3 align=center><strong>Description</strong></h3>
 If the check string or the senders address is encrypted with the same public key it would yield the same cipher every time (since the payloads are constant) which allows classifying messages to groups that originated from unknown addresses. To overcome this and to add another pbfuscation layer, a padding is added at the end of each payload. For this the usual encrypt/decrypt functions are modified such that
 
