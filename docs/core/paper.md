@@ -78,6 +78,11 @@ Most of the secured exchange and hidden routing between clients is enabled by th
 |   | key | String | Symmetric AES key for the entry (contact specific) encrypted with receivers address |
 |   | time | Integer | Ledger entrance timestamp in plain text |   
 
+### IV.2) Authenticity 
+The authenticity is barely guaranteed by the pure fact that a message is received, since someone could have phished the receivers address to encrypt valid packages with it in order to send spam. These messages would yield an unknown sender address by which they might be filtered. Otherwise, if an attacker would mimick a known address (spoofing) he would not be able to receive any messages from the victim (which buys the trap) since he is not the owner of the private key that corresponds to the spoofed address. To overcome the spam issue and to ensure full authenticity the check string can be varied individually between two parties. By default messages whose header is not decryptable or whose decrypted header shows a different yield are directly discarded.
+
+### IV.3) Integrity
+Due to the anonymous and asymmetric end-to-end encryption every manipulation or variation of the entry payload during transit would "almost surely" impact it's decryptability and thus reveal any difference. Corrupted package receivers would not have to engage according to the failed decryption followed by procedure IV.2. Integrity is ensured thereby.
 
 ## V) Clients
 
