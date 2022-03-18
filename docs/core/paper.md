@@ -79,7 +79,9 @@ Most of the secured exchange and hidden routing between clients is enabled by th
 |   | time | Integer | Ledger entrance timestamp in plain text |   
 
 ### IV.2) Authenticity 
-The authenticity is barely guaranteed by the pure successful delivery, someone could have phished the receivers address to create cryptographically valid packages to send spam to thirds. These messages would yield an unknown sender address by which they might be filtered. Otherwise, if an attacker would mimick a known address (spoofing) he would not be able to receive any messages from the victim (which buys the trap) since he is not the owner of the private key that corresponds to the spoofed address. To overcome the spam issue and to ensure full authenticity the check string can be varied individually between two parties. By default messages whose header is not decryptable or whose decrypted header shows a different yield than the check string are directly discarded.
+The authenticity is barely guaranteed by the successful delivery only. Although addresses are anonymous they can potentially be phished and used for the encryption of fake packages (spoofing). If these messages would yield an unknown sender address to the reciever (victim) they might be filtered. Otherwise, if an attacker would mimick a phished address which is known by the victim he would not be able to receive any messages from the victim since he is not the owner of the private key that corresponds to the spoofed address. 
+
+Spoofed attacks and spam can be avoided by a check string upon which clients can mutually aggree to in secret.  By default messages whose header is not decryptable or whose decrypted header shows a different yield than the agreed check are directly discarded.
 
 ### IV.3) Integrity
 Due to the anonymous and asymmetric end-to-end encryption every manipulation or variation of the entry payload during transit would "almost surely" impact it's decryptability and thus reveal any difference. Corrupted package receivers would not have to engage according to the failed decryption followed by procedure IV.2. Integrity is ensured thereby.
