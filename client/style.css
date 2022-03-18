@@ -280,8 +280,11 @@ h3 {
 }
 
 .lock-light {
-    height: 90%;
-    margin: 5%; 
+    position: absolute;
+    right: 10%;
+    top: 10%;
+    bottom: 10%;
+    height: 80%;
     fill:#ddd;
     content: url('./media/lock_light.svg');
     -webkit-transition: all 1s ease;
@@ -323,7 +326,6 @@ h3 {
     width: 100%;
     position: relative
 }
-
 
 .menuDots {
     width: 100%;
