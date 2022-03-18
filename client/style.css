@@ -279,6 +279,27 @@ h3 {
     font-weight: bold;
 }
 
+.lock-light {
+    height: 90%;
+    margin: 5%; 
+    fill:#ddd;
+    content: url('./media/lock_light.svg');
+    -webkit-transition: all 1s ease;
+    -moz-transition: all 1s ease;
+    -ms-transition: all 1s ease;
+    -o-transition: all 1s ease;
+    transition: all 1s ease;
+}
+
+.lock-light:hover {
+    filter: invert(50%) sepia(79%) saturate(2476%) hue-rotate(60deg) brightness(118%) contrast(100%);
+    -webkit-transition: all .5s ease;
+    -moz-transition: all .5s ease;
+    -ms-transition: all .5s ease;
+    -o-transition: all .5s ease;
+    transition: all .5s ease;
+}
+
 #pingField {
     height: 50px;
     width: 80px;
@@ -302,6 +323,7 @@ h3 {
     width: 100%;
     position: relative
 }
+
 
 .menuDots {
     width: 100%;
