@@ -526,7 +526,7 @@ var noledger = new Vue({
                                             await this.loadNewContactThread(wrapper, from);                     // add a new chat in contacts page
                                         } 
 
-                                        if (check2 == this.contacts[from].check2) {                             // if user-specific check string is correct (2. Factor) 
+                                        if (check2 == this.contacts[from].check) {                             // if user-specific check string is correct (2. Factor) 
                                             let internal = {                                                    // append new internal message
                                                 time: new Date().getTime(),
                                                 type: 'from',
@@ -913,7 +913,7 @@ var noledger = new Vue({
 
             try {
                 check = await this.encrypt(this.checkString, key);                      // asymmetrically encode general check string and credentials for tracking
-                check2 = await this.encrypt(this.contacts[address].check);              // encrypt specific user client string
+                check2 = await this.encrypt(this.contacts[address].check, key);              // encrypt specific user client string
                 phrase = await this.encrypt(aesPhrase, key);
                 cipher = await this.aesEncrypt(msg);                                    // aes for heavy payloads
                 from = await this.aesEncrypt(fromAddress);
