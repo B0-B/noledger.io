@@ -297,7 +297,7 @@ h3 {
 }
 
 .lock-light {
-    filter: invert(50%) sepia(79%) saturate(2476%) hue-rotate(60deg) brightness(118%) contrast(100%);
+    filter: invert(50%) sepia(79%) saturate(0%) hue-rotate(60deg) brightness(1000%) contrast(100%);
     position: absolute;
     right: 0;
     top: 10%;
@@ -312,6 +312,7 @@ h3 {
 }
 
 .lock-heavy {
+    filter: invert(50%) sepia(79%) saturate(230%) hue-rotate(-232deg) brightness(130%) contrast(100%);
     position: absolute;
     right: 0;
     top: 10%;

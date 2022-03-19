@@ -619,10 +619,20 @@ var noledger = new Vue({
             }
 
             // decide on 2nd factor lock fill in navi
-            if (this.contacts[address].check == this.checkStringDefault) {
+            if (this.contacts[address].check != this.checkStringDefault) {
                 const lock = document.getElementById("lock-button"); 
-                lock.classList.add('lock-heavy');
-            } 
+                try {
+                    lock.classList.remove('lock-light');
+                } finally {
+                    lock.classList.add('lock-heavy'); 
+                }
+            } else {
+                try {
+                    lock.classList.remove('lock-light');
+                } finally {
+                    lock.classList.add('lock-light'); 
+                }
+            }
 
             this.scrollToBottom();
             this.noUnreadMessages(address);
