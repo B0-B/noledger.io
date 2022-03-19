@@ -100,7 +100,7 @@
                             <p class="symbol clickable" v-on:click="backToContacts()">❮</p>
                         </div>
                         <div class="navi-flex-column col-sm-10 naviLabel">
-                            <p class="symbol">chat with <strong class="highlight-foreground">{{toAddress.slice(0,7)}} ...</strong></p>
+                            <p class="symbol">chat with <strong class="highlight-foreground">{{displayAddress}} ...</strong></p>
                         </div>
                         <div class="navi-flex-column col-sm-1">
                             <img id="lock-button" v-on:click="loadCheckStringField()" class="lock-light">
