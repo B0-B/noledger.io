@@ -620,6 +620,57 @@ var noledger = new Vue({
             this.scrollToBottom();
             this.noUnreadMessages(address);
         },
+        loadCheckStringField: async function () {
+
+            const navCols = Array.prototype.slice.call(                             // gather array of all columns in the chat navi
+                document.getElementsByClassName("navi-flex-column") )
+            navCols[0].style.maxWidth = "0px";                                           // respan the navi columns
+            navCols[1].style.maxWidth = "0px";
+            navCols[2].style.width = "100%";
+            navCols[0].style.opacity = "0";
+            navCols[1].style.opacity = "0";
+            
+            const lock = document.getElementById("lock-button");                    // shift the lock button to the left
+            lock.style.right = "auto";
+            lock.style.left = "5%";
+
+            const inputField = document.createElement('input');                     // create the input field
+            inputField.className = "client-check-input bisque-foreground";
+            inputField.placeholder = "custom authentic secret";
+            inputField.type = "password";
+            lock.parentElement.appendChild(inputField)
+            inputField.focus();
+
+            function defaultLayout() {                                              // reshape the navi columns to normal
+                inputField.remove()
+                lock.style.right = "10%";
+                lock.style.left = "";
+                navCols[0].style.maxWidth = "";                                        
+                navCols[1].style.maxWidth = "";
+                navCols[0].style.opacity = "1";
+                navCols[1].style.opacity = "1";
+                navCols[2].style.width = "";
+            }
+
+            inputField.onfocusout = function () {
+                defaultLayout()
+            }
+
+            inputField.onkeydown = function(e) {
+                if (e.which == 13) {
+                    try {
+                        noledger.contacts[noledger.toAddress].check = e.target.value;
+                        defaultLayout();
+                        noledger.notify(
+                            "New specific check string for authenticity set.");
+                    } catch (error) {
+                        noledger.notify("Failed to set custom check string.");
+                        console.log(error);
+                        defaultLayout();
+                    }
+                } 
+            };
+        },
         loadContactsPage: async function () {
             let wrapper = document.getElementById('wrapper');
 
