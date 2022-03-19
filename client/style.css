@@ -297,13 +297,27 @@ h3 {
 }
 
 .lock-light {
+    filter: invert(50%) sepia(79%) saturate(2476%) hue-rotate(60deg) brightness(118%) contrast(100%);
     position: absolute;
     right: 0;
     top: 10%;
     bottom: 10%;
     height: 80%;
-    fill:#ddd;
     content: url('./media/lock_light.svg');
+    -webkit-transition: all 1s ease;
+    -moz-transition: all 1s ease;
+    -ms-transition: all 1s ease;
+    -o-transition: all 1s ease;
+    transition: all 1s ease;
+}
+
+.lock-heavy {
+    position: absolute;
+    right: 0;
+    top: 10%;
+    bottom: 10%;
+    height: 80%;
+    content: url('./media/lock_dark.svg');
     -webkit-transition: all 1s ease;
     -moz-transition: all 1s ease;
     -ms-transition: all 1s ease;

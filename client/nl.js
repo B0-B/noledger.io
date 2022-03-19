@@ -617,6 +617,13 @@ var noledger = new Vue({
             for (let i = 0; i < stack.length; i++) {
                 await this.blob(stack[i], false)
             }
+
+            // decide on 2nd factor lock fill in navi
+            if (this.contacts[address].check == this.checkStringDefault) {
+                const lock = document.getElementById("lock-button"); 
+                lock.classList.add('lock-heavy');
+            } 
+
             this.scrollToBottom();
             this.noUnreadMessages(address);
         },
@@ -655,14 +662,15 @@ var noledger = new Vue({
             inputField.onfocusout = function () {
                 defaultLayout()
             }
-
             inputField.onkeydown = function(e) {
                 if (e.which == 13) {
                     try {
                         noledger.contacts[noledger.toAddress].check = e.target.value;
                         defaultLayout();
+                        lock.classList.remove('lock-light');
+                        lock.classList.add('lock-heavy');
                         noledger.notify(
-                            "New specific check string for authenticity set.");
+                            "Successfully applied new specific check string. Make sure that your chat partner applies the same.");
                     } catch (error) {
                         noledger.notify("Failed to set custom check string.");
                         console.log(error);
