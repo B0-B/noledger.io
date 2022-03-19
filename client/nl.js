@@ -97,6 +97,7 @@ var noledger = new Vue({
         address: null,
         chatVisible: false,
         checkString: 'noledger-default-check',
+        checkStringDefault: 'noledger-default-check',
         contacts: {},
         emojiString: "😀 😃 😄 😁 😆 😅 😂 🤣 😊 😇 🙂 🙃 😉 😌 😍 😘 😗 😙 😚 😋 😜 😝 😛 🤑 🤗 🤓 😎 🤡 🤠 😏 😒 😞 😔 😟 😕 🙁 😣 😖 😫 😩 😤 😠 😡 😶 😐 😑 😯 😦 😧 😮 😲 😵 😳 😱 😨 😰 😢 😥 🤤 😭 😓 😪 😴 🙄 🤔 🤥 😬 🤐 🤢 🤮 🤧 😷 🤒 🤕 🤨 🤩 🤯 🧐 🤫 🤪 🥺 🤭 🥱 🥳 🥴 🥲 🥸 🥶 🥵 😈 👿 🤬 👹 👺 💩 👻 💀 👽 👾 🤖 🎃 😺 😸 😹 😻 😼 😽 😿 😾 🙀 \n\n👐 🙌 👏 🙏 🤝 👍 👎 👊 ✊ 🤛 🤜 🤞 🤘 👌 👈 👉 👆 👇 ✋ 🤚 🖐 🖖 👋 🤙 💪 🖕 🤟 🤲 🤳 💅 🖖 💋 👄 👅 👂 👃 👣 👁 🧠 🦷 🦴 👀 \n\n🐶 🐱 🐭 🐹 🐰 🦊 🐻 🐼 🐨 🐯 🦁 🐮 🐷 🐽 🐸 🐵 🙈 🙉 🙊 🐒 🐔 🐧 🐦 🐤 🐣 🐥 🦆 🦅 🦉 🦇 🐺 🐗 🐴 🦄 🐝 🐛 🦋 🐌 🐚 🐞 🐜 🕷 🕸 🐢 🐍 🦎 🦂 🦀 🦑 🐙 🦐 🐠 🐟 🐡 🐬 🦈 🐳 🐋 🐊 🐆 🐅 🐃 🐂 🐄 🦌 🐪 🐫 🐘 🦏 🦍 🐎 🐖 🐐 🐏 🐑 🐕 🐩 🐈 🐓 🦃 🕊 🪶 🐇 🐁 🐀 🐿 🐾 🐉 🐲 🦖 🦕 🦒 🦔 🦓 🦗 🦧 🦮 🦥 🦦 🦨 🦩 🌵 🎄 🌲 🌳 🌴 🌱 🌿 ☘️ 🍀 🎍 🎋 🍃 🍂 🍁 🍄 🌾 💐 🌷 🌹 🥀 🌻 🌼 🌸 🌺 🌎 🌍 🌏 🌕 🌖 🌗 🌘 🌑 🌒 🌓 🌔 🌚 🌝 🌞 🌛 🌜 🌙 💫 ⭐️ 🌟 ✨ ⚡️ 🔥 💥 ☄️ 🛸 ☀️ 🌤 ⛅️ 🌥 🌦 🌈 ☁️ 🌧 ⛈ 🌩 🌨 ☃️ ⛄️ ❄️ 🌬 💨 🌪 🌫 🌊 💧 💦 ☔️ \n\n🍏 🍎 🍐 🍊 🍋 🍌 🍉 🍇 🍓 🍈 🍒 🍑 🍍 🥝 🥑 🍅 🍆 🥒 🥕 🌽 🌶 🥔 🍠 🌰 🥜 🍯 🥐 🍞 🥖 🧀 🥚 🍳 🥓 🧄 🧅 🥞 🧇 🍤 🍗 🍖 🍕 🌭 🍔 🍟 🥙 🌮 🌯 🥗 🥘 🍝 🍜 🦪 🍲 🍥 🍣 🍱 🍛 🍚 🧆 🍙 🍘 🍢 🍡 🍧 🍨 🍦 🍰 🎂 🍮 🍭 🍬 🍫 🍿 🍩 🍪 🥛 🧈 🍼 ☕️ 🍵 🍶 🍺 🍻 🥂 🍷 🥃 🍸 🍹 🍾 🧉 🧃 🧊 🥄 🍴 🍽 \n\n⚽️ 🏀 🏈 ⚾️ 🎾 🏐 🏉 🎱 🏓 🏸 🥅 🏒 🏑 🏏 ⛳️ 🏹 🎣 🥊 🥋 ⛸ 🎿 ⛷ 🏂 🏋️‍♀️ 🏋️ 🤺 🤼‍♀️ 🤼‍♂️ 🤸‍♀️ 🤸‍♂️ ⛹️‍♀️ ⛹️ 🤾‍♀️ 🤾‍♂️ 🏌️‍♀️ 🏌️ 🏄‍♀️ 🏄 🏊‍♀️ 🏊 🤽‍♀️ 🤽‍♂️ 🚣‍♀️ 🚣 🤿 🏇 🚴‍♀️ 🚴 🚵‍♀️ 🚵 🎽 🏅 🎖 🥇 🥈 🥉 🏆 🏵 🎗 🎫 🎟 🎪 🤹‍♀️ 🤹‍♂️ 🎭 🎨 🎬 🎤 🎧 🎼 🎹 🥁 🎷 🎺 🎸 🎻 🪕 🎲 🎯 🎳 🪀 🪁 🎮 🎰 \n\n🚗 🚕 🚙 🚌 🚎 🏎 🚓 🚑 🚒 🚐 🚚 🚛 🚜 🛴 🚲 🛵 🏍 🛺 🚨 🚔 🚍 🚘 🚖 🚡 🚠 🚟 🚃 🚋 🚞 🚝 🚄 🚅 🚈 🚂 🚆 🚇 🚊 🚉 🚁 🛩 ✈️ 🛫 🛬 🪂 🚀 🛰 🛸 💺 🛶 ⛵️ 🛥 🚤 🛳 ⛴ 🚢 ⚓️ 🚧 ⛽️ 🚏 🚦 🚥 🗺 🗿 🗽 ⛲️ 🗼 🏰 🏯 🏟 🎡 🎢 🎠 ⛱ 🏖 🏝 ⛰ 🏔 🗻 🌋 🏜 🏕 ⛺️ 🛤 🛣 🏗 🏭 🏠 🏡 🏘 🏚 🏢 🏬 🏣 🏤 🏥 🏦 🏨 🏪 🏫 🏩 💒 🏛 ⛪️ 🕌 🕍 🛕 🕋 ⛩ 🗾 🎑 🏞 🌅 🌄 🌠 🎇 🎆 🌇 🌆 🏙 🌃 🌌 🪐 🌉 🌁 \n\n ⌚️ 📱 📲 💻 ⌨️ 🖥 🖨 🖱 🖲 🕹 🗜 💽 💾 💿 📀 📼 📷 📸 📹 🎥 📽 🎞 📞 ☎️ ⚖ ️📟 📠 📺 📻 🎙 🎚 🎛 ⏱ ⏲ ⏰ 🕰 ⌛️ ⏳ 📡 🔋 🔌 💡 🔦 🕯 🗑 🛢 💸 💵 💴 💶 💷 💰 💳 💎 🧿 ⚖️ 🔧 🔨 ⚒ 🛠 ⛏ 🪓 🧹 🔩 ⚙️ ⛓ 🔫 🪁 💣 🪒 🔪 🗡 ⚔️ 🛡 🚬 ⚰️ ⚱️ 🏺 🪔 🔮 📿 💈 ⚗️ 🔭 🔬 🕳 🦯 🩺 💊 💉 🩸 🩹 🦠 🧫 🧬 🌡 🚽 🚰 🚿 🛁 🛀 🛎 🔑 🗝 🚪 🛋 🛏 🛌 🪑 🖼 🛍 🛒 🎁 🎈 🎏 🎀 🎊 🎉 🎎 🏮 🎐 ✉️ 📩 📨 📧 💌 📥 📤 📦 🏷 📪 📫 📬 📭 📮 📯 📜 📃 📄 📑 📊 📈 📉 🗒 🗓 📆 📅 📇 🗃 🗳 🗄 📋 📁 📂 🗂 🗞 📰 📓 📔 📒 📕 📗 📘 📙 📚 📖 🔖 🔗 📎 🖇 📐 📏 📌 📍 🎌 🏳️ 🏴 🏁 🏳️‍🌈 ✂️ 🖊 🖋 ✒️ 🖌 🖍 📝 ✏️ 🔍 🔎 🔏 🔐 🔒 🔓 💄 👚 👕 👖 👔 👗 👙 👘 👠 👡 👢 👞 👟 👒 🎩 🎓 👑 ⛑ 🎒 🧳 👝 👛 👜 💼 👓 🕶 🌂 ☂️ 🪶 \n\n❤️ 💛 💚 💙 💜 🖤 🤎 🤍 🧡 💔 ❣️ 💕 💞 💓 💗 💖 💘 💝 💟 ☮️ ✝️ ☪️ 🕉 ☸️ ✡️ 🔯 🕎 ☯️ ☦️ 🛐 ⛎ ♈️ ♉️ ♊️ ♋️ ♌️ ♍️ ♎️ ♏️ ♐️ ♑️ ♒️ ♓️ 🆔 ⚛️ 🈳 🉑 ☢️ ☣️ 📴 📳 🈶 🈚️ 🈸 🈺 🈷️ ✴️ 🆚 🉐 ㊙️ ㊗️ 🈴 🈵 🈹 🈲 🅰️ 🅱️ 🆎 🆑 🅾️ 🆘 🚼 ❌ ⭕️ 🛑 ⛔️ 📛 🚫 💯 💮 💢 ♨️ 🚷 🚯 🚳 🚱 🔞 📵 🚭 ❗️ ❕ ❓ ❔ ‼️ ⁉️ 🔅 🔆 〽️ ⚠️ 🚸 🔱 ⚜️ 🔰 ♻️ ✅ 🈯️ 💹 ❇️ ✳️ ❎ 🌐 💠 Ⓜ️ 🌀 💤 🏧 🚾 ♿️ 🅿️ 🈂️ 🛂 🛃 🛄 🛅 🚹 🚺 🚻 🚮 ➿ 🎦 📶 🈁 🔣 ℹ️ 🔤 🔡 🔠 🆖 🆗 🆙 🆒 🆕 🆓 0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟 🔢 #️⃣ *️⃣ ▶️ ⏸ ⏯ ⏹ ⏺ ⏭ ⏮ ⏩ ⏪ ⏫ ⏬ ◀️ 🔼 🔽 ➡️ ⬅️ ⬆️ ⬇️ ↗️ ↘️ ↙️ ↖️ ↪️ ↩️ ⤴️ ⤵️ 🔀 🔁 🔂 🔄 🔃 🔚 🔙 🔛 🔝 🔜 ☑️ ↕️ ↔️ 🎵 🎶 ➕ ➖ ➗ ✖️ 💲 💱 ™️ ©️ ®️ 〰️ ➰ ✔️ 🔘 ⚫️ ⚪️ 🔴 🔵 🟣 ​​🟠​ 🟡​ 🟢​ ​🟣 ​🟤​ 🔺 🔻 🔸 🔹 🔶 🔷 🔳 🔲 ▪️ ▫️ ◾️ ◽️ ◼️ ◻️ ⬛️ ⬜️ ​🟥 ​🟧​ 🟨​ 🟩​ 🟦 ​🟪​ ​🟫​ 🔈 🔇 🔉 🔊 🔔 🔕 📣 📢 👁‍🗨 💬 💭 🗯 ♠️ ♣️ ♥️ ♦️ 🃏 🎴 🀄️ 🕐 🕑 🕒 🕓 🕔 🕕 🕖 🕗 🕘 🕙 🕚 🕛 🕜 🕝 🕞 🕟 🕠 🕡 🕢 🕣 🕤 🕥 🕦 🕧",
         emojiHtml: "",
@@ -142,7 +143,6 @@ var noledger = new Vue({
         this.initKeyBindings();
         this.initSounds();
         this.initEmojis();
-        this.initListener();
         this.destroyLoadFrameDelayed();
     },
     methods: {
@@ -270,62 +270,6 @@ var noledger = new Vue({
             this.scrollToBottom()
             return span
         },
-        cleaner: async function () {
-            /* A loop which deletes expired messages */
-            while (true) {
-                try {
-                    if (this.lifetime.includes('Never')) {
-                        /* do nothing */
-                    } else {
-                        let now = new Date().getTime(), lt, changes = false;
-                        // determine lifetime in seconds
-                        if (this.lifetime.includes('1 Hour')) {
-                            lt = 3600
-                        } else if (this.lifetime.includes('60')) {
-                            lt = 60
-                        } else if (this.lifetime.includes('15')) {
-                            lt = 300
-                        } else if (this.lifetime.includes('5')) {
-                            lt = 900
-                        } else if (this.lifetime.includes('30')) {
-                            lt = 1800
-                        } else if (this.lifetime.includes('3')) {
-                            lt = 10800
-                        } else if (this.lifetime.includes('6')) {
-                            lt = 21600
-                        } else if (this.lifetime.includes('Daily')) {
-                            lt = 86400
-                        }
-                        for (let key in this.contacts) {
-                            for (let i = 0; i < this.contacts[key].stack.length; i++) {
-                                msg = this.contacts[key].stack[i]
-                                timestamp = msg.time;
-                                diff = (now - timestamp) * 0.001 
-                                if (diff > lt && i != this.contacts[key].stack.length-1) {
-                                    // leapfrog expired msg
-                                } else if (diff > lt && i == this.contacts[key].stack.length-1) {
-                                    this.contacts[key].stack = []
-                                    this.noUnreadMessages(key);
-                                    if (this.toAddress == key && i > 0) {
-                                        this.loadChat(key)
-                                    }
-                                } else {
-                                    this.contacts[key].stack = this.contacts[key].stack.slice(i)
-                                    if (this.toAddress == key && i > 0) {
-                                        this.loadChat(key)
-                                    }
-                                    break
-                                }
-                            }   
-                        }
-                    }
-                } catch (error) {
-                    console.log('cleaner', error)
-                } finally {
-                    await this.sleep(5)
-                }
-            }
-        },
         decrypt: async function (cipher) {
 
             /*
@@ -406,27 +350,95 @@ var noledger = new Vue({
             );            
         },
         generateNewAccount: async function () {
+
+            /*
+            Creates new account from scratch and starts all necessary services.
+            */
+
             console.log("generate new account ...")
-            this.keyPair = await this.generateKeyPair();
-            // flush wrapper content
-            let wrapper = document.getElementById('wrapper');
+            this.keyPair = await this.generateKeyPair();                    // generate new rsa key pair
+            
+            let wrapper = document.getElementById('wrapper');               // flush wrapper content
             wrapper.innerHTML = "";
             this.address = await this.getAddress();
-            // build contacts page
-            await this.loadContactsPage();
-            // start cleaner once the account is available
-            this.cleaner();
+            
+            await this.loadContactsPage();                                  // build contacts page
+            this.initCleanerHook();                                         // start cleaner once the account is available
+            this.initLedgerHook();                                          // start the ledger reading
+
         },
         generateRandomBytes: async function (length) {
+
+            /*
+            Generate Bytes of specified length.
+            */
+            
             let pad = '';
             for (let i = 0; i < length; i++) {
                 pad += this.encryption.aes.ascii[Math.floor(Math.random()*this.encryption.aes.ascii.length)]
             }
             return pad
+
         },
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
             return pub.n;
+        },
+        initCleanerHook: async function () {
+            /* A loop which deletes expired messages */
+            while (true) {
+                try {
+                    if (this.lifetime.includes('Never')) {
+                        /* do nothing */
+                    } else {
+                        let now = new Date().getTime(), lt, changes = false;
+                        // determine lifetime in seconds
+                        if (this.lifetime.includes('1 Hour')) {
+                            lt = 3600
+                        } else if (this.lifetime.includes('60')) {
+                            lt = 60
+                        } else if (this.lifetime.includes('15')) {
+                            lt = 300
+                        } else if (this.lifetime.includes('5')) {
+                            lt = 900
+                        } else if (this.lifetime.includes('30')) {
+                            lt = 1800
+                        } else if (this.lifetime.includes('3')) {
+                            lt = 10800
+                        } else if (this.lifetime.includes('6')) {
+                            lt = 21600
+                        } else if (this.lifetime.includes('Daily')) {
+                            lt = 86400
+                        }
+                        for (let key in this.contacts) {
+                            for (let i = 0; i < this.contacts[key].stack.length; i++) {
+                                msg = this.contacts[key].stack[i]
+                                timestamp = msg.time;
+                                diff = (now - timestamp) * 0.001 
+                                if (diff > lt && i != this.contacts[key].stack.length-1) {
+                                    // leapfrog expired msg
+                                } else if (diff > lt && i == this.contacts[key].stack.length-1) {
+                                    this.contacts[key].stack = []
+                                    this.noUnreadMessages(key);
+                                    if (this.toAddress == key && i > 0) {
+                                        this.loadChat(key)
+                                    }
+                                } else {
+                                    this.contacts[key].stack = this.contacts[key].stack.slice(i)
+                                    if (this.toAddress == key && i > 0) {
+                                        this.loadChat(key)
+                                    }
+                                    break
+                                }
+                            }   
+                        }
+                    }
+                } catch (error) {
+                    console.log('cleaner', error)
+                } finally {
+                    await this.sleep(5)
+                }
+            }
         },
         initContact: async function (address) {
             
@@ -438,9 +450,12 @@ var noledger = new Vue({
                 const phrase = await this.generateRandomBytes(16);                                              // remember construction phrase 
                 const aesKey = await this.generateAESkeyFromPhrase(phrase);                                     // construct AES key from phrase
 
+                const check = this.checkStringDefault;                                                          // set the default specific check string for the contact
+
                 this.contacts[address] = {                                                                      // append to contacts object
                     aesBuffer: aesKey,
                     aesPhrase: phrase,
+                    check: check,                                                                               // encrypted check string
                     key: _key,
                     stack: [],
                     unread: 0
@@ -475,7 +490,7 @@ var noledger = new Vue({
                 noledger.entryCollapse()
             }
         },
-        initListener: async function () {
+        initLedgerHook: async function () {
             console.log('start listener ...')
             while (true) {
                 try {
@@ -494,35 +509,40 @@ var noledger = new Vue({
                                     } catch (error) {
                                         check_decrypted = null
                                     }
-                                    
-                                    if (check_decrypted == this.checkString) {                                  // on success
-        
+
+                                    if (check_decrypted == this.checkString) {                                  // on success (1. Factor)
+
                                         let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
                                         let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
                                         
                                         let msg = await this.aesDecrypt(pkg.cipher, aesKey);                    // decrypt body and senders address
                                         let from = await this.aesDecrypt(pkg.from, aesKey);
-        
+
+                                        let check2 = await this.decrypt(str2buf(pkg.check2));                   // decrypt user specific check string
+
                                         if (!(from in this.contacts)) {                                         // initialize new contact if it doesn't exist
                                             let wrapper = document.getElementById('contacts-wrapper');
                                             await this.initContact(from);
                                             await this.loadNewContactThread(wrapper, from);                     // add a new chat in contacts page
-                                        }
-                                        
-                                        let internal = {                                                        // append new internal message
-                                            time: new Date().getTime(),
-                                            type: 'from',
-                                            msg: msg
-                                        }; this.contacts[from].stack.push(internal);
-                                        
-                                        if (!this.sounds.mute){                                                // decide on new message sound
-                                            this.playSoundFor(msg)
-                                        }                        
-        
-                                        if (this.chatVisible && this.toAddress == from) {                       // decide wether to build a blob in chat or increment the unread tag
-                                            this.blob(internal, true);
+                                        } 
+
+                                        if (check2 == this.contacts[from].check) {                             // if user-specific check string is correct (2. Factor) 
+                                            let internal = {                                                    // append new internal message
+                                                time: new Date().getTime(),
+                                                type: 'from',
+                                                msg: msg
+                                            }; this.contacts[from].stack.push(internal);
+                                            if (!this.sounds.mute){                                             // decide on new message sound
+                                                this.playSoundFor(msg)
+                                            }
+                                            if (this.chatVisible && this.toAddress == from) {                   // decide wether to build a blob in chat or increment the unread tag
+                                                this.blob(internal, true);
+                                            } else {
+                                                this.newUnreadMessage(from);
+                                            }
                                         } else {
-                                            this.newUnreadMessage(from);
+                                            // failed to decrypt check string
+                                            console.log('Wrong client check string found in pkg.')
                                         }
                                     }
                                 } catch (error) {
@@ -597,8 +617,77 @@ var noledger = new Vue({
             for (let i = 0; i < stack.length; i++) {
                 await this.blob(stack[i], false)
             }
+
+            // decide on 2nd factor lock fill in navi
+            if (this.contacts[address].check != this.checkStringDefault) {
+                const lock = document.getElementById("lock-button"); 
+                try {
+                    lock.classList.remove('lock-light');
+                } finally {
+                    lock.classList.add('lock-heavy'); 
+                }
+            } else {
+                try {
+                    lock.classList.remove('lock-light');
+                } finally {
+                    lock.classList.add('lock-light'); 
+                }
+            }
+
             this.scrollToBottom();
             this.noUnreadMessages(address);
+        },
+        loadCheckStringField: async function () {
+
+            const navCols = Array.prototype.slice.call(                             // gather array of all columns in the chat navi
+                document.getElementsByClassName("navi-flex-column") )
+            navCols[0].style.maxWidth = "0px";                                           // respan the navi columns
+            navCols[1].style.maxWidth = "0px";
+            navCols[2].style.width = "100%";
+            navCols[0].style.opacity = "0";
+            navCols[1].style.opacity = "0";
+            
+            const lock = document.getElementById("lock-button");                    // shift the lock button to the left
+            lock.style.right = "auto";
+            lock.style.left = "5%";
+
+            const inputField = document.createElement('input');                     // create the input field
+            inputField.className = "client-check-input bisque-foreground";
+            inputField.placeholder = "custom authentic secret";
+            inputField.type = "password";
+            lock.parentElement.appendChild(inputField)
+            inputField.focus();
+
+            function defaultLayout() {                                              // reshape the navi columns to normal
+                inputField.remove()
+                lock.style.right = "10%";
+                lock.style.left = "";
+                navCols[0].style.maxWidth = "";                                        
+                navCols[1].style.maxWidth = "";
+                navCols[0].style.opacity = "1";
+                navCols[1].style.opacity = "1";
+                navCols[2].style.width = "";
+            }
+
+            inputField.onfocusout = function () {
+                defaultLayout()
+            }
+            inputField.onkeydown = function(e) {
+                if (e.which == 13) {
+                    try {
+                        noledger.contacts[noledger.toAddress].check = e.target.value;
+                        defaultLayout();
+                        lock.classList.remove('lock-light');
+                        lock.classList.add('lock-heavy');
+                        noledger.notify(
+                            "Successfully applied new specific check string. Make sure that your chat partner applies the same.");
+                    } catch (error) {
+                        noledger.notify("Failed to set custom check string.");
+                        console.log(error);
+                        defaultLayout();
+                    }
+                } 
+            };
         },
         loadContactsPage: async function () {
             let wrapper = document.getElementById('wrapper');
@@ -892,7 +981,8 @@ var noledger = new Vue({
             const timestamp = new Date().getTime();
 
             try {
-                check = await this.encrypt(this.checkString, key);                      // asymmetrically encode check string and credentials for tracking
+                check = await this.encrypt(this.checkString, key);                      // asymmetrically encode general check string and credentials for tracking
+                check2 = await this.encrypt(this.contacts[address].check, key);              // encrypt specific user client string
                 phrase = await this.encrypt(aesPhrase, key);
                 cipher = await this.aesEncrypt(msg);                                    // aes for heavy payloads
                 from = await this.aesEncrypt(fromAddress);
@@ -904,10 +994,10 @@ var noledger = new Vue({
                 delete aesPhrase;
             }
             
-            console.log("check",buf2str(check))
             pkg = {                                                                     // build package for request
                 time: new Date().getTime(),
                 check: buf2str(check),
+                check2: buf2str(check2),
                 from: from,
                 cipher: cipher,
                 phrase: buf2str(phrase)
@@ -925,7 +1015,6 @@ var noledger = new Vue({
             this.emojiVisible = false;                                                  // toggle off emoji frame and scroll back
             document.getElementById('emojiFrame').scrollTop = 0;
         
-            //this.entryCollapse()                                                        // minimize the entry field again
         },
         sleep: function (seconds) {
             return new Promise(function(resolve) {

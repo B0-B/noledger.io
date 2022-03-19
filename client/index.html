@@ -95,14 +95,15 @@
             </div>
             <div id="chatWindow" v-show="chatVisible" class="container-fluid p-0">
                 <div class="navi container-fluid p-0 grey-background highlight-foreground">
-                    <div class="d-flex flex-row no-gutters">
-                        <div class="col-sm-1">
+                    <div id="navi-flex-wrapper" class="d-flex flex-row no-gutters">
+                        <div class="navi-flex-column col-sm-1">
                             <p class="symbol clickable" v-on:click="backToContacts()">❮</p>
                         </div>
-                        <div class="col-sm-10 naviLabel">
+                        <div class="navi-flex-column col-sm-10 naviLabel">
                             <p class="symbol">chat with <strong class="highlight-foreground">{{toAddress.slice(0,7)}} ...</strong></p>
                         </div>
-                        <div class="col-sm-1">
+                        <div class="navi-flex-column col-sm-1">
+                            <img id="lock-button" v-on:click="loadCheckStringField()" class="lock-light">
                         </div>
                     </div>
                 </div>
