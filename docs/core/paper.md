@@ -73,9 +73,10 @@ Most of the secured exchange and hidden routing between clients is enabled by th
 | Entry  | Content | Type | Description |
 |---|---|---|---|
 |   | header | String | Check string encrypted with receivers address  |
+|   | check | String | Client specific check string encrypted with receivers address  |
 |   | from | String | The senders public address sym. encrypted with AES key |
-|   | cypher | String | The senders message encrypted with AES key |
-|   | key | String | Symmetric AES key for the entry (contact specific) encrypted with receivers address |
+|   | cipher | String | The senders message encrypted with AES key |
+|   | phrase | String | Secret phrase for AES key generation encrypted with receivers address |
 |   | time | Integer | Ledger entrance timestamp in plain text |   
 
 ### IV.2) Authenticity 
@@ -98,8 +99,9 @@ Every active participant (client) needs to request each ledger entry in its encr
 Entries are requested by the client by sending the last observed ledger id to the central node. The returned package will contain all entries between the last id observed by the client and the last id received by the ledger. The last observed id is updated by the highest id in the returned set.
 
 ### V.4) Entry Decryption
-Every entry contained in the node response is tried to be decrypted with the requester's private key. The success is determined from decrypting the header and comparing to the check string to upon which all clients or a subset of them have agreed to. On inequality the entry is discarded while on success the rest of the entry is decrypted in the order 
-1. Decrypt the provided AES key using the private key
-2. Use the decrypted AES key to further decrypt the sender's address
-3. Use the AES key to decrypt the cypher with the message yield
+Every entry contained in the node response is tried to be decrypted with the requester's private key. The success is determined from decrypting the header and comparing to the check string to upon which all clients or a subset of them have agreed to. Additionally, a second check string (2nd factor) can be used mutually between clients. If one of the factors fail the entry is discarded whereas on success the rest of the entry is decrypted in the order 
+1. Decrypt the provided AES phrase using the private key
+2. Generate the AES key
+3. Use the decrypted AES key to further decrypt the sender's address
+4. Use the AES key to decrypt the cypher with the message yield
 Step 2 fulfills the key exchange outlined in II.2. 

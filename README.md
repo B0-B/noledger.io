@@ -33,7 +33,7 @@ For the default port open https://localhost in the browser.
 |---|---|---|---|
 | Spam Infeasability | A client-side PoW ansatz intended to protect the ledger from massive spam. | Validation | - |
 | Image Transfer | Secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 |
-| Specific Check String | A second, contact specific check string for authenticity proof. | Pending | v-1.0.0 |
+| Specific Check String | A second, contact specific check string for authenticity proof. | Stable | v-1.0.0 |
 | Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Stable | v-1.0.0 | 
 | Base Protocol | A secure and anonymous ledger-based messaging protocol.  | Stable | v-1.0.0 |
 
