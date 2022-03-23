@@ -506,7 +506,7 @@ var noledger = new Vue({
 
                                     let check_decrypted;                                                        // try to decrypt the check
                                     try {
-                                        check_decrypted = await this.decrypt(str2buf(pkg.check));
+                                        check_decrypted = await this.decrypt(str2buf(pkg.header));
                                     } catch (error) {
                                         check_decrypted = null
                                     }
@@ -519,7 +519,7 @@ var noledger = new Vue({
                                         let msg = await this.aesDecrypt(pkg.cipher, aesKey);                    // decrypt body and senders address
                                         let from = await this.aesDecrypt(pkg.from, aesKey);
 
-                                        let check2 = await this.decrypt(str2buf(pkg.check2));                   // decrypt user specific check string
+                                        let check2 = await this.decrypt(str2buf(pkg.check));                   // decrypt user specific check string
 
                                         if (!(from in this.contacts)) {                                         // initialize new contact if it doesn't exist
                                             let wrapper = document.getElementById('contacts-wrapper');
@@ -1000,13 +1000,13 @@ var noledger = new Vue({
                 delete aesPhrase;
             }
             
-            pkg = {                                                                     // build package for request
-                time: new Date().getTime(),
-                check: buf2str(check),
-                check2: buf2str(check2),
+            pkg = {
+                header: buf2str(check),
+                check: buf2str(check2),
                 from: from,
                 cipher: cipher,
-                phrase: buf2str(phrase)
+                phrase: buf2str(phrase),
+                time: new Date().getTime(),
             }
 
             if (!this.sounds.mute) {this.sounds.send.play()}                            // play a send sound
