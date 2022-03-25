@@ -428,6 +428,8 @@ h3 {
     box-shadow: 0 0 10px 1px rgba(0,0,0,0.3);
     z-index: 100;
     line-height: 50px;
+    padding-left: 25px !important;
+    padding-right: 25px !important;
 }
 
 .navi div {
