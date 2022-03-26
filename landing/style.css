@@ -14,7 +14,7 @@
 }
 
 #about-description {
-
+    font-size: 1.5rem;
     padding-top: 50px;
     padding-bottom: 50px;
 }
@@ -26,7 +26,7 @@
 }
 
 .big-text {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-family: 'geo-sans-light';
     line-height: 3.5rem;
     text-align: center;
@@ -168,6 +168,7 @@
 }
 
 .section {
+    padding-top: 50px;
     display: block;
     width: 100%;
     height: auto;
@@ -184,7 +185,8 @@
     transition: color 400ms;
     margin-left: 30%;
     margin-right: 30%;
-    width: 40%
+    width: 40%;
+    height: 100px
 }
 
 .slide-button-blue::before {
