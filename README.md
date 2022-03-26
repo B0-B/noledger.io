@@ -6,6 +6,17 @@ A secure and anonymous messaging service based on a public ledger protocol. Clie
 
 Read the full [article](https://github.com/B0-B/noledger/blob/main/docs/core/paper.md).
 
+---
+
+## [Project & Protocol Development](https://github.com/B0-B/noledger/blob/main/docs/development/development.md)
+| Function | Description | Status | Protocol Version | 
+|---|---|---|---|
+| Image Transfer | Secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 |
+| Specific Check String | A second, contact specific check string for authenticity proof. | Stable | v-1.0.0 |
+| Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Stable | v-1.0.0 | 
+| Base Protocol | A secure and anonymous ledger-based messaging protocol.  | Stable | v-1.0.0 |
+
+<br>
 
 ## Setup
 Run the setup script in the root directory
@@ -16,7 +27,7 @@ then open the certificate path
 ```bash
 cd ./cert/self_signed
 ```
-Either, generate a new certificate via
+and generate a new certificate via
 ```bash
 bash create.sh # follow instructions
 ```
@@ -39,12 +50,16 @@ For the default port open https://localhost in the browser.
 
 <br>
 
-## [Project & Protocol Development](https://github.com/B0-B/noledger/blob/main/docs/development/development.md)
-| Function | Description | Status | Protocol Version | 
-|---|---|---|---|
-| Spam Infeasability | A client-side PoW ansatz intended to protect the ledger from massive spam. | Validation | - |
-| Image Transfer | Secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 |
-| Specific Check String | A second, contact specific check string for authenticity proof. | Stable | v-1.0.0 |
-| Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Stable | v-1.0.0 | 
-| Base Protocol | A secure and anonymous ledger-based messaging protocol.  | Stable | v-1.0.0 |
+## API
+Every node hosts two endpoints `localhost/submit` (writing) and `localhost/ledger` (reading). It is possible to develop a custom client to read from and submit messages to the ledger via JSON HTTP request.
+```nodejs
+pkg = {
+    header: "Array Buffer of encrypted check string header",
+    check: buf2str(check2),
+    from: from,
+    cipher: cipher,
+    phrase: buf2str(phrase),
+    time: new Date().getTime(),
+}
+```
 
