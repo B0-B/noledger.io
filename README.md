@@ -2,13 +2,33 @@
 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20secure%20and%20anonymous%20messaging%20service%20based%20on%20a%20public%20ledger%20protocol.&url=https://github.com/B0-B/noledger.io&hashtags=noledger,secure,ledger,messenger)
 
-A secure and anonymous messaging service based on a public ledger protocol. Clients connect through Diffie-Hellman key exchange and messages are broadcasted publicly in a central ledger (ciphered) and are requested by every client which syncronizes with the ledger, but can be decrypted only by those who own a private key which corresponds to their address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. 
+A secure and anonymous messaging service based on a public ledger protocol. Clients connect through Diffie-Hellman key exchange and messages are broadcasted publicly in a central ledger (ciphered) and are requested by every client which synchronizes with the ledger, but can be decrypted only by those who own a private key which corresponds to their address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. 
 
 Read the full [article](https://github.com/B0-B/noledger/blob/main/docs/core/paper.md).
 
+## Features
+noledger.io is the only messaging service which
+
+- is completely free, liberal and avoids any KYC
+- stores messages on a time-limited public ledger but respects integrity, authenticity and absolute anonimity
+- prohibits the tracing of connections, routes or meta data by design and with mathematical/informational certainty 
+- can always be trusted, even if the service is corrupt
+
 ---
 
-## [Project & Protocol Development](https://github.com/B0-B/noledger/blob/main/docs/development/development.md)
+## Why noledger was initiated in a table
+The table below is a collection of publicly known security incidents (headlines and articles) with common E2E messaging services. 
+
+| Date | Subject |
+|---|---|
+|9/8/2021|[Whatsapp end-2-end encryption is not private.](https://arstechnica.com/gadgets/2021/09/whatsapp-end-to-end-encrypted-messages-arent-that-private-after-all/)|
+|6/19/2021|["Then in October 2019, WhatsApp revealed that journalists and human rights activists in India had been targets of surveillance by operators using Pegasus"](https://hydnews.net/2021/07/what-is-pegasus-surveillance-and-why-it-needed-full-and-unbiased-investigation/)|
+
+---
+
+<br>
+
+## [Core Protocol Development](https://github.com/B0-B/noledger/blob/main/docs/development/development.md)
 | Function | Description | Status | Protocol Version | 
 |---|---|---|---|
 | Image Transfer | Secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 |
@@ -49,17 +69,3 @@ sudo node server 3000 # start the node on port 3000
 For the default port open https://localhost in the browser.
 
 <br>
-
-## API
-Every node hosts two endpoints `localhost/submit` (writing) and `localhost/ledger` (reading). It is possible to develop a custom client to read from and submit messages to the ledger via JSON HTTP request.
-```nodejs
-pkg = {
-    header: "Array Buffer of encrypted check string header",
-    check: buf2str(check2),
-    from: from,
-    cipher: cipher,
-    phrase: buf2str(phrase),
-    time: new Date().getTime(),
-}
-```
-
