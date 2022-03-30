@@ -24,7 +24,7 @@ The table below is a collection of publicly known security incidents (headlines 
 |2/15/2022|[European Commission justifies mass surveilance through child sex abuse - leaked internal statement.](https://edri.org/wp-content/uploads/2022/03/2022-03-21-csam-avis-rsb-15-fevrier.pdf)|
 |9/8/2021|[Whatsapp end-2-end encryption is not private.](https://arstechnica.com/gadgets/2021/09/whatsapp-end-to-end-encrypted-messages-arent-that-private-after-all/)|
 |6/19/2021|["Then in October 2019, WhatsApp revealed that journalists and human rights activists in India had been targets of surveillance by operators using Pegasus"](https://hydnews.net/2021/07/what-is-pegasus-surveillance-and-why-it-needed-full-and-unbiased-investigation/)|
-|6/10/2021|[Germany passed new policy which allow authorities to utilize "governmental" trojans for mass surveilance.](https://www.spiegel.de/netzwelt/netzpolitik/bundestag-genehmigt-staatstrojaner-fuer-alle-a-d01006d4-a530-41c9-ad69-21a3990acfa8)|
+|6/10/2021|[Germany passed new policy which allows authorities to utilize "governmental" trojans for mass surveilance.](https://www.spiegel.de/netzwelt/netzpolitik/bundestag-genehmigt-staatstrojaner-fuer-alle-a-d01006d4-a530-41c9-ad69-21a3990acfa8)|
 ---
 
 <br>
