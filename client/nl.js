@@ -155,12 +155,17 @@ var noledger = new Vue({
             const decoded = await this.encryption.decoder.decode(encodedBuffer);
             return decoded
         },
-        aesEncrypt: async function (plainText) {
+        aesEncrypt: async function (plainText, cryptoKey=null) {
             const encodedText = this.encryption.encoder.encode(plainText);
             const byteLength = this.encryption.aes.ivLength;    
             const iv = crypto.getRandomValues(new Uint8Array(byteLength));                               // generate a random 4096 bit or 16 byte vector
             const algo = { name: this.encryption.aes.algorithm, iv: iv };
-            const key = await this.encryption.aes.currentAESkey;
+            let key;
+            if (cryptoKey) {
+                key = cryptoKey;
+            } else {
+                key = await this.encryption.aes.currentAESkey;
+            }
             let encrypted = await crypto.subtle.encrypt(algo, key, encodedText);  
             encrypted_b64 = buf2str(encrypted);       
             iv_b64 = buf2str(iv);         
@@ -290,7 +295,47 @@ var noledger = new Vue({
             await this.sleep(1);
             document.getElementById('load-frame').remove()
         },
+        dumpAccount: async function (password) {
+            
+            /* 
+            Dumps account into a file. 
+            */
+
+            // isolate contact information
+            contacts = {}
+            for (let key in this.contacts) {
+                c = Object.assign({}, this.contacts[key]);
+                c.stack = [];
+                contacts[key] = c;
+            }
+
+            // create package for dump
+            pkg = {
+                checkstring: this.checkString,
+                contacts: contacts,
+                keypair: this.keyPair,
+                lifetime: this.lifetime,
+                id: this.id
+            }
+            console.log('pkg json', pkg)
+
+            await this.sleep(.2)
+
+            // generate AES key from the password provided
+            const key = await this.generateAESkeyFromPhrase(password);
+
+            // encrypt the package
+            const pkgEncrypted = await this.aesEncrypt(pkg, key);
+            console.log('pkgEncrypted', pkgEncrypted, 'type', typeof pkgEncrypted);
+
+            // encode to hex and return
+            pkgEncryptedEncoded = this.encryption.encoder.encode(JSON.stringify(pkgEncrypted));
+
+            return pkgHEX
+
+        },
         generateAESkeyFromPhrase: async function (phrase=null) {
+            /* Secure method which creates a cryptoKey with AES algorithm constructed from a provided phrase. */  
             if (!phrase) {
                 phrase = await this.generateRandomBytes(16);
             }
@@ -327,6 +372,9 @@ var noledger = new Vue({
 
         },
         entryExpand: async function () {
+            /* 
+            Expands the message input in chat window on focus.
+            */
             // document.getElementById("entryFrame").classList.remove('slide-height-collapsed');
             // document.getElementById("entryFrame").classList.add('slide-height-expanded');
             document.getElementById("entryInput").classList.remove('slide-height-collapsed');
