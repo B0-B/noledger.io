@@ -298,7 +298,7 @@ var noledger = new Vue({
         dumpAccount: async function (password) {
             
             /* 
-            Dumps account into a file. 
+            Dumps account encrypted with a pass phrase into a file. 
             */
 
             // isolate contact information
@@ -317,21 +317,41 @@ var noledger = new Vue({
                 lifetime: this.lifetime,
                 id: this.id
             }
-            console.log('pkg json', pkg)
-
-            await this.sleep(.2)
 
             // generate AES key from the password provided
             const key = await this.generateAESkeyFromPhrase(password);
 
             // encrypt the package
             const pkgEncrypted = await this.aesEncrypt(pkg, key);
-            console.log('pkgEncrypted', pkgEncrypted, 'type', typeof pkgEncrypted);
 
             // encode to hex and return
-            pkgEncryptedEncoded = this.encryption.encoder.encode(JSON.stringify(pkgEncrypted));
+            const pkgEncryptedEncoded = this.encryption.encoder.encode(JSON.stringify(pkgEncrypted));
+            const pkgEncryptedEncoded2HEX = buf2str(pkgEncryptedEncoded);
+            console.log('encoded string', pkgEncryptedEncoded2HEX)
 
-            return pkgHEX
+            // prepare file for download
+            const filename = 'account.nl'
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(pkgEncryptedEncoded2HEX));
+            element.setAttribute('download', filename);
+            element.style.display = 'none';
+            document.body.appendChild(element);
+            element.click();
+            document.body.removeChild(element);
+
+            //return pkgEncryptedEncoded2HEX
+
+        },
+        dumpAccountAction: async function () {
+
+            // create a input field
+            await this.notifyReadAndCallback(
+                "Enter a PIN to protect the account:",
+                this.dumpAccount,
+                true,
+                "download",
+                "Please check your download folder."
+            )
 
         },
         generateAESkeyFromPhrase: async function (phrase=null) {
@@ -889,6 +909,53 @@ var noledger = new Vue({
             span.classList.remove("notify-box-transparent");
             await this.sleep(1);
             span.remove();
+        },
+        notifyReadAndCallback: async function (message, callback, hidden=false, buttonLabel="submit", submitMessage="") {
+            
+            /*
+            A function which notifies and parses an input which is 
+            feeded into an arbitrary provided callback function.
+                message: string
+                callback: function
+                hidden: boolean | For hiding passwords
+            */
+
+            // build notify box
+            let span = document.createElement("span");
+            let p = document.createElement("p");
+            document.body.appendChild(span);
+            span.appendChild(p);
+            span.classList.add("notify-box");
+            p.innerHTML = message;
+            await this.sleep(.1);
+            span.classList.add("notify-box-transparent");
+            
+            // add an interactive input section
+            if (hidden) {
+                span.innerHTML += '<input id="notify-input-field" type="password">'
+            } else {
+                span.innerHTML += '<input id="notify-input-field">'
+            }
+            span.innerHTML += '<button id="notify-submit-button"></button>'
+            await this.sleep(.05); // give DOM 50ms time to parse new children
+            const inputField = document.getElementById('notify-input-field');
+            const button = document.getElementById('notify-submit-button');
+            button.innerHTML = buttonLabel;
+
+            // add the callback to the button
+            button.onmousedown = async function () {
+                callback(inputField.value);
+                inputField.remove();
+                button.remove();
+                if (submitMessage.length != 0) {
+                    p.innerHTML = submitMessage;
+                    await noledger.sleep(2);
+                }
+                span.classList.remove("notify-box-transparent");
+                await noledger.sleep(1);
+                span.remove();
+            }
+            
         },
         noUnreadMessages: async function (address) {
             /* Increments the unread variable of the contact. The contact needs to exist already. */

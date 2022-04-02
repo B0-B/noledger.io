@@ -502,7 +502,15 @@ h3 {
     transition: all 1s ease;
 }
 
+#notify-input-field {
+    margin-bottom: 10px;
+}
+
 #regenerate-AES-button {
+    width: 100%;
+}
+
+#save-address-button {
     width: 100%;
 }
 
