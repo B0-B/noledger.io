@@ -482,6 +482,7 @@ h3 {
     -o-transition: all 1s ease;
     transition: all 1s ease;
     vertical-align: middle !important;
+    overflow: hidden;
 }
 
 .notify-box p {
@@ -503,6 +504,7 @@ h3 {
 }
 
 #notify-input-field {
+    width: 100%;
     margin-bottom: 10px;
 }
 

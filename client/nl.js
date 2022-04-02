@@ -927,6 +927,7 @@ var noledger = new Vue({
             span.appendChild(p);
             span.classList.add("notify-box");
             p.innerHTML = message;
+            p.id = "notify-input-field";
             await this.sleep(.1);
             span.classList.add("notify-box-transparent");
             
@@ -941,14 +942,15 @@ var noledger = new Vue({
             const inputField = document.getElementById('notify-input-field');
             const button = document.getElementById('notify-submit-button');
             button.innerHTML = buttonLabel;
+            inputField.focus();
 
             // add the callback to the button
+            const sbm = submitMessage;
             button.onmousedown = async function () {
                 callback(inputField.value);
-                inputField.remove();
-                button.remove();
-                if (submitMessage.length != 0) {
-                    p.innerHTML = submitMessage;
+                
+                if (sbm.length != 0) {
+                    document.getElementById("notify-input-field").innerHTML = sbm;
                     await noledger.sleep(2);
                 }
                 span.classList.remove("notify-box-transparent");
