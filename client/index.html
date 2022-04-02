@@ -96,7 +96,12 @@
             </div>
             <div id="wrapper" v-show="wrapperVisible" class="container-fluid p-0">
                 <div id="generate" class="row no-gutters">
-                    <h2 href="#" v-on:click="generateNewAccount()">generate</h2>
+                    <h2 v-on:click="generateNewAccount()">generate</h2>
+                </div>
+                <div id="reconstruct" class="row no-gutters">
+                    <h2 v-on:click="restoreAccountFromFile()">
+                        restore account from <input type="file"> <!-- loader for account file -->
+                    </h2>
                 </div>
             </div>
             <div id="chatWindow" v-show="chatVisible" class="container-fluid p-0">

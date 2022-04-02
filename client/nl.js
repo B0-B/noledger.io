@@ -945,12 +945,10 @@ var noledger = new Vue({
             inputField.focus();
 
             // add the callback to the button
-            const sbm = submitMessage;
             button.onmousedown = async function () {
                 callback(inputField.value);
-                
-                if (sbm.length != 0) {
-                    document.getElementById("notify-input-field").innerHTML = sbm;
+                if (submitMessage.length != 0) {
+                    document.getElementById("notify-input-field").innerHTML = submitMessage;
                     await noledger.sleep(2);
                 }
                 span.classList.remove("notify-box-transparent");
@@ -1076,6 +1074,19 @@ var noledger = new Vue({
                     reject({'errors': ['error during request: no connection']})
                 }
                 xhr.send(JSON.stringify(options)); 
+            });
+        },
+        restoreAccountFromFile: async function () {
+            let source,
+            input = document.crea;
+
+            document.querySelector('input[type="file"]').addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    var input = document.querySelector('input');
+                    
+          
+                    source = URL.createObjectURL(this.files[0]); // set src to blob url
+                }
             });
         },
         scrollToBottom: function () {
