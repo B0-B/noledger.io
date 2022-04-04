@@ -129,6 +129,7 @@ var noledger = new Vue({
             length: 4096,
             hash: 'SHA-256'
         },
+        fileSource: null,
         id: 0,
         keyPair: {},
         lifetime: '1 Hour',
@@ -143,6 +144,7 @@ var noledger = new Vue({
         this.initKeyBindings();
         this.initSounds();
         this.initEmojis();
+        this.initFileListener();
         this.destroyLoadFrameDelayed();
     },
     methods: {
@@ -302,32 +304,47 @@ var noledger = new Vue({
             */
 
             // isolate contact information
-            contacts = {}
-            for (let key in this.contacts) {
-                c = Object.assign({}, this.contacts[key]);
-                c.stack = [];
-                contacts[key] = c;
-            }
-
-            // create package for dump
-            pkg = {
-                checkstring: this.checkString,
-                contacts: contacts,
-                keypair: this.keyPair,
-                lifetime: this.lifetime,
-                id: this.id
-            }
+            const contacts = Array.from(Object.keys(this.contacts)).join('/////');
+            // for (let key in this.contacts) {
+            //     c = Object.assign({}, this.contacts[key]);
+            //     c.stack = [];
+            //     contacts[key] = c;
+            // }
 
             // generate AES key from the password provided
             const key = await this.generateAESkeyFromPhrase(password);
 
+            // export keyPair
+            const encryptedPub = JSON.stringify(await this.aesEncrypt(await this.keyExport(this.keyPair.publicKey), key));
+            const encryptedPriv = JSON.stringify(await this.aesEncrypt(await this.keyExport(this.keyPair.privateKey), key));
+
+            // prepare parameters for package
+
+            // create package for dump
+            pkg = {
+                contacts: JSON.stringify(await this.aesEncrypt(contacts, key)),
+                pub: encryptedPub,
+                priv: encryptedPriv,
+                id: JSON.stringify(await this.aesEncrypt(this.id, key))
+            }
+
+            
+
+            //console.log("pkg", pkg)
+
+            // generate AES key from the password provided
+            // const key = await this.generateAESkeyFromPhrase(password);
+
             // encrypt the package
-            const pkgEncrypted = await this.aesEncrypt(pkg, key);
+            const pkgStringed = JSON.stringify(pkg);
+
+            //pkgDecryptedEncoded = await noledger.aesDecrypt(pkgEncrypted, key);
+            //console.log("decrypted", pkgDecryptedEncoded)
 
             // encode to hex and return
-            const pkgEncryptedEncoded = this.encryption.encoder.encode(JSON.stringify(pkgEncrypted));
+            const pkgEncryptedEncoded = this.encryption.encoder.encode(pkgStringed);
             const pkgEncryptedEncoded2HEX = buf2str(pkgEncryptedEncoded);
-            console.log('encoded string', pkgEncryptedEncoded2HEX)
+            console.log('enrypted pkg', pkgEncryptedEncoded2HEX)
 
             // prepare file for download
             const filename = 'account.nl'
@@ -541,6 +558,30 @@ var noledger = new Vue({
                     emojiFrame.innerHTML += `<span class="emoji" onclick=noledger.loadEmoji('${emoji}')>${emoji}</span>`
                 } emojiFrame.innerHTML += '<br><br><br>'
             }
+        },
+        initFileListener: async function () {
+
+            /*
+            A function which triggers the account reconstruction when source field is changed.
+            */
+
+            document.querySelector('input[type="file"]')
+                .addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    var img = document.querySelector('img');
+                    img.onload = () => 
+                    {URL.revokeObjectURL(img.src)}  // no longer needed, free memory
+                    img.src = URL.createObjectURL(this.files[0]); // set src to blob url
+                    console.log('source', img.src, this.value)
+                    const reader = new FileReader();
+                    reader.onload = event => {
+                        console.log("target result from file", event.target.result, typeof event.target.result); 
+                        noledger.restoreAccountFromFile(event.target.result)
+                    }// desired file content
+                    reader.onerror = error => reject(error);
+                    reader.readAsText(this.files[0]) 
+                }
+            });
         },
         initKeyBindings: async function () {
             // bind enter key for msg sending
@@ -817,6 +858,13 @@ var noledger = new Vue({
             this.emojiVisible = false;
         },
         loadNewContactButton: async function (parent) {
+
+            /*
+            Creates an interactive Button which on keydown enables the user to enter a new
+            contact address and will establish a new thread accordingly.
+            Note: Do not use this function to add a contact via code, instead use loadNewContactThread().
+            */
+
             let el = document.createElement('span');
             el.className = 'contact-box highlight-foreground dark-blue-background clickable';
             el_payload = document.createElement('p');
@@ -869,6 +917,13 @@ var noledger = new Vue({
             parent.appendChild(el);
         },
         loadNewContactThread: async function (el, address) {
+
+            /* 
+            Loads new contact in contacts wrapper (UI) with interactive button which
+            redirects into the chat frame. A contact needs to exist already in the contacts
+            object as prerequisite. For this call initContact(). 
+            */
+
             let thread_box = document.createElement('span');
             thread_box.innerHTML = `<div>${address.slice(0,9)}...</div>   <div class="unread"></div>`;
             thread_box.className = 'contact-box highlight-foreground dark-blue-background clickable';
@@ -1076,18 +1131,82 @@ var noledger = new Vue({
                 xhr.send(JSON.stringify(options)); 
             });
         },
-        restoreAccountFromFile: async function () {
-            let source,
-            input = document.crea;
+        restoreAccountFromFile: async function (payload) {
 
-            document.querySelector('input[type="file"]').addEventListener('change', function() {
-                if (this.files && this.files[0]) {
-                    var input = document.querySelector('input');
+            /*
+            Restores the account which was previously dumped.
+            - payload: Encrypted string payload obtained from the file
+            */
+            
+            // decode payload
+            const pkgDecoded = this.encryption.decoder.decode(str2buf(payload));
+            const pkgEncrypted = JSON.parse(pkgDecoded);
+            console.log("decoded", pkgEncrypted)
+            
+            // decrypt
+            this.notifyReadAndCallback(
+                "Enter password to decrypt account:",
+                async (pwd) => {
                     
-          
-                    source = URL.createObjectURL(this.files[0]); // set src to blob url
-                }
-            });
+                    try {
+                        
+                        // reconstruct the AES key
+                        const key = await noledger.generateAESkeyFromPhrase(pwd);
+                        
+                        // decrypt payload
+                        for (let key in pkgEncrypted) {
+                            const entryEncrypted = JSON.parse(pkgEncrypted[key]);
+                            console.log('object', pkgDecrypted)
+                            const entryDecrypted = await noledger.aesDecrypt(entryEncrypted, key);
+                            pkgDecrypted[key] = entryDecrypted; 
+                        }
+
+                        console.log('decrypted', pkgDecrypted)
+
+                        // prepare all parameters to restore account
+                        const contacts = pkgDecrypted.contacts.split('/////'); // convert string back to array of addresses
+                        const pub = await noledger.keyImport(pkgDecrypted.pub);
+                        const priv = await noledger.keyImport(pkgDecrypted.priv);
+                        const id = pkgDecrypted.id;
+
+                        // restore keyPair
+                        noledgerk.keyPair = {
+                            publicKey: await noledger.keyImport(pub, ['encrypt']),
+                            privateKey: await noledger.keyImport(priv, ['encrypt'])
+                        }
+                        
+                        // since the keyPair is restored and embedded try to load the contacts page
+                        await noledger.loadContactsPage();
+                        
+                        // restore contacts
+                        const contactWrapper = document.getElementById('contacts-wrapper');
+                        for (let contact of contacts) {
+                            await noledger.initContact(contact);
+                            await noledger.loadNewContactButton(contact, contactWrapper)
+                        }
+                        
+                        // remove legacies
+                        delete pkgDecrypted;
+                        delete priv;
+                        delete pub
+
+
+                        // pkgDecryptedEncoded = await noledger.aesDecrypt(pkgEncrypted, key);
+                        // //pkgDecrypted = JSON.parse(noledger.encryption.decoder.decode(str2buf(pkgDecryptedEncoded)));
+                        // pkgDecrypted = JSON.parse(pkgDecryptedEncoded);
+                        // console.log('test3')
+                        // console.log('pkg', pkgDecrypted)
+                        // info = "restoring account ..."
+                        
+                    } catch (error) {
+                        console.log('Error during decryption:', error)
+                        info = "error during decryption."
+                    }
+                },
+                true,
+                "restore",
+                "done."
+            )
         },
         scrollToBottom: function () {
             if (this.chatVisible) {
