@@ -153,7 +153,7 @@ var noledger = new Vue({
             encrypted.encrypted = str2buf(encrypted.encrypted);
             encrypted.iv = str2buf(encrypted.iv);
             const algo = { name: this.encryption.aes.algorithm, iv: encrypted.iv };
-            const encodedBuffer = await crypto.subtle.decrypt(algo, cryptoKey, encrypted.encrypted);
+            const encodedBuffer = await crypto.subtle.decrypt(algo, cryptoKey, encrypted.encrypted); // problem
             const decoded = await this.encryption.decoder.decode(encodedBuffer);
             return decoded
         },
@@ -304,7 +304,8 @@ var noledger = new Vue({
             */
 
             // isolate contact information
-            const contacts = Array.from(Object.keys(this.contacts)).join('/////');
+            const padding = this.generateRandomBytes(16);
+            const contacts = Array.from(Object.keys(this.contacts)).join('/////') + '/////' + padding;
             // for (let key in this.contacts) {
             //     c = Object.assign({}, this.contacts[key]);
             //     c.stack = [];
@@ -314,9 +315,13 @@ var noledger = new Vue({
             // generate AES key from the password provided
             const key = await this.generateAESkeyFromPhrase(password);
 
-            // export keyPair
-            const encryptedPub = JSON.stringify(await this.aesEncrypt(await this.keyExport(this.keyPair.publicKey), key));
-            const encryptedPriv = JSON.stringify(await this.aesEncrypt(await this.keyExport(this.keyPair.privateKey), key));
+            // export keypair
+            const exportedPub = await this.keyExport(this.keyPair.publicKey);
+            const exportedPriv = await this.keyExport(this.keyPair.privateKey);
+
+            // encrypt keyPair
+            const encryptedPub = JSON.stringify(await this.aesEncrypt(JSON.stringify(exportedPub), key));
+            const encryptedPriv = JSON.stringify(await this.aesEncrypt(JSON.stringify(exportedPriv), key));
 
             // prepare parameters for package
 
@@ -337,6 +342,7 @@ var noledger = new Vue({
 
             // encrypt the package
             const pkgStringed = JSON.stringify(pkg);
+            console.log('stringed package', pkgStringed)
 
             //pkgDecryptedEncoded = await noledger.aesDecrypt(pkgEncrypted, key);
             //console.log("decrypted", pkgDecryptedEncoded)
@@ -1151,13 +1157,14 @@ var noledger = new Vue({
                     try {
                         
                         // reconstruct the AES key
-                        const key = await noledger.generateAESkeyFromPhrase(pwd);
+                        const aesKey = await noledger.generateAESkeyFromPhrase(pwd);
                         
                         // decrypt payload
                         for (let key in pkgEncrypted) {
                             const entryEncrypted = JSON.parse(pkgEncrypted[key]);
-                            console.log('object', pkgDecrypted)
-                            const entryDecrypted = await noledger.aesDecrypt(entryEncrypted, key);
+                            console.log(key, 'object', entryEncrypted)
+                            const entryDecrypted = await noledger.aesDecrypt(entryEncrypted, aesKey);
+                            console.log(key, 'object decrypted', entryEncrypted)
                             pkgDecrypted[key] = entryDecrypted; 
                         }
 
@@ -1165,14 +1172,16 @@ var noledger = new Vue({
 
                         // prepare all parameters to restore account
                         const contacts = pkgDecrypted.contacts.split('/////'); // convert string back to array of addresses
-                        const pub = await noledger.keyImport(pkgDecrypted.pub);
-                        const priv = await noledger.keyImport(pkgDecrypted.priv);
+                        const pub = await noledger.keyImport(JSON.parse(pkgDecrypted.pub), ['encrypt']);
+                        const priv = await noledger.keyImport(JSON.parse(pkgDecrypted.priv), ['decrypt']);
                         const id = pkgDecrypted.id;
 
+                        noledger.id = id;
+
                         // restore keyPair
-                        noledgerk.keyPair = {
-                            publicKey: await noledger.keyImport(pub, ['encrypt']),
-                            privateKey: await noledger.keyImport(priv, ['encrypt'])
+                        noledger.keyPair = {
+                            publicKey: pub,
+                            privateKey: priv
                         }
                         
                         // since the keyPair is restored and embedded try to load the contacts page
