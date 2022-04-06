@@ -304,8 +304,9 @@ var noledger = new Vue({
             */
 
             // isolate contact information
-            const padding = this.generateRandomBytes(16);
+            const padding = await this.generateRandomBytes(16);
             const contacts = Array.from(Object.keys(this.contacts)).join('/////') + '/////' + padding;
+            console.log('contacts string', contacts)
             // for (let key in this.contacts) {
             //     c = Object.assign({}, this.contacts[key]);
             //     c.stack = [];
@@ -1161,9 +1162,11 @@ var noledger = new Vue({
                         
                         // decrypt payload
                         for (let key in pkgEncrypted) {
+                            console.log('test pkg value', pkgEncrypted[key])
                             const entryEncrypted = JSON.parse(pkgEncrypted[key]);
                             console.log(key, 'object', entryEncrypted)
-                            const entryDecrypted = await noledger.aesDecrypt(entryEncrypted, aesKey);
+                            let     entryDecrypted = await noledger.aesDecrypt(entryEncrypted, aesKey);
+                                    entryDecrypted = JSON.parse(entryDecrypted);
                             console.log(key, 'object decrypted', entryEncrypted)
                             pkgDecrypted[key] = entryDecrypted; 
                         }
@@ -1197,15 +1200,7 @@ var noledger = new Vue({
                         // remove legacies
                         delete pkgDecrypted;
                         delete priv;
-                        delete pub
-
-
-                        // pkgDecryptedEncoded = await noledger.aesDecrypt(pkgEncrypted, key);
-                        // //pkgDecrypted = JSON.parse(noledger.encryption.decoder.decode(str2buf(pkgDecryptedEncoded)));
-                        // pkgDecrypted = JSON.parse(pkgDecryptedEncoded);
-                        // console.log('test3')
-                        // console.log('pkg', pkgDecrypted)
-                        // info = "restoring account ..."
+                        delete pub;
                         
                     } catch (error) {
                         console.log('Error during decryption:', error)
