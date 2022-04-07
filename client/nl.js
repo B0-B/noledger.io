@@ -153,6 +153,7 @@ var noledger = new Vue({
             encrypted.encrypted = str2buf(encrypted.encrypted);
             encrypted.iv = str2buf(encrypted.iv);
             const algo = { name: this.encryption.aes.algorithm, iv: encrypted.iv };
+            await this.sleep(1)
             const encodedBuffer = await crypto.subtle.decrypt(algo, cryptoKey, encrypted.encrypted); // problem
             const decoded = await this.encryption.decoder.decode(encodedBuffer);
             return decoded
@@ -160,7 +161,7 @@ var noledger = new Vue({
         aesEncrypt: async function (plainText, cryptoKey=null) {
             const encodedText = this.encryption.encoder.encode(plainText);
             const byteLength = this.encryption.aes.ivLength;    
-            const iv = crypto.getRandomValues(new Uint8Array(byteLength));                               // generate a random 4096 bit or 16 byte vector
+            const iv = await crypto.getRandomValues(new Uint8Array(byteLength));                               // generate a random 4096 bit or 16 byte vector
             const algo = { name: this.encryption.aes.algorithm, iv: iv };
             let key;
             if (cryptoKey) {
@@ -306,12 +307,7 @@ var noledger = new Vue({
             // isolate contact information
             const padding = await this.generateRandomBytes(16);
             const contacts = Array.from(Object.keys(this.contacts)).join('/////') + '/////' + padding;
-            console.log('contacts string', contacts)
-            // for (let key in this.contacts) {
-            //     c = Object.assign({}, this.contacts[key]);
-            //     c.stack = [];
-            //     contacts[key] = c;
-            // }
+            console.log('contacts string', contacts);
 
             // generate AES key from the password provided
             const key = await this.generateAESkeyFromPhrase(password);
@@ -324,8 +320,6 @@ var noledger = new Vue({
             const encryptedPub = JSON.stringify(await this.aesEncrypt(JSON.stringify(exportedPub), key));
             const encryptedPriv = JSON.stringify(await this.aesEncrypt(JSON.stringify(exportedPriv), key));
 
-            // prepare parameters for package
-
             // create package for dump
             pkg = {
                 contacts: JSON.stringify(await this.aesEncrypt(contacts, key)),
@@ -333,20 +327,12 @@ var noledger = new Vue({
                 priv: encryptedPriv,
                 id: JSON.stringify(await this.aesEncrypt(this.id, key))
             }
-
-            
-
-            //console.log("pkg", pkg)
-
-            // generate AES key from the password provided
-            // const key = await this.generateAESkeyFromPhrase(password);
+            console.log('contacts decrypt test input', JSON.parse(pkg.contacts))
+            console.log('contacts decrypt test', await this.aesDecrypt(JSON.parse(pkg.contacts),key))
 
             // encrypt the package
             const pkgStringed = JSON.stringify(pkg);
             console.log('stringed package', pkgStringed)
-
-            //pkgDecryptedEncoded = await noledger.aesDecrypt(pkgEncrypted, key);
-            //console.log("decrypted", pkgDecryptedEncoded)
 
             // encode to hex and return
             const pkgEncryptedEncoded = this.encryption.encoder.encode(pkgStringed);
@@ -362,8 +348,6 @@ var noledger = new Vue({
             document.body.appendChild(element);
             element.click();
             document.body.removeChild(element);
-
-            //return pkgEncryptedEncoded2HEX
 
         },
         dumpAccountAction: async function () {
@@ -1165,6 +1149,7 @@ var noledger = new Vue({
                             console.log('test pkg value', pkgEncrypted[key])
                             const entryEncrypted = JSON.parse(pkgEncrypted[key]);
                             console.log(key, 'object', entryEncrypted)
+                            await noledger.sleep(.25);
                             let     entryDecrypted = await noledger.aesDecrypt(entryEncrypted, aesKey);
                                     entryDecrypted = JSON.parse(entryDecrypted);
                             console.log(key, 'object decrypted', entryEncrypted)
