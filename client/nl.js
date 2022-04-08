@@ -299,6 +299,7 @@ var noledger = new Vue({
             document.getElementById('load-frame').remove()
         },
         dumpAccount: async function (password) {
+            console.log('pwd',password)
             
             /* 
             Dumps account encrypted with a pass phrase into a file. 
@@ -315,7 +316,7 @@ var noledger = new Vue({
             // export keypair
             const exportedPub = await this.keyExport(this.keyPair.publicKey);
             const exportedPriv = await this.keyExport(this.keyPair.privateKey);
-
+            
             // encrypt keyPair
             const encryptedPub = JSON.stringify(await this.aesEncrypt(JSON.stringify(exportedPub), key));
             const encryptedPriv = JSON.stringify(await this.aesEncrypt(JSON.stringify(exportedPriv), key));
@@ -973,7 +974,7 @@ var noledger = new Vue({
             span.appendChild(p);
             span.classList.add("notify-box");
             p.innerHTML = message;
-            p.id = "notify-input-field";
+            p.id = "notify-message";
             await this.sleep(.1);
             span.classList.add("notify-box-transparent");
             
@@ -992,7 +993,8 @@ var noledger = new Vue({
 
             // add the callback to the button
             button.onmousedown = async function () {
-                callback(inputField.value);
+                //console.log('inputField test', document.getElementById('notify-input-field').value)
+                callback(document.getElementById('notify-input-field').value);
                 if (submitMessage.length != 0) {
                     document.getElementById("notify-input-field").innerHTML = submitMessage;
                     await noledger.sleep(2);
@@ -1134,15 +1136,17 @@ var noledger = new Vue({
             const pkgEncrypted = JSON.parse(pkgDecoded);
             console.log("decoded", pkgEncrypted)
             
-            // decrypt
+            // decrypt using the pass phrase provided by the notify window
             this.notifyReadAndCallback(
                 "Enter password to decrypt account:",
                 async (pwd) => {
+                    console.log('pwd', pwd)
                     
                     try {
                         
                         // reconstruct the AES key
                         const aesKey = await noledger.generateAESkeyFromPhrase(pwd);
+                        console.log('aes key', aesKey)
                         
                         // decrypt payload
                         for (let key in pkgEncrypted) {
