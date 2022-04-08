@@ -685,19 +685,26 @@ var noledger = new Vue({
             );
             return exported
         },
-        keyImport: async function (key, usage=['encrypt']) {
-            // encode the key to base64url
+        keyImport: async function (key, usage=['encrypt'], encode=false) {
+            
+            /*
+            Imports priorly exported key
+            - key:  key.n value - entry of jwk object 
+                    https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#json_web_key
+            */
+            
+            let keyObj = { 
+                kty: "RSA", 
+                e: "AQAB", 
+                n: key,
+                alg: this.encryption.rsa.algorithm,
+                ext: true,
+            }
             const imported = await crypto.subtle.importKey(
                 "jwk",
-                { 
-                    kty: "RSA", 
-                    e: "AQAB", 
-                    n: key,
-                    alg: this.encryption.rsa.algorithm,
-                    ext: true,
-                },
+                keyObj,
                 this.encryption.algorithm,
-                false,
+                true,
                 usage
             );
             return imported
@@ -994,7 +1001,8 @@ var noledger = new Vue({
             // add the callback to the button
             button.onmousedown = async function () {
                 //console.log('inputField test', document.getElementById('notify-input-field').value)
-                callback(document.getElementById('notify-input-field').value);
+                
+                callback(inputField.value);
                 if (submitMessage.length != 0) {
                     document.getElementById("notify-input-field").innerHTML = submitMessage;
                     await noledger.sleep(2);
@@ -1140,34 +1148,38 @@ var noledger = new Vue({
             this.notifyReadAndCallback(
                 "Enter password to decrypt account:",
                 async (pwd) => {
-                    console.log('pwd', pwd)
                     
                     try {
                         
                         // reconstruct the AES key
                         const aesKey = await noledger.generateAESkeyFromPhrase(pwd);
-                        console.log('aes key', aesKey)
                         
                         // decrypt payload
+                        let pkgDecrypted = {};
                         for (let key in pkgEncrypted) {
-                            console.log('test pkg value', pkgEncrypted[key])
+                            
                             const entryEncrypted = JSON.parse(pkgEncrypted[key]);
-                            console.log(key, 'object', entryEncrypted)
-                            await noledger.sleep(.25);
-                            let     entryDecrypted = await noledger.aesDecrypt(entryEncrypted, aesKey);
-                                    entryDecrypted = JSON.parse(entryDecrypted);
-                            console.log(key, 'object decrypted', entryEncrypted)
+                            let entryDecrypted = await noledger.aesDecrypt(entryEncrypted, aesKey);
+                            
+                            // overwrite encrypted entry with decrypted one
                             pkgDecrypted[key] = entryDecrypted; 
+                            //console.log(key, 'pkg', pkgEncrypted[key])
                         }
 
-                        console.log('decrypted', pkgDecrypted)
+                        console.log('finished pkg decryption', pkgDecrypted)
+
 
                         // prepare all parameters to restore account
+                        console.log('test 0')
+                        console.log('key parsed', JSON.parse(pkgDecrypted.pub))
                         const contacts = pkgDecrypted.contacts.split('/////'); // convert string back to array of addresses
-                        const pub = await noledger.keyImport(JSON.parse(pkgDecrypted.pub), ['encrypt']);
-                        const priv = await noledger.keyImport(JSON.parse(pkgDecrypted.priv), ['decrypt']);
+                        const pub = await noledger.keyImport(JSON.parse(pkgDecrypted.pub).n, ['encrypt']);
+                        console.log('test 1')
+                        const priv = await noledger.keyImport(JSON.parse(pkgDecrypted.priv).n, ['decrypt']);
                         const id = pkgDecrypted.id;
+                        console.log('test 1')
 
+                        // restore the last observed ledger id
                         noledger.id = id;
 
                         // restore keyPair
@@ -1178,14 +1190,14 @@ var noledger = new Vue({
                         
                         // since the keyPair is restored and embedded try to load the contacts page
                         await noledger.loadContactsPage();
-                        
+                        console.log('test 2')
                         // restore contacts
                         const contactWrapper = document.getElementById('contacts-wrapper');
                         for (let contact of contacts) {
                             await noledger.initContact(contact);
                             await noledger.loadNewContactButton(contact, contactWrapper)
                         }
-                        
+                        console.log('test 3')
                         // remove legacies
                         delete pkgDecrypted;
                         delete priv;
