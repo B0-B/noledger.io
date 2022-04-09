@@ -997,7 +997,7 @@ var noledger = new Vue({
             }
             span.innerHTML += '<button id="notify-submit-button"></button>'
             await this.sleep(.05); // give DOM 50ms time to parse new children
-            const inputField = document.getElementById('notify-message');
+            const inputField = document.getElementById('notify-input-field');
             const button = document.getElementById('notify-submit-button');
             button.innerHTML = buttonLabel;
             inputField.focus();
