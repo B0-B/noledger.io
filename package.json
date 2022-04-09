@@ -2,6 +2,7 @@
   "name": "noledger.io",
   "version": "1.1.0",
   "notes": [
+    "Fixed generate AES key issue - Receivers were not decrypting correctly after AES key exchange",
     "Improved UI interactivity",
     "Added release script in release/ directory",
     "Added version badge to readme",

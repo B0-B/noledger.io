@@ -364,17 +364,6 @@ var noledger = new Vue({
             )
 
         },
-        generateAESkeyFromPhrase: async function (phrase=null) {
-            /* Secure method which creates a cryptoKey with AES algorithm constructed from a provided phrase. */  
-            if (!phrase) {
-                phrase = await this.generateRandomBytes(16);
-            }
-            const pwEncoded = this.encryption.encoder.encode(phrase);                                           // utf8 encode phrase string as seed for AES key
-            const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                    // Hash the encoded seed
-            const algo = { name: this.encryption.aes.algorithm };
-            const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);   // construct a CryptoKey from phrase
-            return aesKey;
-        },
         encrypt: async function (data, key) {
 
             /*
@@ -417,6 +406,17 @@ var noledger = new Vue({
             document.getElementById("emojiFrame").classList.remove('slide-padding-collapsed');
             document.getElementById("emojiFrame").classList.add('slide-padding-expanded');
             document.getElementById("entryInput").style.minWidth = "60vw";
+        },
+        generateAESkeyFromPhrase: async function (phrase=null) {
+            /* Secure method which creates a cryptoKey with AES algorithm constructed from a provided phrase. */  
+            if (!phrase) {
+                phrase = await this.generateRandomBytes(16);
+            }
+            const pwEncoded = this.encryption.encoder.encode(phrase);                                           // utf8 encode phrase string as seed for AES key
+            const pwHash = await crypto.subtle.digest('SHA-256', pwEncoded);                                    // Hash the encoded seed
+            const algo = { name: this.encryption.aes.algorithm };
+            const aesKey = await crypto.subtle.importKey('raw', pwHash, algo, false, ['encrypt', 'decrypt']);   // construct a CryptoKey from phrase
+            return aesKey;
         },
         generateKeyPair: async function () {
             return window.crypto.subtle.generateKey(
@@ -623,11 +623,12 @@ var noledger = new Vue({
                                         console.log(3)
                                         let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
                                         let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
+                                        
                                         console.log(4)
                                         let msg = await this.aesDecrypt(pkg.cipher, aesKey);                    // decrypt body and senders address
                                         let from = await this.aesDecrypt(pkg.from, aesKey);
 
-                                        let check2 = await this.decrypt(str2buf(pkg.check));                   // decrypt user specific check string
+                                        let check2 = await this.decrypt(str2buf(pkg.check));                    // decrypt user specific check string
 
                                         if (!(from in this.contacts)) {                                         // initialize new contact if it doesn't exist
                                             let wrapper = document.getElementById('contacts-wrapper');
@@ -1107,7 +1108,8 @@ var noledger = new Vue({
             await this.sleep(.5);
             for (let address in this.contacts) {
                 const phrase = await this.generateRandomBytes(16); 
-                this.contacts[address].aesBuffer = await this.generateAESkeyFromPhrase(phrase);
+                this.contacts[address].aesPhrase = phrase; // save the phrase for future AES key generation
+                this.contacts[address].aesBuffer = await this.generateAESkeyFromPhrase(phrase); // generate
             }
             btn.innerHTML = "done."
             await this.sleep(1);
