@@ -683,8 +683,7 @@ table input, select {
     border-radius: 3px 3px 3px 3px;
 }
 
-#wrapper div {
-    height: 100px;
+#wrapper > div {
     padding: 50px;
     padding-bottom: 0;
     display: block;

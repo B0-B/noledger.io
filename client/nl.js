@@ -603,19 +603,21 @@ var noledger = new Vue({
                         for (let pkg of collection) {                                                           // iterate through packages in returned collection
                             if (pkg) {
                                 try {
-
+                                    console.log(0)
                                     let check_decrypted;                                                        // try to decrypt the check
                                     try {
                                         check_decrypted = await this.decrypt(str2buf(pkg.header));
+                                        console.log(1)
                                     } catch (error) {
                                         check_decrypted = null
+                                        console.log(2)
                                     }
 
                                     if (check_decrypted == this.checkString) {                                  // on success (1. Factor)
-
+                                        console.log(3)
                                         let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
                                         let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
-                                        
+                                        console.log(4)
                                         let msg = await this.aesDecrypt(pkg.cipher, aesKey);                    // decrypt body and senders address
                                         let from = await this.aesDecrypt(pkg.from, aesKey);
 
@@ -624,10 +626,12 @@ var noledger = new Vue({
                                         if (!(from in this.contacts)) {                                         // initialize new contact if it doesn't exist
                                             let wrapper = document.getElementById('contacts-wrapper');
                                             await this.initContact(from);
+                                            console.log(5)
                                             await this.loadNewContactThread(wrapper, from);                     // add a new chat in contacts page
+                                            console.log(6)
                                         } 
 
-                                        if (check2 == this.contacts[from].check) {                             // if user-specific check string is correct (2. Factor) 
+                                        if (check2 == this.contacts[from].check) {      
                                             let internal = {                                                    // append new internal message
                                                 time: new Date().getTime(),
                                                 type: 'from',
