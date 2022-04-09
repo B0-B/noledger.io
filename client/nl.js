@@ -1165,7 +1165,6 @@ var noledger = new Vue({
                             
                             // overwrite encrypted entry with decrypted one
                             pkgDecrypted[key] = entryDecrypted; 
-                            //console.log(key, 'pkg', pkgEncrypted[key])
                         }
 
                         console.log('finished pkg decryption', pkgDecrypted)
@@ -1174,7 +1173,8 @@ var noledger = new Vue({
                         // prepare all parameters to restore account
                         console.log('test 0')
                         console.log('key parsed', JSON.parse(pkgDecrypted.pub))
-                        const contacts = pkgDecrypted.contacts.split('/////'); // convert string back to array of addresses
+                        let contacts = pkgDecrypted.contacts.split('/////'); // convert string back to array of addresses
+                        contacts = contacts.slice(0, contacts.length-1);
                         const pub = await noledger.keyImport(JSON.parse(pkgDecrypted.pub).n, ['encrypt']);
                         console.log('test 1')
                         //const priv = await noledger.keyImport(JSON.parse(pkgDecrypted.priv).n, ['decrypt']);
@@ -1197,16 +1197,22 @@ var noledger = new Vue({
                             privateKey: priv
                         }
                         
-                        // since the keyPair is restored and embedded try to load the contacts page
-                        await noledger.loadContactsPage();
-                        console.log('test 2')
-                        // restore contacts
+                        
+
+                        //  restore contacts
                         const contactWrapper = document.getElementById('contacts-wrapper');
                         for (let contact of contacts) {
-                            await noledger.initContact(contact);
-                            await noledger.loadNewContactButton(contact, contactWrapper)
+                            if (contact != '') {
+                                await noledger.initContact(contact);
+                        //         await noledger.loadNewContactButton(contact, contactWrapper)
+                            }
                         }
-                        console.log('test 3')
+
+                        // since the keyPair is restored and embedded try to load the contacts page
+                        let wrapper = document.getElementById('wrapper');               // flush wrapper content
+                        wrapper.innerHTML = "";
+                        await noledger.loadContactsPage();
+
                         // remove legacies
                         delete pkgDecrypted;
                         delete priv;
