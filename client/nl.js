@@ -240,7 +240,8 @@ var noledger = new Vue({
             dots.onmousedown = function () {
                 this.style.color = 'aquamarine';
             }
-                // listen to simulated outside focus events
+
+            // listen to simulated outside focus events
             document.addEventListener('click', function(e){   
                 if (document.contains(e.target) && !dots.contains(e.target) ){
                     dots.style.color = '#ddd';
@@ -976,6 +977,9 @@ var noledger = new Vue({
                 message: string
                 callback: function
                 hidden: boolean | For hiding passwords
+                buttonLabel: string | String displayed in Button
+                submitMessage: string | Message displayed on successful submit
+                errorMessage: string | Message displayed when submit fails
             */
 
             // build notify box
@@ -1000,7 +1004,29 @@ var noledger = new Vue({
             const inputField = document.getElementById('notify-input-field');
             const button = document.getElementById('notify-submit-button');
             button.innerHTML = buttonLabel;
+
+            // focus the inputField from the beginning
             inputField.focus();
+
+
+            // focus out on outside click
+            document.addEventListener('click', async function(e){   
+                if (document.contains(e.target) && !span.contains(e.target) ){
+                    span.classList.remove("notify-box-transparent");
+                    await noledger.sleep(1);
+                    span.remove();
+                }
+            });
+
+            // add enter button listener for submission
+            inputField.onkeydown = async function (e) {
+                e = e || window.event;
+                switch (e.keyCode) {
+                    case 13 : 
+                        // Code for enter input
+                        button.click()
+                }
+            }
 
             // add the callback to the button
             button.onmousedown = async function () {
