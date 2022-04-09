@@ -2,17 +2,17 @@
 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20secure%20and%20anonymous%20messaging%20service%20based%20on%20a%20public%20ledger%20protocol.&url=https://github.com/B0-B/noledger.io&hashtags=noledger,secure,ledger,messenger)
 
-A secure and anonymous messaging service based on a public ledger protocol. Clients connect through Diffie-Hellman key exchange and messages are broadcasted publicly in a central ledger (ciphered) and are requested by every client which synchronizes with the ledger, but can be decrypted only by those who own a private key which corresponds to their address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. 
+A secure and anonymous messaging service based on a public ledger protocol. Clients connect through Diffie-Hellman key exchange and broadcast their messages publicly in a central ledger (ciphered) which is subsequently requested by every client that synchronizes with the ledger, but can be decrypted only locally by those who own a private key which is associated to the address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. Users do not have to raise any concerns towards the service host, even if it is corrupt. 
 
 Read the full [article](https://github.com/B0-B/noledger/blob/main/docs/core/paper.md).
 
 ## Features
 noledger.io is the only messaging service which
 
-- is completely free, liberal and avoids any KYC
-- stores messages on a time-limited public ledger but respects integrity, authenticity and absolute anonimity
-- prohibits the tracing of connections, routes or meta data by design and with mathematical/informational certainty 
-- can always be trusted, even if the service is corrupt
+- 🤲🏽 is completely free, liberal and avoids any KYC
+- 📜 stores messages on a time-limited public ledger but respects integrity, authenticity and absolute anonimity through distributional entropy
+- 🕵🏽‍♂️ prohibits the tracing of connections, routes or meta data by design and with mathematical/informational certainty 
+- 🔐 can always be trusted if the client-side protocol is obeyed, even if the service is corrupt
 
 ---
 
@@ -32,7 +32,7 @@ The table below is a collection of publicly known security incidents (headlines 
 ## [Core Protocol Development](https://github.com/B0-B/noledger/blob/main/docs/development/development.md)
 | Function | Description | Status | Protocol Version | 
 |---|---|---|---|
-| Image Transfer | Secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 |
+| Secure File Relay | A secure way to exchange files using the messenger. | Pending | v-1.1.0 |
 | Long-term Accounts | A function which enables clients to download/save their whole account encrypted in a file and can be reconstructed in any browser. | Stable | v-1.1.0 |
 | Specific Check String | A second, contact specific check string for authenticity proof. | Stable | v-1.0.0 |
 | Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Stable | v-1.0.0 | 
