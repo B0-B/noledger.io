@@ -1,6 +1,11 @@
 {
   "name": "noledger.io",
-  "version": "1.0.0",
+  "version": "1.1.0",
+  "notes": [
+    "Added release script in release/ directory",
+    "Added version badge to readme",
+    "Fully implemented account saving and loading for long-term usage"
+  ],
   "description": "",
   "main": "nl.js",
   "scripts": {
