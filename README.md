@@ -43,6 +43,10 @@ The table below is a collection of publicly known security incidents (headlines 
 <br>
 
 ## Patch Notes
+| Release | Patch Notes|
+|---|---|
+|1.1.0| - Fixed generate AES key issue - Receivers were not decrypting correctly after AES key exchange <br> - Fully implemented account saving and loading for long-term usage <br> - Improved UI interactivity <br> - Added release script in release/ directory <br> - Added version badge to README.md |
+
 
 <br>
 
