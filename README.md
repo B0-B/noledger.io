@@ -8,7 +8,7 @@ A secure and anonymous messaging service based on a public ledger protocol. Clie
 
 Read the full [article](https://github.com/B0-B/noledger.io/blob/main/docs/core/paper.md).
 
-### Checkout the deployed service at [noledger.cc](https://noledger.cc/)
+### Check out the deployed service at [noledger.cc](https://noledger.cc/)
 
 <br>
 
