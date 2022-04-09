@@ -850,7 +850,6 @@ var noledger = new Vue({
             this.encryption.aes.currentAESkey = null;
 
             
-            
         },
         loadEmoji: async function (string) {
             this.writeInput(string);
@@ -1167,17 +1166,10 @@ var noledger = new Vue({
                             pkgDecrypted[key] = entryDecrypted; 
                         }
 
-                        console.log('finished pkg decryption', pkgDecrypted)
-
-
                         // prepare all parameters to restore account
-                        console.log('test 0')
-                        console.log('key parsed', JSON.parse(pkgDecrypted.pub))
                         let contacts = pkgDecrypted.contacts.split('/////'); // convert string back to array of addresses
                         contacts = contacts.slice(0, contacts.length-1);
                         const pub = await noledger.keyImport(JSON.parse(pkgDecrypted.pub).n, ['encrypt']);
-                        console.log('test 1')
-                        //const priv = await noledger.keyImport(JSON.parse(pkgDecrypted.priv).n, ['decrypt']);
                         const priv = await crypto.subtle.importKey(
                             "jwk",
                             JSON.parse(pkgDecrypted.priv),
@@ -1186,7 +1178,6 @@ var noledger = new Vue({
                             ["decrypt"]
                         );
                         const id = pkgDecrypted.id;
-                        console.log('test 1')
 
                         // restore the last observed ledger id
                         noledger.id = id;
@@ -1196,19 +1187,17 @@ var noledger = new Vue({
                             publicKey: pub,
                             privateKey: priv
                         }
-                        
-                        
 
                         //  restore contacts
                         const contactWrapper = document.getElementById('contacts-wrapper');
                         for (let contact of contacts) {
                             if (contact != '') {
                                 await noledger.initContact(contact);
-                        //         await noledger.loadNewContactButton(contact, contactWrapper)
                             }
                         }
 
-                        // since the keyPair is restored and embedded try to load the contacts page
+                        // since contacts were initialized and keypair is imported
+                        // try to load contacts page
                         let wrapper = document.getElementById('wrapper');               // flush wrapper content
                         wrapper.innerHTML = "";
                         await noledger.loadContactsPage();
@@ -1219,8 +1208,7 @@ var noledger = new Vue({
                         delete pub;
                         
                     } catch (error) {
-                        console.log('Error during decryption:', error)
-                        info = "error during decryption."
+                        console.log('Error during restoring:', error)
                     }
                 },
                 true,
