@@ -626,9 +626,7 @@ var noledger = new Vue({
                                         if (!(from in this.contacts)) {                                         // initialize new contact if it doesn't exist
                                             let wrapper = document.getElementById('contacts-wrapper');
                                             await this.initContact(from);
-                                            console.log(5)
-                                            await this.loadNewContactThread(wrapper, from);                     // add a new chat in contacts page
-                                            console.log(6)
+                                            await this.loadNewContactThread(wrapper, from);
                                         } 
 
                                         if (check2 == this.contacts[from].check) {      
@@ -1179,7 +1177,14 @@ var noledger = new Vue({
                         const contacts = pkgDecrypted.contacts.split('/////'); // convert string back to array of addresses
                         const pub = await noledger.keyImport(JSON.parse(pkgDecrypted.pub).n, ['encrypt']);
                         console.log('test 1')
-                        const priv = await noledger.keyImport(JSON.parse(pkgDecrypted.priv).n, ['decrypt']);
+                        //const priv = await noledger.keyImport(JSON.parse(pkgDecrypted.priv).n, ['decrypt']);
+                        const priv = await crypto.subtle.importKey(
+                            "jwk",
+                            JSON.parse(pkgDecrypted.priv),
+                            this.encryption.algorithm,
+                            true,
+                            ["decrypt"]
+                        );
                         const id = pkgDecrypted.id;
                         console.log('test 1')
 
