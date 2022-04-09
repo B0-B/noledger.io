@@ -33,7 +33,7 @@ The table below is a collection of publicly known security incidents (headlines 
 | Function | Description | Status | Protocol Version | 
 |---|---|---|---|
 | Image Transfer | Secure image exchange ability using RGB reconstruction to avoid original meta data leakage. | Pending | v-1.1.0 |
-| Long-term Accounts | A function which enables clients to download/save their whole account encrypted in a file and can be reconstructed in any browser. | Pending | v-1.1.0 |
+| Long-term Accounts | A function which enables clients to download/save their whole account encrypted in a file and can be reconstructed in any browser. | Stable | v-1.1.0 |
 | Specific Check String | A second, contact specific check string for authenticity proof. | Stable | v-1.0.0 |
 | Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Stable | v-1.0.0 | 
 | Base Protocol | A secure and anonymous ledger-based messaging protocol.  | Stable | v-1.0.0 |

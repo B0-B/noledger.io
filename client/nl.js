@@ -401,9 +401,12 @@ var noledger = new Vue({
 
         },
         entryExpand: async function () {
+
             /* 
             Expands the message input in chat window on focus.
+            This seemingly gives the user more space to write.
             */
+
             // document.getElementById("entryFrame").classList.remove('slide-height-collapsed');
             // document.getElementById("entryFrame").classList.add('slide-height-expanded');
             document.getElementById("entryInput").classList.remove('slide-height-collapsed');
@@ -965,7 +968,7 @@ var noledger = new Vue({
             await this.sleep(1);
             span.remove();
         },
-        notifyReadAndCallback: async function (message, callback, hidden=false, buttonLabel="submit", submitMessage="") {
+        notifyReadAndCallback: async function (message, callback, hidden=false, buttonLabel="submit", submitMessage="", errorMessage="") {
             
             /*
             A function which notifies and parses an input which is 
@@ -994,7 +997,7 @@ var noledger = new Vue({
             }
             span.innerHTML += '<button id="notify-submit-button"></button>'
             await this.sleep(.05); // give DOM 50ms time to parse new children
-            const inputField = document.getElementById('notify-input-field');
+            const inputField = document.getElementById('notify-message');
             const button = document.getElementById('notify-submit-button');
             button.innerHTML = buttonLabel;
             inputField.focus();
@@ -1002,15 +1005,25 @@ var noledger = new Vue({
             // add the callback to the button
             button.onmousedown = async function () {
                 //console.log('inputField test', document.getElementById('notify-input-field').value)
-                
-                callback(inputField.value);
-                if (submitMessage.length != 0) {
-                    document.getElementById("notify-input-field").innerHTML = submitMessage;
-                    await noledger.sleep(2);
+                try {
+                    callback(inputField.value);
+                    if (submitMessage.length != 0) {
+                        document.getElementById("notify-message").innerHTML = submitMessage;
+                        await noledger.sleep(2);
+                    }
+                } catch(e) {
+                    if (errorMessage.length != 0) {
+                        document.getElementById("notify-message").innerHTML = errorMessage;
+                        await noledger.sleep(2);
+                    } else {
+                        document.getElementById("notify-message").innerHTML = "Error";
+                    }
+                } finally {
+                    span.classList.remove("notify-box-transparent");
+                    await noledger.sleep(1);
+                    span.remove();
                 }
-                span.classList.remove("notify-box-transparent");
-                await noledger.sleep(1);
-                span.remove();
+
             }
             
         },
@@ -1149,7 +1162,7 @@ var noledger = new Vue({
             this.notifyReadAndCallback(
                 "Enter password to decrypt account:",
                 async (pwd) => {
-                    
+                    console.log('pwd',pwd)
                     try {
                         
                         // reconstruct the AES key
