@@ -35,6 +35,8 @@ for (let note of pkg.notes) {
 // display all patch notes
 console.log('\033[0;36m-------- Patch Notes --------\033[0m\n');
 console.log(notes);
+
+// display all changes
 console.log('\033[0;36m-------- Differences --------\033[0m\n');
 exec(` 
     git diff dev..main  
@@ -73,7 +75,7 @@ setTimeout(async () => {
             cd ${__dirname}/../ && 
             git add . && 
             git commit -m 'release cleanu-up ${pkg.version}' &&
-            git merge ${mergeBranch}    
+            git merge ${mergeBranch} -m ${notes} 
         `,
         (e, stdout, stderr) => {
             if (e) {
@@ -94,7 +96,7 @@ setTimeout(async () => {
                 newVersion = vArray.slice(0,2).join('.') + `.${newSubVersion}`;
                 p.version = newVersion;
                 
-                // overwrite notes
+                // remove patch notes
                 p.notes = [];
 
                 // override JSON file
