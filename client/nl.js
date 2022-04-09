@@ -606,6 +606,7 @@ var noledger = new Vue({
 
                         for (let pkg of collection) {                                                           // iterate through packages in returned collection
                             if (pkg) {
+                                console.log('New package')
                                 try {
                                     console.log(0)
                                     let check_decrypted;                                                        // try to decrypt the check
@@ -618,6 +619,7 @@ var noledger = new Vue({
                                     }
 
                                     if (check_decrypted == this.checkString) {                                  // on success (1. Factor)
+                                        console.log('Factor 1')
                                         console.log(3)
                                         let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
                                         let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
@@ -633,7 +635,8 @@ var noledger = new Vue({
                                             await this.loadNewContactThread(wrapper, from);
                                         } 
 
-                                        if (check2 == this.contacts[from].check) {      
+                                        if (check2 == this.contacts[from].check) {   
+                                            console.log('Factor 2')   
                                             let internal = {                                                    // append new internal message
                                                 time: new Date().getTime(),
                                                 type: 'from',
@@ -1243,6 +1246,10 @@ var noledger = new Vue({
                         let wrapper = document.getElementById('wrapper');               // flush wrapper content
                         wrapper.innerHTML = "";
                         await noledger.loadContactsPage();
+
+                        // initialize all hooks
+                        noledger.initCleanerHook();                                     // start cleaner once the account is available
+                        noledger.initLedgerHook();                                      // start the ledger reading
 
                         // remove legacies
                         delete pkgDecrypted;
