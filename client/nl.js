@@ -1008,7 +1008,6 @@ var noledger = new Vue({
             // focus the inputField from the beginning
             inputField.focus();
 
-
             // focus out on outside click
             document.addEventListener('click', async function(e){   
                 if (document.contains(e.target) && !span.contains(e.target) ){
@@ -1030,19 +1029,23 @@ var noledger = new Vue({
 
             // add the callback to the button
             button.onmousedown = async function () {
-                //console.log('inputField test', document.getElementById('notify-input-field').value)
+                
+                const msgObj = document.getElementById("notify-message")
+                msgObj.innerHTML = 'restoring account ...';
+                await noledger.sleep(.5);
+
                 try {
                     callback(inputField.value);
                     if (submitMessage.length != 0) {
-                        document.getElementById("notify-message").innerHTML = submitMessage;
+                        msgObj.innerHTML = submitMessage;
                         await noledger.sleep(2);
                     }
                 } catch(e) {
                     if (errorMessage.length != 0) {
-                        document.getElementById("notify-message").innerHTML = errorMessage;
+                        msgObj.innerHTML = errorMessage;
                         await noledger.sleep(2);
                     } else {
-                        document.getElementById("notify-message").innerHTML = "Error";
+                        msgObj.innerHTML = "Error";
                     }
                 } finally {
                     span.classList.remove("notify-box-transparent");
