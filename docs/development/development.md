@@ -1,6 +1,6 @@
 # Protocol Proposals and Development
-
-<h2><strong>Client-Specific Check String</strong></h2>
+# 1.1.0
+<h2><strong>Client-Specific Check String</strong> [stable]</h2>
 First attempts to create authenticity involved elliptic curve signatures which would enable every client to sign each message. The receiver at the other end, who posseses the senders public key is able to determine if the sender is in posession of the private key.
 
 The upper method is very often used in most of the web-encrypted communication however it poses a threat but also does not solve the problem of real authenticity since:
@@ -12,7 +12,8 @@ A much simpler and original solution is the sharing of relation-specific informa
 The header check string is used to test the decryptability of a package, but the same mechanism can be used as a second factor for authenticity checks or to block spam. For this two participants that share a secret (word, number, etc.) can send it encrypted with the entry to the ledger. Messages (entries) which are downloaded from the ledger might be decryptable and show the correct receiver address, but in order to authenticate must also yield the client specific check string, otherwise the entry will be discarded. Spam attacks could be filtered, but also this second check string can be invoked to block a conversation i.e. changing the client-specific check string without letting anyone know. The spec. check string is by default initialized in the same way as the default header check string. Two client can be reached by another client if his address is known and their client-specific check strings match.
 <br><br>
 
-<h2><strong>Random Padding</strong></h2>
+# 1.0.0
+<h2><strong>Random Padding</strong> [stable]</h2>
 If the check string or the senders address is encrypted with the same public key it would yield the same cipher every time (since the payloads are constant) which allows classifying messages to groups that originated from unknown addresses. To overcome this and to add another pbfuscation layer, a padding is added at the end of each payload. For this the usual encrypt/decrypt functions are modified such that
 
 for encryption
@@ -29,7 +30,7 @@ and for decryption
 The modified functions should be used for all encryption/decryption processes.
 <br><br>
 
-<h2><strong>Base Protocol</strong></h2>
+<h2><strong>Base Protocol</strong> [stable]</h2>
 
 A secure and anonymous ledger-based messaging protocol. 
 
