@@ -6,7 +6,7 @@
 
 A secure and anonymous messaging service based on a public ledger protocol. Clients connect through Diffie-Hellman key exchange and broadcast their messages publicly in a central ledger (ciphered) which is subsequently requested by every client that synchronizes with the ledger, but can be decrypted only locally by those who own a private key which is associated to the address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. Users do not have to raise any concerns towards the service host, even if it is corrupt. 
 
-Read the full [article](https://github.com/B0-B/noledger/main/docs/core/paper.md).
+Read the full [article](https://github.com/B0-B/noledger.io/blob/main/docs/core/paper.md).
 
 ### Checkout the deployed service at [noledger.cc](https://noledger.cc/)
 
@@ -35,7 +35,7 @@ The table below is a collection of publicly known security incidents (headlines 
 
 <br>
 
-## [Core Protocol Development](https://github.com/B0-B/noledger/blob/main/docs/development/development.md)
+## [Core Protocol Development](https://github.com/B0-B/noledger.io/blob/main/docs/development/development.md)
 | Function | Description | Status | Protocol Version | 
 |---|---|---|---|
 | Secure File Relay | A secure way to exchange files using the messenger. | Pending | v-1.2.0 |
