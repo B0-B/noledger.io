@@ -1,4 +1,16 @@
 # Protocol Proposals and Development
+# 1.1.1
+<h2><strong>Grouping</strong> [pending]</h2>
+Bit message est. at 2012 has already shown that grouping the clients into "streams" would releaf the clients from high network traffic. DDoS quickly reveals to be the downside of the protocol, but can be enhanced through further decentralization of service (split the traffic) or computational infeasability.
+
+To avoid unnecessary load balance of groups users cannot chose the group by themselves, but instead will be automatically drawn from the generated address.
+The number of groups can be varied by this approach:
+1. Find the first digit in the address -> 10 bins
+2. Find the first letter in the address -> 26 bins
+3. Upper and lower case -> 52 bins
+
+and so on. So if a message is packaged for the ledger submit it will be tagged with the group label that is associated to the receiver address. For instance an address which starts with "5Oq_eBqku.." will be automatically assiged to group 5 if we follow the consensus in 1. This way of choice makes sure that all clients will be distributed uniformly (by the weak law of large numbers) across all groups. The traffic needed to be decrypted shrinks by a factor of `1/g` where `g` is the number of bins. 
+
 # 1.1.0
 <h2><strong>Client-Specific Check String</strong> [stable]</h2>
 First attempts to create authenticity involved elliptic curve signatures which would enable every client to sign each message. The receiver at the other end, who posseses the senders public key is able to determine if the sender is in posession of the private key.
