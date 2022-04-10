@@ -1,15 +1,22 @@
 # Protocol Proposals and Development
 # 1.1.1
 <h2><strong>Grouping</strong> [pending]</h2>
-Bit message est. at 2012 has already shown that grouping the clients into "streams" would releaf the clients from high network traffic. DDoS quickly reveals to be the downside of the protocol, but can be enhanced through further decentralization of service (split the traffic) or computational infeasability.
+[Bitmessage](https://wiki.bitmessage.org/) (est. 2012) has already shown that grouping the clients into "streams" would releaf the clients from high network traffic. DDoS quickly appears to be the downside of the protocol, but can be enhanced through further decentralization of service (split the traffic) or computational infeasability - or in this case - grouping.
 
-To avoid unnecessary load balance of groups users cannot chose the group by themselves, but instead will be automatically drawn from the generated address.
-The number of groups can be varied by this approach:
+To avoid unnecessary load balances of groups users cannot chose the group by themselves. It could lead to non-uniform accumulations of clients, instead the group id will be automatically drawn from the generated address or public key.
+The number of groups can be varied by choice of bins allowed by the mechanism:
 1. Find the first digit in the address -> 10 bins
 2. Find the first letter in the address -> 26 bins
 3. Upper and lower case -> 52 bins
 
-and so on. So if a message is packaged for the ledger submit it will be tagged with the group label that is associated to the receiver address. For instance an address which starts with "5Oq_eBqku.." will be automatically assiged to group 5 if we follow the consensus in 1. This way of choice makes sure that all clients will be distributed uniformly (by the weak law of large numbers) across all groups. The traffic needed to be decrypted shrinks by a factor of `1/g` where `g` is the number of bins. 
+and so on. All users would have to obey the consensus, since the construction of the group id while sending messages is crucial to reach the receiver.
+
+So if a message is locally packaged for the submit it will be tagged with the group label that is associated to the receiver address. For instance an address which starts with "5Oq_eBqku.." will be automatically assiged to group 5 if we follow the consensus in 1. This way of choice makes sure that all clients will be distributed uniformly (by the weak law of large numbers) across all groups. The traffic needed to be decrypted shrinks by a factor of `1/g` where `g` is the number of bins. 
+
+An appropriate choice of the base would depend on the current traffic. If there is a traffic load limit `l = const.` in units of bytes/s for each user and `L` the current network traffic i.e. data rate streamed to the ledger then `g ≥ L/l` where `L/l` represents the lower bound. On average every user of any of the `g` groups would receive a traffic smaller or equal to `l`. The total data size received by the same users is obtained by multiplying `l` with the time frame considered (usually 1s).
+
+The derivation of the total traffic obeys the same scaling as [Metcalfe's law](https://en.wikipedia.org/wiki/Metcalfe%27s_law) as the more users enter the network the more contacts one client will exchange messages with (prop.) which will scale his overall usage proportionally to `n²` ([triangular number](https://en.wikipedia.org/wiki/Triangular_number) whose linear term vanishes in large limit), `n` is the number of active clients. This can also be understood as the number of possible pings between n nodes in an enclosed network.
+Alternatively, this law can be derived from a more specific perspective. n active users may have on average `z` contacts they communicate to. For each contact they on average may exchange `m` messages each of mean size `s` (in Bytes). Then the total size send to the ledger equals the stream `L = z•m•s•n` and the mean stream/user can be condensed to `<L/m> = z•m•s` since z, m and s are all meaned.
 
 # 1.1.0
 <h2><strong>Client-Specific Check String</strong> [stable]</h2>
