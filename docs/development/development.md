@@ -1,6 +1,6 @@
 # Protocol Proposals and Development
 # 1.1.1
-<h2><strong>Grouping</strong> [pending]</h2>
+<h2><strong>Adaptive Grouping</strong> [pending]</h2>
 
 [Bitmessage](https://wiki.bitmessage.org/) (est. 2012) has already shown that grouping the clients into "streams" would releaf the clients from high network traffic. DDoS quickly appears to be the downside of the protocol, but can be enhanced through further decentralization of service (split the traffic) or computational infeasability - or in this case by grouping.
 
@@ -40,7 +40,7 @@ Finally we get
 1. If a client connects to read or write he will get the current mechanism from the server
 2. To send a messages clients needs to determine the group ID given the receivers address and the current mechanism received in 5. The first HEX compliant number of the receiver address will then fix his group ID.
 3. The package send to the server needs to contain the ID in plain text.
-4. All active clients need to append, next to the ledger id, their own group ID (determined analogous to 6. with own address) to the ledger reading request. The node will then gather only entries for the response which show the same group ID
+4. To read messages all active clients need to append, next to the ledger id, their own group ID (determined analogous to 6. with own address) to the ledger reading request. The node will then gather only entries for the response which show the same group ID
 
 
 <br>

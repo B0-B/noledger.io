@@ -39,7 +39,7 @@ The table below is a collection of publicly known security incidents (headlines 
 | Function | Description | Status | Protocol Version | 
 |---|---|---|---|
 | Secure File Relay | A secure way to exchange files using the messenger. | Pending | v-1.2.0 |
-| Grouping | Automatic mechanism to relief clients from high traffic. | Pending |v-1.1.1 |
+| Adaptive Grouping | Automatic mechanism to relief clients from high traffic. | Pending |v-1.1.1 |
 | Long-term Accounts | A function which enables clients to download/save their whole account encrypted in a file and can be reconstructed on any device. | Stable | v-1.1.0 |
 | Specific Check String | A second, contact specific check string for authenticity proof. | Stable | v-1.0.0 |
 | Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Stable | v-1.0.0 | 
