@@ -2,7 +2,7 @@
 # 1.1.1
 <h2><strong>Adaptive Grouping</strong> [pending]</h2>
 
-[Bitmessage](https://wiki.bitmessage.org/) (est. 2012) has already shown that grouping the clients into "streams" would releaf the clients from high network traffic. DDoS quickly appears to be the downside of the protocol, but can be enhanced through further decentralization of service (split the traffic) or computational infeasability - or in this case by grouping.
+[Bitmessage](https://wiki.bitmessage.org/) (est. 2012) has already shown that grouping the clients into "streams" would releaf their traffic. DDoS quickly appears to be the downside of the protocol, since an attacker could submit junk data to the ledger which needs to be downloaded by every client to determine the integrity. But the protocol can be enhanced through further decentralization of service (split the traffic) or computational infeasability - or in this case by grouping.
 
 To avoid unnecessary load balances of groups users cannot chose the group by themselves. It could lead to non-uniform accumulations of clients. Instead the group id will be automatically drawn from the generated address or public key to ensure the uniformity drawn from the unpredictability of the hash function.
 The number of groups can be varied by choice of bins allowed by the mechanism:
@@ -30,11 +30,12 @@ Finally we get
 | `g ≥ L/l` |
 
 ### Server-side Process
-1. The node estimates `L`
+1. The node estimates `L` by counting the size of the ledger in Bytes and deviding by the the timestamp difference (in seconds) between last and first entry.
 2. When `L` is determined, the node computes the lower bound `L/l`
 3. determine the needed base `g = L/l`
-4. If the current grouping mechanism supports this base go to 1. Otherwise continue with 4.
+4. If the current grouping mechanism supports this base go to 1. Otherwise continue with 5.
 5. Choose a grouping mechanism 1., 2., 3., 4., ... which supports the needed base `g`. For g = 11 one might choose a HEX system for grouping since 16 > 11 thus fulfills the group bin condition.
+6. Go to 1.
 
 ### Client-side Process
 1. If a client connects to read or write he will get the current mechanism from the server
