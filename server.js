@@ -6,14 +6,23 @@ const firewall = require('./modules/firewall.js')
 const bodyParser = require('body-parser'); 
 const { exec } = require('child_process');
 
+
 var node = function () {
+
+    /* Main noledger node object */
+
     this.dir = path.join(__dirname, '/');
-    this.id_high = 0;
+    
+    this.id_high = 0;                                   // track current ID
     this.id_low = 0;
-    this.ledger = {};
-    this.lifetime = 60; // in minutes
-    this.port = null;
-    this.server = this.build();
+    
+    this.ledger = {};                                   // initialize ledger object
+
+    this.lifetime = 60;                                 // message lifetime in the ledger in minutes
+    this.port = null;                                   // port on which to start the node (is provided by run() method)
+    
+    this.server = this.build();                         // build the express server                         
+
 }
 
 node.prototype.build = function () {

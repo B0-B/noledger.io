@@ -36,6 +36,13 @@ async function testBuffer () {
     console.log('key', _key)
     console.log('output', await noledger.decrypt(str2buf(JSON.parse(JSON.stringify({x:buf2str(await noledger.encrypt('hello world !', _key))})).x) ))
 } 
+
+function b64Index(char) {
+    /* Returns the Base64 char index from RFC 4648 table */
+    let b64Table = "ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789+/";
+    if (!b64Table.contains(char)) { throw Error(`"${char}" is not a base 64 character.`)}
+    return b64Table.indexOf(char)
+}
 /* ---------------------------- */
 
 
@@ -130,6 +137,7 @@ var noledger = new Vue({
             hash: 'SHA-256'
         },
         fileSource: null,
+        groupBins: 1,
         id: 0,
         keyPair: {},
         lifetime: '1 Hour',
@@ -464,6 +472,175 @@ var noledger = new Vue({
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
             return pub.n;
+        },
+        getGroupIdFromAddress: async function (address) {
+
+            /* Determines the current GroupId from the group bins and address */
+            
+            // draw the latest observed bins from server
+            const bins = this.groupBins;
+            
+            /* ---- Mechanism Switcher ---- */
+            if (bins == 1) {
+                // 1 group is the default setting, so all users will be assigned to lowest group "0"
+                return 0
+            } else if (bins == 4) {
+                // base 4 is established by 2 bits determined from first two digits 
+                // obtained from address (when read from left to right). Determine if the
+                // integer is odd then bit = 0; otherwise 1.
+                let bit1 = null;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (!isNaN(char)) {
+                        let b = 0;
+                        if (n % 2 == 0) { b = 0 } 
+                        else { b = 1 }
+                        if (!bit1) { bit1 = b}
+                        else {
+                            return parseInt(bit1+b, 2)
+                        }
+                    } 
+                }
+            } else if (bins == 16) {
+                // base 16 mechanism scans for the first HEX-conform number in the address
+                const re = /[0-9A-Fa-f]{6}/g;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (re.test(char)) {
+                        return parseInt(char, 16)
+                    } 
+                    // reset index after using test()
+                    re.lastIndex = 0;
+                }
+            } else if (bins == 26) {
+                // base 26 considers finding the first alphabetic letter
+                const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i].toLowerCase();
+                    if (char.match(/[a-z]/i)) {
+                        return alphabet.indexOf(char)
+                    }
+                }
+            } else if (bins == 64) {
+                // base 64 uses b64 conform characters to get the group id from 0-63
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i];
+                    try {
+                        return b64Index(char)
+                    } catch (error) {
+                        //
+                    }
+                }
+            } else if (bins == 128) {
+
+                // base 128 will use base 64 combined with a random binary query e.g. 
+                // wether the first digit is odd or even that will yield a factor 1 or 2
+                // which is multiplied with the b64 result.
+
+                let factor = null;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (!isNaN(char)) {
+                        if (n % 2 == 0) { factor = 1 } 
+                        else { factor = 2 }
+                        break
+                    } 
+                }
+                // determine b64 number multiplied with determined factor
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i];
+                    try {
+                        return b64Index(char)*factor
+                    } catch (error) {
+                        //
+                    }
+                }
+            } else if (bins == 256) {
+                
+                // base 256 is analogous to base 128 but with 2 combined base 16 HEX numbers
+
+                let n1=null;
+                const re = /[0-9A-Fa-f]{6}/g;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (re.test(char)) { // check if hex number
+                        if (!n1) {
+                            n1 = parseInt(char, 16)
+                        } else {
+                            return n1*parseInt(char, 16)
+                        }
+                    } 
+                    // reset index after using test()
+                    re.lastIndex = 0;
+                }
+
+            } else if (bins == 512) {
+
+                // base 512 uses base 256 number combined with a binary query
+
+                let factor = null;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (!isNaN(char)) {
+                        if (n % 2 == 0) { factor = 1 } 
+                        else { factor = 2 }
+                        break
+                    } 
+                }
+
+                let n1=null;
+                const re = /[0-9A-Fa-f]{6}/g;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (re.test(char)) { // check if hex number
+                        if (!n1) {
+                            n1 = parseInt(char, 16)
+                        } else {
+                            return n1*parseInt(char, 16)*factor
+                        }
+                    } 
+                    // reset index after using test()
+                    re.lastIndex = 0;
+                }
+
+            } else if (bins == 1024) {
+
+                // base 1024 is build like base 512 but with two bits
+
+                let factor = 1;
+                let bit1 = null;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (!isNaN(char)) {
+                        let b = 0;
+                        if (n % 2 == 0) { b = 0 } 
+                        else { b = 1 }
+                        if (!bit1) { bit1 = b}
+                        else {
+                            factor = parseInt(bit1+b, 2)
+                        }
+                    } 
+                }
+
+                let n1=null;
+                const re = /[0-9A-Fa-f]{6}/g;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (re.test(char)) { // check if hex number
+                        if (!n1) {
+                            n1 = parseInt(char, 16)
+                        } else {
+                            return n1*parseInt(char, 16)*factor
+                        }
+                    } 
+                    // reset index after using test()
+                    re.lastIndex = 0;
+                }
+
+            } else {
+                throw Error(`base ${bins} exceeds maximum of 1024.`)
+            }
+
         },
         initCleanerHook: async function () {
             /* A loop which deletes expired messages */
