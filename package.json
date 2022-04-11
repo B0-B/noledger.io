@@ -2,11 +2,7 @@
   "name": "noledger.io",
   "version": "1.1.1",
   "notes": [
-    "Fixed generate AES key issue - Receivers were not decrypting correctly after AES key exchange",
-    "Improved UI interactivity",
-    "Added release script in release/ directory",
-    "Added version badge to readme",
-    "Fully implemented account saving and loading for long-term usage"
+    "Added adaptive grouping mechanism server and client-side"
   ],
   "description": "",
   "main": "nl.js",

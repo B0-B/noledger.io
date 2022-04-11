@@ -2,7 +2,7 @@
 
 <!-- Badges -->
 <!-- twitter -->
-[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20secure%20and%20anonymous%20messaging%20service%20based%20on%20a%20public%20ledger%20protocol.&url=https://github.com/B0-B/noledger.io&hashtags=noledger,secure,ledger,messenger)<!-- version --><a name="stealth"><img src="https://img.shields.io/badge/Release%20-1.1.0-cyan.svg"/></a>
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20secure%20and%20anonymous%20messaging%20service%20based%20on%20a%20public%20ledger%20protocol.&url=https://github.com/B0-B/noledger.io&hashtags=noledger,secure,ledger,messenger)<!-- version --><a name="stealth"><img src="https://img.shields.io/badge/Release%20-1.1.1-cyan.svg"/></a>
 
 A secure and anonymous messaging service based on a public ledger protocol. Clients connect through Diffie-Hellman key exchange and broadcast their messages publicly in a central ledger (ciphered) which is subsequently requested by every client that synchronizes with the ledger, but can be decrypted only locally by those who own a private key which is associated to the address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. Users do not have to raise any concerns towards the service host, even if it is corrupt. 
 
@@ -50,6 +50,7 @@ The table below is a collection of publicly known security incidents (headlines 
 ## Patch Notes
 | Release | Patch Notes|
 |---|---|
+|1.1.1| - Added adaptive grouping mechanism server and client-side|
 |1.1.0| - Fixed generate AES key issue - Receivers were not decrypting correctly after AES key exchange <br> - Fully implemented account saving and loading for long-term usage <br> - Improved UI interactivity <br> - Added release script in release/ directory <br> - Added version badge to README.md |
 
 
