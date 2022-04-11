@@ -40,7 +40,7 @@ async function testBuffer () {
 function b64Index(char) {
     /* Returns the Base64 char index from RFC 4648 table */
     let b64Table = "ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789+/";
-    if (!b64Table.contains(char)) { throw Error(`"${char}" is not a base 64 character.`)}
+    if (!b64Table.includes(char)) { throw Error(`"${char}" is not a base 64 character.`)}
     return b64Table.indexOf(char)
 }
 /* ---------------------------- */
@@ -137,7 +137,10 @@ var noledger = new Vue({
             hash: 'SHA-256'
         },
         fileSource: null,
-        groupBins: 1,
+        grouping: {
+            bins: 1,
+            id: 0
+        },
         id: 0,
         keyPair: {},
         lifetime: '1 Hour',
@@ -251,7 +254,7 @@ var noledger = new Vue({
 
             // listen to simulated outside focus events
             document.addEventListener('click', function(e){   
-                if (document.contains(e.target) && !dots.contains(e.target) ){
+                if (document.includes(e.target) && !dots.includes(e.target) ){
                     dots.style.color = '#ddd';
                     menu.remove()
                 }
@@ -473,46 +476,55 @@ var noledger = new Vue({
             let pub = await this.keyExport(this.keyPair.publicKey);
             return pub.n;
         },
-        getGroupIdFromAddress: async function (address) {
+        getGroupIdFromAddress: async function (address, bins=null) {
 
             /* Determines the current GroupId from the group bins and address */
             
             // draw the latest observed bins from server
-            const bins = this.groupBins;
+            if (!bins) {
+                bins = this.grouping.bins;
+            }
             
             /* ---- Mechanism Switcher ---- */
             if (bins == 1) {
+
                 // 1 group is the default setting, so all users will be assigned to lowest group "0"
+
                 return 0
-            } else if (bins == 4) {
+
+            } else if (bins == 4) { // stable
+
                 // base 4 is established by 2 bits determined from first two digits 
                 // obtained from address (when read from left to right). Determine if the
                 // integer is odd then bit = 0; otherwise 1.
+
                 let bit1 = null;
                 for (let i = 0; i < address.length; i++) {
                     const char = parseInt(address[i]);
                     if (!isNaN(char)) {
                         let b = 0;
-                        if (n % 2 == 0) { b = 0 } 
+                        if (char % 2 == 0) { b = 0 } 
                         else { b = 1 }
                         if (!bit1) { bit1 = b}
                         else {
-                            return parseInt(bit1+b, 2)
+                            return parseInt(`${bit1}${b}`, 2)
                         }
                     } 
                 }
-            } else if (bins == 16) {
+
+            } else if (bins == 16) { // stable
+
                 // base 16 mechanism scans for the first HEX-conform number in the address
-                const re = /[0-9A-Fa-f]{6}/g;
+                const hex = '0123456789abcdef';
                 for (let i = 0; i < address.length; i++) {
-                    const char = parseInt(address[i]);
-                    if (re.test(char)) {
+                    const char = address[i].toLowerCase();
+                    if (hex.includes(char)) {
                         return parseInt(char, 16)
-                    } 
-                    // reset index after using test()
-                    re.lastIndex = 0;
+                    }
                 }
-            } else if (bins == 26) {
+
+            } else if (bins == 26) { // stable
+
                 // base 26 considers finding the first alphabetic letter
                 const alphabet = 'abcdefghijklmnopqrstuvwxyz';
                 for (let i = 0; i < address.length; i++) {
@@ -521,7 +533,9 @@ var noledger = new Vue({
                         return alphabet.indexOf(char)
                     }
                 }
-            } else if (bins == 64) {
+
+            } else if (bins == 64) { // stable
+
                 // base 64 uses b64 conform characters to get the group id from 0-63
                 for (let i = 0; i < address.length; i++) {
                     const char = address[i];
@@ -531,7 +545,8 @@ var noledger = new Vue({
                         //
                     }
                 }
-            } else if (bins == 128) {
+
+            } else if (bins == 128) { // stable
 
                 // base 128 will use base 64 combined with a random binary query e.g. 
                 // wether the first digit is odd or even that will yield a factor 1 or 2
@@ -541,11 +556,12 @@ var noledger = new Vue({
                 for (let i = 0; i < address.length; i++) {
                     const char = parseInt(address[i]);
                     if (!isNaN(char)) {
-                        if (n % 2 == 0) { factor = 1 } 
+                        if (char % 2 == 0) { factor = 1 } 
                         else { factor = 2 }
                         break
                     } 
                 }
+
                 // determine b64 number multiplied with determined factor
                 for (let i = 0; i < address.length; i++) {
                     const char = address[i];
@@ -555,26 +571,25 @@ var noledger = new Vue({
                         //
                     }
                 }
-            } else if (bins == 256) {
+
+            } else if (bins == 256) { // stable
                 
                 // base 256 is analogous to base 128 but with 2 combined base 16 HEX numbers
 
                 let n1=null;
-                const re = /[0-9A-Fa-f]{6}/g;
+                const hex = '0123456789abcdef'
                 for (let i = 0; i < address.length; i++) {
-                    const char = parseInt(address[i]);
-                    if (re.test(char)) { // check if hex number
+                    const char = address[i];
+                    if (hex.includes(char)) {
                         if (!n1) {
                             n1 = parseInt(char, 16)
                         } else {
-                            return n1*parseInt(char, 16)
+                            return n1 * parseInt(char, 16)
                         }
-                    } 
-                    // reset index after using test()
-                    re.lastIndex = 0;
+                    }
                 }
 
-            } else if (bins == 512) {
+            } else if (bins == 512) { // stable
 
                 // base 512 uses base 256 number combined with a binary query
 
@@ -582,25 +597,23 @@ var noledger = new Vue({
                 for (let i = 0; i < address.length; i++) {
                     const char = parseInt(address[i]);
                     if (!isNaN(char)) {
-                        if (n % 2 == 0) { factor = 1 } 
+                        if (char % 2 == 0) { factor = 1 } 
                         else { factor = 2 }
                         break
                     } 
                 }
 
                 let n1=null;
-                const re = /[0-9A-Fa-f]{6}/g;
+                const hex = '0123456789abcdef'
                 for (let i = 0; i < address.length; i++) {
-                    const char = parseInt(address[i]);
-                    if (re.test(char)) { // check if hex number
+                    const char = address[i];
+                    if (hex.includes(char)) {
                         if (!n1) {
                             n1 = parseInt(char, 16)
                         } else {
-                            return n1*parseInt(char, 16)*factor
+                            return n1 * parseInt(char, 16) * factor
                         }
-                    } 
-                    // reset index after using test()
-                    re.lastIndex = 0;
+                    }
                 }
 
             } else if (bins == 1024) {
@@ -613,28 +626,27 @@ var noledger = new Vue({
                     const char = parseInt(address[i]);
                     if (!isNaN(char)) {
                         let b = 0;
-                        if (n % 2 == 0) { b = 0 } 
+                        if (char % 2 == 0) { b = 0 } 
                         else { b = 1 }
                         if (!bit1) { bit1 = b}
                         else {
-                            factor = parseInt(bit1+b, 2)
+                            factor = parseInt(`${bit1}${b}`, 2)
+                            break
                         }
                     } 
                 }
 
                 let n1=null;
-                const re = /[0-9A-Fa-f]{6}/g;
+                const hex = '0123456789abcdef'
                 for (let i = 0; i < address.length; i++) {
-                    const char = parseInt(address[i]);
-                    if (re.test(char)) { // check if hex number
+                    const char = address[i];
+                    if (hex.includes(char)) {
                         if (!n1) {
                             n1 = parseInt(char, 16)
                         } else {
-                            return n1*parseInt(char, 16)*factor
+                            return n1 * parseInt(char, 16) * factor
                         }
-                    } 
-                    // reset index after using test()
-                    re.lastIndex = 0;
+                    }
                 }
 
             } else {
@@ -1191,7 +1203,7 @@ var noledger = new Vue({
 
             // focus out on outside click
             document.addEventListener('click', async function(e){   
-                if (document.contains(e.target) && !span.contains(e.target) ){
+                if (document.includes(e.target) && !span.includes(e.target) ){
                     span.classList.remove("notify-box-transparent");
                     await noledger.sleep(1);
                     span.remove();
