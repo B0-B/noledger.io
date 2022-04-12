@@ -18,7 +18,8 @@ const bodyParser = require('body-parser');
 const { exec } = require('child_process');
 
 const firewall = require('./modules/firewall.js')
-const traffic = require('./modules/traffic.js')
+const traffic = require('./modules/traffic.js');
+const { isStringObject } = require('util/types');
 
 
 var node = function () {
@@ -26,9 +27,6 @@ var node = function () {
     /* Main noledger node object */
 
     this.dir = path.join(__dirname, '/');
-    
-    this.id_high = 0;                                           // track current ID
-    this.id_low = 0;
     
     this.ledger = this.createLedger();                          // create a new ledger object
         
@@ -68,53 +66,86 @@ node.prototype.build = function () {
     api.post('/ledger', async function(request, response){
         
         // establish an empty response package
-        let response_pkg = {collection: [], id_high: null, errors: []}
+        let response_pkg = {collection: [], id_high: null, base: this.ledger.bins, errors: []}
         
         try {
 
             /* FIREWALL */
-            let result = await firewall(request),
-                upperBound = _node.id_high;
-            
-            if (result) {
+            if (await firewall(request)) {
 
-                // check if the result is not empty
-                _keys = Object.keys(_node.ledger)
-                if (Object.keys(_node.ledger).length > 0) {
-                    
-                    // extract package body
-                    const json = result.body
+                // extract package body
+                const json = request.body;
 
-                    // define iteration bounds based on request
-                    let lowerBound;
-                    
-                    // 
-                    if (json.id < _node.id_low) {
-                        lowerBound = _node.id_low;
-                    } else {
-                        lowerBound = json.id;
-                    }
+                // determine group to which to assign pkg to
+                const group = json.group;
 
-                    // collect all ledger entries between decided bounds
-                    let collected = [];
-                    for (let i = lowerBound; i <= upperBound; i++) {
-                        const msg = _node.ledger[`${i}`];
-                        collected.push(msg);
-                    }
-
-                    // append to pkg
-                    response_pkg.id_high = upperBound + 1;
-                    response_pkg.collection = collected;
-                } else {
-                    response_pkg.id_high = upperBound;
+                // check if the format is proper
+                if (!(group && typeof group === 'string')) {
+                    console.log('the format of group is not a string! Instead got ', group, typeof group)
+                    throw
+                } else if (group <= this.ledger.bins) {
+                    console.log(`provided group "${group}" exceeds current highest bin (group id) which is ${this.ledger.bins}!`)
+                    throw
                 }
+
+                // from the group ID get the correct stack from the ledger
+                const stack = this.ledger.group[group];
+
+                /* set the group id to the highest observed global id_glob in the ledger. 
+                This will assure that the next entry pkg thrown into the group stack will 
+                have an id > id_glob */
+                if (!this.ledger.maxid) { // ledger is empty
+                    response_pkg.id_high = 0;
+                } else {
+                    response_pkg.id_high = this.ledger.maxid + 1;
+                }
+                
+                // proceed with collecting entries within requested id bound if the group stack is non-empty
+                if (!Object.keys(stack).length == 0) {
+
+                    // get an array of ids contained in the group stack
+                    const stackIdArray = Array.from(Object.keys(stack));
+
+                    // determine from which id to start from
+                    let lowerBound;
+                    if (json.id < ledger.minid) {
+
+                        /* if the last observed id (sent by json pkg) is smaller than
+                        the smallest id in the entire ledger, it is outdated. Best one may
+                        assume is to take the smallest id known in the group stack.
+                        The lower bound becomes an infimum.*/
+                        lowerBound = stackIdArray[0];
+                    
+                    } else {
+
+                        /* Provided json id is still served */
+                        lowerBound = json.id;
+
+                    }
+
+                    // find the index in the keys array of stack obj
+                    const lowerBoundIndex = stackIdArray.indexOf(lowerBound);
+
+                    /* the desired collection equals the slice starting from the lower bound index.
+                    Add it to the response package. */
+                    response_pkg.collection = Array.from(Object.values(stack)).slice(lowerBoundIndex);
+                
+                }
+
             } else {
+
                 response_pkg.errors.push('Your request was blocked by the server.')
+
             }
+
         } catch (error) {
-            console.log('submit error:', error)
+
+            console.log('ledger request error:', error)
+
         } finally {
+
             response.send(response_pkg)
+
         }
         
     });
@@ -123,10 +154,11 @@ node.prototype.build = function () {
 
         let response_pkg = {data: [], errors: []}
         try {
+
             /* FIREWALL */
-            result = await firewall(request);
-            if (result) {
-                /* -- code here */
+            if (await firewall(request)) {
+
+
                 const json = request.body;
                 //console.log('request', json);
 
@@ -165,7 +197,10 @@ node.prototype.createLedger = function (maxBins=1024) {
 
     var ledger = {
         size: 0,                                                // size in bytes 
+        bins: 1,                                                // start with a single group
         structSize: 0,                                          // object empty structure size in bytes 
+        maxid: null,
+        minid: 0,
         group: {}                                               // group object
     };
 
@@ -176,7 +211,7 @@ node.prototype.createLedger = function (maxBins=1024) {
     ledger.structSize = traffic.estimateSize(this.ledger)       // estimate vanilla structure size
 
     return ledger
-    
+
 }
 
 node.prototype.cleaner = async function () {

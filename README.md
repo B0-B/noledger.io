@@ -2,7 +2,7 @@
 
 <!-- Badges -->
 <!-- twitter -->
-[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20secure%20and%20anonymous%20messaging%20service%20based%20on%20a%20public%20ledger%20protocol.&url=https://github.com/B0-B/noledger.io&hashtags=noledger,secure,ledger,messenger)<!-- version --><a name="stealth"><img src="https://img.shields.io/badge/Release%20-1.1.1-cyan.svg"/></a>
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20secure%20and%20anonymous%20messaging%20service%20based%20on%20a%20public%20ledger%20protocol.&url=https://github.com/B0-B/noledger.io&hashtags=noledger,secure,ledger,messenger)<!-- version --><a name="stealth"><img src="https://img.shields.io/badge/Release%20-1.2.0-cyan.svg"/></a>
 
 A secure and anonymous messaging service based on a public ledger protocol. Clients connect through Diffie-Hellman key exchange and broadcast their messages publicly in a central ledger (ciphered) which is subsequently requested by every client that synchronizes with the ledger, but can be decrypted only locally by those who own a private key which is associated to the address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. Users do not have to raise any concerns towards the service host, even if it is corrupt. 
 
@@ -38,8 +38,8 @@ The table below is a collection of publicly known security incidents (headlines 
 ## [Core Protocol Development](https://github.com/B0-B/noledger.io/blob/main/docs/development/development.md)
 | Function | Description | Status | Protocol Version | 
 |---|---|---|---|
-| Secure File Relay | A secure way to exchange files using the messenger. | Pending | v-1.2.0 |
-| Adaptive Grouping | Automatic mechanism to relief clients from high traffic. | Pending |v-1.1.1 |
+| Secure File Relay | A secure way to exchange files using the messenger. | Pending | - |
+| Adaptive Grouping | Automatic mechanism to protect clients from high traffic. | Pending |v-1.2.0 |
 | Long-term Accounts | A function which enables clients to download/save their whole account encrypted in a file and can be reconstructed on any device. | Stable | v-1.1.0 |
 | Specific Check String | A second, contact specific check string for authenticity proof. | Stable | v-1.0.0 |
 | Random Padding | Randomly generated nonce that is appended to the plain text. This feature randomizes every cipher output to prevent classification of identical plain text samples that were encrypted with the same key. | Stable | v-1.0.0 | 
