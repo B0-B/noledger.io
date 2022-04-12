@@ -27,16 +27,17 @@ var node = function () {
 
     this.dir = path.join(__dirname, '/');
     
-    this.id_high = 0;                                   // track current ID
+    this.id_high = 0;                                           // track current ID
     this.id_low = 0;
     
-    this.ledger = this.createLedger();                   // create a new ledger object
-    //this.ledger = {};                                   // initialize ledger object
+    this.ledger = this.createLedger();                          // create a new ledger object
+        
+    //this.ledger = {};                                         // initialize ledger object
 
-    this.lifetime = 60;                                 // message lifetime in the ledger in minutes
-    this.port = null;                                   // port on which to start the node (is provided by run() method)
+    this.lifetime = 60;                                         // message lifetime in the ledger in minutes
+    this.port = null;                                           // port on which to start the node (is provided by run() method)
     
-    this.server = this.build();                         // build the express server                         
+    this.server = this.build();                                 // build the express server                         
 
 }
 
@@ -70,7 +71,7 @@ node.prototype.build = function () {
         let response_pkg = {collection: [], id_high: null, errors: []}
         
         try {
-            
+
             /* FIREWALL */
             let result = await firewall(request),
                 upperBound = _node.id_high;
@@ -163,14 +164,19 @@ node.prototype.createLedger = function (maxBins=1024) {
     /* A function which creates the ledger object depending on maximum bins */
 
     var ledger = {
-        size: 0, // size in bytes 
-        groups: {}
+        size: 0,                                                // size in bytes 
+        structSize: 0,                                          // object empty structure size in bytes 
+        group: {}                                               // group object
     };
 
     for (let i = 0; i < maxBins; i++) {
-        ledger.groups[i] = {}
+        ledger.group[i] = {}                                    // every group will have a ledger stack
     }
 
+    ledger.structSize = traffic.estimateSize(this.ledger)       // estimate vanilla structure size
+
+    return ledger
+    
 }
 
 node.prototype.cleaner = async function () {
