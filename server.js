@@ -1,10 +1,24 @@
+/*
+==================================================================
+noledger.io
+Server-Side Code Copyright © 2022 noledger
+Author: B0-B (alch3mist94@protonmail.com)
+------------------------------------------------------------------
+
+
+==================================================================
+*/
+
+
 var express = require('express'); 
 var fs = require('fs'); 
 var path = require('path'); 
 var https = require('https');
-const firewall = require('./modules/firewall.js')
 const bodyParser = require('body-parser'); 
 const { exec } = require('child_process');
+
+const firewall = require('./modules/firewall.js')
+const traffic = require('./modules/traffic.js')
 
 
 var node = function () {
@@ -16,7 +30,8 @@ var node = function () {
     this.id_high = 0;                                   // track current ID
     this.id_low = 0;
     
-    this.ledger = {};                                   // initialize ledger object
+    this.ledger = this.createLedger();                   // create a new ledger object
+    //this.ledger = {};                                   // initialize ledger object
 
     this.lifetime = 60;                                 // message lifetime in the ledger in minutes
     this.port = null;                                   // port on which to start the node (is provided by run() method)
@@ -50,22 +65,29 @@ node.prototype.build = function () {
     });
     api.use(bodyParser.json());
     api.post('/ledger', async function(request, response){
-        //console.log('received json', request.body)
+        
+        // establish an empty response package
         let response_pkg = {collection: [], id_high: null, errors: []}
+        
         try {
+            
             /* FIREWALL */
             let result = await firewall(request),
                 upperBound = _node.id_high;
+            
             if (result) {
+
+                // check if the result is not empty
                 _keys = Object.keys(_node.ledger)
                 if (Object.keys(_node.ledger).length > 0) {
-                    /* -- code here */
-                    let collected = [],
+                    
+                    // extract package body
+                    const json = result.body
 
                     // define iteration bounds based on request
-                        lowerBound;
-                    const json = request.body;
+                    let lowerBound;
                     
+                    // 
                     if (json.id < _node.id_low) {
                         lowerBound = _node.id_low;
                     } else {
@@ -73,6 +95,7 @@ node.prototype.build = function () {
                     }
 
                     // collect all ledger entries between decided bounds
+                    let collected = [];
                     for (let i = lowerBound; i <= upperBound; i++) {
                         const msg = _node.ledger[`${i}`];
                         collected.push(msg);
@@ -135,8 +158,27 @@ node.prototype.build = function () {
     return server
 }
 
+node.prototype.createLedger = function (maxBins=1024) {
+
+    /* A function which creates the ledger object depending on maximum bins */
+
+    var ledger = {
+        size: 0, // size in bytes 
+        groups: {}
+    };
+
+    for (let i = 0; i < maxBins; i++) {
+        ledger.groups[i] = {}
+    }
+
+}
+
 node.prototype.cleaner = async function () {
-    /* Removes old messages from the ledger */
+
+    /* 
+    Removes old messages from the ledger and updates all necessary parameters. 
+    */
+    
     console.log('start cleaner ...')
     const ms2min = 1/60000;
     while (this.server) {

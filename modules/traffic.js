@@ -3,12 +3,17 @@
 const userTrafficLimit = 1; // traffic lower bound in [MB/s]
 const bins = [1, 4, 16, 26, 64, 128, 256, 512, 1024];
 
+async function estimateSize (ledger) {
+    /* Estimates the size in bytes */
+    const size = new TextEncoder().encode(JSON.stringify(ledger)).length;
+    return size;
+}
 async function estimateStream (ledger) {
 
     /* Estimate the data stream in Bytes/s from given ledger object */
 
     // estimate ledger load in Bytes
-    const load = new TextEncoder().encode(JSON.stringify(ledger)).length;
+    const load = await estimateSize (ledger);
 
     // estimate the time in seconds
     const ledgerEntries = Object.values(ledger);
@@ -40,3 +45,7 @@ async function base (binLowerBound) {
 
     throw Error("The provided stream traffic is to high to choose an appropriate base and respect the user traffic limit.")
 }
+
+module.exports = {
+    estimateSize, estimateStream, estimateBinLowerBound, base
+};
