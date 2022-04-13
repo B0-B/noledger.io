@@ -29,8 +29,6 @@ var node = function () {
     this.dir = path.join(__dirname, '/');
     
     this.ledger = this.createLedger();                          // create a new ledger object
-        
-    //this.ledger = {};                                         // initialize ledger object
 
     this.lifetime = 60;                                         // message lifetime in the ledger in minutes
     this.port = null;                                           // port on which to start the node (is provided by run() method)
@@ -158,18 +156,24 @@ node.prototype.build = function () {
             /* FIREWALL */
             if (await firewall(request)) {
 
+                /* directly raise the maxid in the ledger
+                to save the id and space from other requests for the current message */
+                this.ledger.maxid += 1;
+                const reservedEntryId = this.ledger.maxid;
 
+                // extract the package body
                 const json = request.body;
-                //console.log('request', json);
 
-                // override the timestep
-                json.time = new Date().getTime();
+                // determine group id
+                const id = json.group;
 
-                // append to ledger
-                _node.id_high += 1;
-                _node.ledger[`${_node.id_high}`] = json;
-                
-                //_node.ledger.push(json)
+                // append message to ledger group stack
+                this.ledger.group[id][reservedEntryId] = json;
+
+                /* add mapping from ledger entry ID to group ID, this will make it very easy for the cleaner 
+                to collect messages chronically starting from lowest id. */
+                this.map[reservedEntryId] = id;
+
             }
         } catch (error) {
             console.log('submit error:', error)
@@ -201,9 +205,11 @@ node.prototype.createLedger = function (maxBins=1024) {
         structSize: 0,                                          // object empty structure size in bytes 
         maxid: null,
         minid: 0,
+        map: {},                                                // map ledger entry ID to group ID
         group: {}                                               // group object
     };
 
+    // greate group streams
     for (let i = 0; i < maxBins; i++) {
         ledger.group[i] = {}                                    // every group will have a ledger stack
     }
@@ -221,28 +227,84 @@ node.prototype.cleaner = async function () {
     */
     
     console.log('start cleaner ...')
+
     const ms2min = 1/60000;
+    const delayInSeconds = 10;
+
     while (this.server) {
-        let changes = false,
-            currentTime = new Date().getTime(),
-            keys = Object.keys(this.ledger).sort((a, b) => a - b);
-        if (keys.length > 0) {
-            console.log(keys)
-            const firstKey = keys[0];
-            const firstVal = this.ledger[firstKey];
-            const timeDiffInMin = (currentTime - firstVal.time)*ms2min;
-            if (timeDiffInMin - this.lifetime > 0) {
-                console.log(`delete message [id ${firstKey}]`)
-                // delete the message if exceeds allowed lifetime
-                delete this.ledger[firstKey];
-                changes = true;
+
+        try {
+
+            // draw current timestamp once for reference
+            const currentTimestamp = new Date().getTime();
+
+            // iterate from lowest id known in the ledger
+            for (let i = this.ledger.minid; i <= this.ledger.maxid; i++) {
+
+                // use mapping to get group and entry id
+                const entryId = i;
+                const groupId = this.map[entryId];
+                
+                // draw entry from ledger group stack
+                const entry = this.ledger.group[groupId][i];
+
+                // compute the entry's age in minutes
+                const age = (currentTimestamp - entry.time) * ms2min;
+
+                if (age >= this.lifetime) {
+
+                    console.log(`delete message [id ${firstKey}] in group ${i}`)
+
+                    // remove message from group stack
+                    delete this.ledger.group[i][ledgerId];
+
+                    // remove ID from map
+                    delete this.map[entryId];
+
+                } else {
+
+                    // exit here, save the current index as new minimum
+                    this.ledger.minid = i;
+
+                    /* The map is mighty as it allows to stop checking entries by respecting the chronic.
+                    If an entry's age associated with an id "i" does not exceed the lifetime then all later entries with id > i
+                    won't either. This allows to skip the loop over these IDs. */
+                    break
+
+                }
             }
+            
+        } catch (e) {
+        
+            console.log(e)
+        
+        } finally {
+
+            await this.sleep(5)
+        
         }
-        if (!changes) {
-            // define new bottom id
-            this.id_low = this.id_high - Object.keys(this.ledger).length;
-            await this.sleep(5);
-        }
+        // let changes = false,
+        //     currentTime = new Date().getTime(),
+        //     keys = Object.keys(this.ledger).sort((a, b) => a - b);
+        // if (keys.length > 0) {
+        //     console.log(keys)
+        //     const firstKey = keys[0];
+        //     const firstVal = this.ledger[firstKey];
+        //     const timeDiffInMin = (currentTime - firstVal.time)*ms2min;
+        //     if (timeDiffInMin - this.lifetime > 0) {
+        //         console.log(`delete message [id ${firstKey}]`)
+        //         // delete the message if exceeds allowed lifetime
+        //         delete this.ledger[firstKey];
+        //         changes = true;
+        //     }
+        // }
+        // if (!changes) {
+        //     // define new bottom id
+        //     this.id_low = this.id_high - Object.keys(this.ledger).length;
+        //     await this.sleep(5);
+        // }
+
+        await this.sleep(delayInSeconds);
     }
     console.log('stopped cleaner.')
 }
