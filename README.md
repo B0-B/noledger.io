@@ -4,7 +4,7 @@
 <!-- twitter -->
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=A%20secure%20and%20anonymous%20messaging%20service%20based%20on%20a%20public%20ledger%20protocol.&url=https://github.com/B0-B/noledger.io&hashtags=noledger,secure,ledger,messenger)<!-- version --><a name="stealth"><img src="https://img.shields.io/badge/Release%20-1.2.0-cyan.svg"/></a>
 
-A secure and anonymous messaging service based on a public ledger protocol. Clients connect through Diffie-Hellman key exchange and broadcast their messages publicly in a central ledger (ciphered) which is subsequently requested by every client that synchronizes with the ledger, but can be decrypted only locally by those who own a private key which is associated to the address (public key). There are no sender, nor receiver nodes to which encrpyted packages can be traced back. Users do not have to raise any concerns towards the service host, even if it is corrupt. 
+A secure and anonymous messaging service based on a ledger protocol. Clients connect by exchanging addresses (Diffie-Hellman key exchange) and broadcast their ciphered messages publicly in a central ledger. Every client that synchronizes with the ledger is downloading each message but will be only able to decrypt it if he posesses the private key associated to the receiver's address. By the proposed protocol there are no sender nor receiver IPs to which encrpyted packages can be traced back. Users do not have to raise any concerns towards the service host, even if it is corrupt. 
 
 Read the full [article](https://github.com/B0-B/noledger.io/blob/main/docs/core/paper.md).
 
@@ -56,16 +56,21 @@ The table below is a collection of publicly known security incidents (headlines 
 
 <br>
 
+## IP Spoofing
+Protecting the user IP goes beyond the capabilities of the node-side protocol and is probably the only action which lies in the user's hands and spans across all web services. It is thus highly recommended to hide the IP via VPN or TOR window (Brave Browser for example). Attackers still cannot break the encryption nor reveal the E2E route of fetched packages but may map them in ciphered form to the origin IP. SOCKS5 implementation for a hidden service is already in plan.
+
+<br>
+
 ## Setup
 Run the setup script in the root directory
 ```bash
 bash setup.sh
 ```
-then open the certificate path
+open the certificate path
 ```bash
 cd ./cert/self_signed
 ```
-and generate a new certificate via
+generate a new certificate (optional)
 ```bash
 bash create.sh # follow instructions
 ```
