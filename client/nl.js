@@ -1546,13 +1546,16 @@ var noledger = new Vue({
                 delete aesPhrase;
             }
             
+            const group = await this.getGroupIdFromAddress(address);                    // determine current group of receiver
+
             pkg = {
+                group: group,
                 header: buf2str(check),
                 check: buf2str(check2),
                 from: from,
                 cipher: cipher,
                 phrase: buf2str(phrase),
-                time: new Date().getTime(),
+                time: new Date().getTime()
             }
 
             if (!this.sounds.mute) {this.sounds.send.play()}                            // play a send sound

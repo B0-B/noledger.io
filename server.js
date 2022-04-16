@@ -29,11 +29,21 @@ var node = function () {
     this.dir = path.join(__dirname, '/');
     
     this.ledger = this.createLedger();                          // create a new ledger object
+    this.map = {}                                               // object which maps entry IDs to group
 
     this.lifetime = 60;                                         // message lifetime in the ledger in minutes
     this.port = null;                                           // port on which to start the node (is provided by run() method)
     
-    this.server = this.build();                                 // build the express server                         
+    this.server = this.build();                                 // build the express server         
+    
+    
+    this.requests = 0;                                          // no. of attempts
+    this.connections = 0;                                       // total no. of requests to the client
+    this.messages = 0;                                          // trace the number of messages
+    this.stream = 0;
+    this.traffic = 0;
+    this.userTrafficLimit = 10**6                               // traffic limit per user
+    this.trafficLoad = 0;
 
 }
 
@@ -44,6 +54,9 @@ node.prototype.build = function () {
     var _node = this;
     api.use(express.static(this.dir));
     api.get('/', async function(request, response){
+
+        this.requests += 1
+
         /* FIREWALL */
         result = await firewall(request);
         if (result) {
@@ -52,11 +65,13 @@ node.prototype.build = function () {
     });
     api.get('/client', async function(request, response){
 
+        this.requests += 1
+
         /* FIREWALL */
         console.log('client request ...')
         result = await firewall(request);
         if (result) {
-            /* -- code here */
+            this.connections += 1;
             response.redirect('/client');
         }
     });
@@ -173,6 +188,9 @@ node.prototype.build = function () {
                 /* add mapping from ledger entry ID to group ID, this will make it very easy for the cleaner 
                 to collect messages chronically starting from lowest id. */
                 this.map[reservedEntryId] = id;
+
+                // update the traffic load for the traffic listener
+                this.trafficLoad += traffic.estimateSize(json);
 
             }
         } catch (error) {
@@ -312,6 +330,7 @@ node.prototype.cleaner = async function () {
 node.prototype.run = async function (port) {
     try {
         this.cleaner();
+        this.screenTraffic();
         this.port = port;
         this.server.listen(port, () => {
             console.log(`noledger node running at https://localhost:${port}`);
@@ -331,6 +350,57 @@ node.prototype.sleep = function (seconds) {
             resolve(0);
         }, 1000*seconds);
     });
+}
+
+node.prototype.screenTraffic = async function () {
+    
+    /* 
+    This method uses the traffic module to determine the current
+    traffic parameters, aiming to adjust the current bins size.
+    */
+
+    const T = 60; // sec period
+    const N = 20; // time window for EMA
+    
+    while(this.server) {
+
+        try {
+            
+            // estimate current ledger size by subtracting the initial size (when empty) as this is the data amount users have to download
+            this.ledger.size = (traffic.estimateSize(this.ledger)-this.ledger.structSize);
+
+            // update the number of messages
+            this.messages = this.ledger.maxid - this.ledger.minid;
+
+            // update current stream by recent load gathered within a period in B/s
+            const load = this.trafficLoad;
+            this.trafficLoad = 0;
+            this.stream = await traffic.updateStream(load/T, this.stream, N);
+
+            // try to estimate bins
+            const lowerBound = await traffic.estimateBinLowerBound(this.stream);
+            this.ledger.bins = await traffic.base(lowerBound);
+
+            var output = `---------- Traffic Analysis ----------\n`;
+            output += `Total Requests:\t${this.requests}\n`;
+            output += `Total Valid Connections:\t${this.connections}\n`;
+            output += `Current Ledger Size:\t${this.ledger.size} Bytes\n`;
+            output += `Current Messages:\t${this.messages}\n`;
+            output += `Stream Traffic:\t${this.stream} Bytes/s\n`;
+            output += `Group Bins:\t${this.ledger.bins}\n`;
+            output += '---------------------------------------'
+            console.log(output)
+
+        } catch (error) {
+
+            console.log(error)
+
+        } finally {
+
+            await this.sleep(T)
+
+        }
+    }
 }
 
 // ------------------------------------

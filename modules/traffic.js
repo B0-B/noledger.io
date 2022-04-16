@@ -8,7 +8,7 @@ async function estimateSize (ledger) {
     const size = new TextEncoder().encode(JSON.stringify(ledger)).length;
     return size;
 }
-async function estimateStream (ledger) {
+async function estimateStream (ledger, meanWindow=20) {
 
     /* Estimate the data stream in Bytes/s from given ledger object */
 
@@ -24,6 +24,16 @@ async function estimateStream (ledger) {
 
     return traffic
 
+}
+
+async function updateStream (newValue, old, window=20) {
+
+    /* Takes packaged entry and old stream value to return the new updated stream */
+
+    // return updated value using exponential smoothing with delay window converted to alpha
+    const alpha = 2/(window+1);
+    return alpha*newValue+(1-alpha)*old;
+    
 }
 async function estimateBinLowerBound (stream) {
 
