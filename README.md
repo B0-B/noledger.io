@@ -66,15 +66,12 @@ Run the setup script in the root directory
 ```bash
 bash setup.sh
 ```
-open the certificate path
+open the certificate path and generate a new certificate (optional)
 ```bash
 cd ./cert/self_signed
+bash create.sh # follow instructions in terminal
 ```
-generate a new certificate (optional)
-```bash
-bash create.sh # follow instructions
-```
-or store a valid certificate and key as `ssl.crt` and `ssl.key`, respectively.
+or store a valid certificate and key as `ssl.crt` and `ssl.key`.
 
 <br>
 
@@ -84,7 +81,7 @@ The default port will be 443
 sudo node server
 ```
 
-otherwise a port can be provided via command line argument
+otherwise a port can be provided via argument
 ```bash
 sudo node server 3000 # start the node on port 3000
 ```

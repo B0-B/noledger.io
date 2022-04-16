@@ -144,6 +144,9 @@ var noledger = new Vue({
         id: 0,
         keyPair: {},
         lifetime: '1 Hour',
+        safeScreenTime: 1,
+        safeScreenOnLeaveEnabled: true,
+        screenActivityTime: 0,
         settingsVisible: false,
         sounds: {
             mute: false
@@ -457,6 +460,7 @@ var noledger = new Vue({
             await this.loadContactsPage();                                  // build contacts page
             this.initCleanerHook();                                         // start cleaner once the account is available
             this.initLedgerHook();                                          // start the ledger reading
+            this.initSafeScreenGuard();                                     // start listener to close the screen on inactivity or leave
 
         },
         generateRandomBytes: async function (length) {
@@ -1441,6 +1445,7 @@ var noledger = new Vue({
                         // initialize all hooks
                         noledger.initCleanerHook();                                     // start cleaner once the account is available
                         noledger.initLedgerHook();                                      // start the ledger reading
+                        noledger.initSafeScreenGuard();                                     // start listener to close the screen on inactivity or leave
 
                         // remove legacies
                         delete pkgDecrypted;
@@ -1455,6 +1460,53 @@ var noledger = new Vue({
                 "restore",
                 "done."
             )
+        },
+        initSafeScreenGuard: async function () {
+
+            /*
+            Starts a listener who waits for a click outside of the document which will
+            close any chat/settings window and go back to contacts page.
+            */
+
+            // listen for clicks outside of the document and denote a time for each click or keydown event
+            document.addEventListener('click', function(e){   
+                console.log('click event happened')
+                if (this.safeScreenOnLeaveEnabled && !document.includes(e.target)){
+                    noledger.backToContacts()
+                }
+                this.safeScreenTime = new Date.getTime();
+            });
+            document.onkeydown = function (e) {
+                console.log('keydown event happened')
+                this.safeScreenTime = new Date.getTime();
+            }
+
+            // detect if there was no activity for longer than the set
+            while (true) {
+
+                try {
+
+                    const now = new Date.getTime();
+                    const minutesSinceLastActivity = (now - this.screenActivityTime)*.001/60;
+                    if (this.safeScreenTime && minutesSinceLastActivity > this.safeScreenTime) {
+                        this.backToContacts()
+                    }
+
+                } catch (error) {
+
+                    console.log('SafeScreenGuard:',error)
+
+                } finally {
+
+                    await this.sleep(1)
+
+                }
+                
+            }
+
+
+
+
         },
         scrollToBottom: function () {
             if (this.chatVisible) {
