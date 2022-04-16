@@ -8,23 +8,6 @@ async function estimateSize (ledger) {
     const size = new TextEncoder().encode(JSON.stringify(ledger)).length;
     return size;
 }
-async function estimateStream (ledger, meanWindow=20) {
-
-    /* Estimate the data stream in Bytes/s from given ledger object */
-
-    // estimate ledger load in Bytes
-    const load = await estimateSize (ledger);
-
-    // estimate the time in seconds
-    const ledgerEntries = Object.values(ledger);
-    const time = (ledgerEntries[-1].timestamp - ledgerEntries[0].timestamp) * .001;
-
-    // estimate traffic in MB/s
-    const traffic = load/time/(1024**2);
-
-    return traffic
-
-}
 
 async function updateStream (newValue, old, window=20) {
 
@@ -35,6 +18,7 @@ async function updateStream (newValue, old, window=20) {
     return alpha*newValue+(1-alpha)*old;
     
 }
+
 async function estimateBinLowerBound (stream) {
 
     /* Estimate the lower bound for needed bins = number of groups*/
@@ -42,6 +26,7 @@ async function estimateBinLowerBound (stream) {
     return Math.floor( stream/userTrafficLimit ) + 1
 
 }
+
 async function base (binLowerBound) {
 
     /* This function chooses an appropriate base >= given bins */
@@ -57,5 +42,5 @@ async function base (binLowerBound) {
 }
 
 module.exports = {
-    estimateSize, estimateStream, estimateBinLowerBound, base
+    estimateSize, updateStream, estimateBinLowerBound, base
 };
