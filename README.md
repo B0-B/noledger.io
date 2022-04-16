@@ -50,7 +50,7 @@ The table below is a collection of publicly known security incidents (headlines 
 ## Patch Notes
 | Release | Patch Notes|
 |---|---|
-|1.2.0| - Added adaptive grouping mechanism server and client-side to protect clients from high traffic <br> - Improved server-side cleaner perormance through mapping entry IDs to group IDs <br> - Added new traffic module for group determination|
+|1.2.0| - Added adaptive grouping mechanism server and client-side to protect clients from high traffic <br> - Improved server-side cleaner perormance through mapping entry IDs to group IDs <br> - Added new traffic module for group determination <br> - Added new "screen lock" mechanism which triggers on inactivity and when leaving the app |
 |1.1.0| - Fixed generate AES key issue - Receivers were not decrypting correctly after AES key exchange <br> - Fully implemented account saving and loading for long-term usage <br> - Improved UI interactivity <br> - Added release script in release/ directory <br> - Added version badge to README.md |
 
 
