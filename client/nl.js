@@ -456,12 +456,13 @@ var noledger = new Vue({
             let wrapper = document.getElementById('wrapper');               // flush wrapper content
             wrapper.innerHTML = "";
             this.address = await this.getAddress();
-            
+            this.id = 
             await this.loadContactsPage();                                  // build contacts page
             this.initCleanerHook();                                         // start cleaner once the account is available
             this.initLedgerHook();                                          // start the ledger reading
             this.initSafeScreenGuard();                                     // start listener to close the screen on inactivity or leave
 
+            
         },
         generateRandomBytes: async function (length) {
 
@@ -794,7 +795,14 @@ var noledger = new Vue({
                 try {
                     if (Object.keys(this.keyPair).length > 0) {
                         
-                        const response = await this.request({id: this.id}, '/ledger');
+                        var response = await this.request({id: this.id, group: this.grouping.id}, '/ledger');
+
+                        // check if the bins have changed, then apply and repeat request
+                        if (response.bins != this.grouping.bins) {
+                            this.grouping.bins = response.bins;
+                            response = await this.request({id: this.id, group: this.grouping.id}, '/ledger');
+                        }
+
                         const collection = Array.from(response.collection);                                     // get collected messages from API
 
                         for (let pkg of collection) {                                                           // iterate through packages in returned collection
@@ -913,6 +921,7 @@ var noledger = new Vue({
             return imported
         },
         loadChat: async function (address) {
+
             this.toAddress = address;
             this.chatVisible = true;
             this.wrapperVisible = false;
@@ -949,6 +958,7 @@ var noledger = new Vue({
 
             this.scrollToBottom();
             this.noUnreadMessages(address);
+
         },
         loadCheckStringField: async function () {
 
@@ -1468,29 +1478,40 @@ var noledger = new Vue({
             close any chat/settings window and go back to contacts page.
             */
 
-            // listen for clicks outside of the document and denote a time for each click or keydown event
-            document.addEventListener('click', function(e){   
-                console.log('click event happened')
-                if (this.safeScreenOnLeaveEnabled && !document.includes(e.target)){
-                    noledger.backToContacts()
-                }
-                this.safeScreenTime = new Date.getTime();
+            // 
+            document.addEventListener('click', async function(e){ 
+                console.log('click event happened');
+                this.screenActivityTime = Date.now();
             });
             document.onkeydown = function (e) {
                 console.log('keydown event happened')
-                this.safeScreenTime = new Date.getTime();
+                this.screenActivityTime = Date.now();
             }
 
-            // detect if there was no activity for longer than the set
+            // initialize the first activity timestamp
+            if (this.screenActivityTime == 0) {
+                this.screenActivityTime = Date.now();
+            }
+
+            // detect if there was no activity for longer than the set sleep time
+            var now, minutesSinceLastActivity;
             while (true) {
 
                 try {
 
-                    const now = new Date.getTime();
-                    const minutesSinceLastActivity = (now - this.screenActivityTime)*.001/60;
+                    // check if inactivity has exceeded tolerance
+                    now = Date.now();
+                    minutesSinceLastActivity = (now - this.screenActivityTime)*.001/60;
+                    console.log('trigger back to contacts, time:', minutesSinceLastActivity, this.safeScreenTime)
                     if (this.safeScreenTime && minutesSinceLastActivity > this.safeScreenTime) {
                         this.backToContacts()
                     }
+
+                    // check if the document is still focused, otherwise lock
+                    const focusOut = !document.hasFocus();
+                    if (this.safeScreenOnLeaveEnabled && focusOut) {
+                        this.backToContacts()
+                    } 
 
                 } catch (error) {
 
@@ -1503,9 +1524,6 @@ var noledger = new Vue({
                 }
                 
             }
-
-
-
 
         },
         scrollToBottom: function () {

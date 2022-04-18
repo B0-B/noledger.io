@@ -19,7 +19,6 @@ const { exec } = require('child_process');
 
 const firewall = require('./modules/firewall.js')
 const traffic = require('./modules/traffic.js');
-const { isStringObject } = require('util/types');
 
 
 var node = function () {
@@ -55,7 +54,7 @@ node.prototype.build = function () {
     api.use(express.static(this.dir));
     api.get('/', async function(request, response){
 
-        this.requests += 1
+        _node.requests += 1
 
         /* FIREWALL */
         result = await firewall(request);
@@ -65,13 +64,13 @@ node.prototype.build = function () {
     });
     api.get('/client', async function(request, response){
 
-        this.requests += 1
+        _node.requests += 1
 
         /* FIREWALL */
         console.log('client request ...')
         result = await firewall(request);
         if (result) {
-            this.connections += 1;
+            _node.connections += 1;
             response.redirect('/client');
         }
     });
@@ -79,7 +78,7 @@ node.prototype.build = function () {
     api.post('/ledger', async function(request, response){
         
         // establish an empty response package
-        let response_pkg = {collection: [], id_high: null, base: this.ledger.bins, errors: []}
+        let response_pkg = {collection: [], id_high: null, bins: _node.ledger.bins, errors: []}
         
         try {
 
@@ -93,28 +92,25 @@ node.prototype.build = function () {
                 const group = json.group;
 
                 // check if the format is proper
-                if (!(group && typeof group === 'string')) {
-                    console.log('the format of group is not a string! Instead got ', group, typeof group)
-                    throw
-                } else if (group <= this.ledger.bins) {
-                    console.log(`provided group "${group}" exceeds current highest bin (group id) which is ${this.ledger.bins}!`)
-                    throw
+                if (group >= _node.ledger.bins) {
+                    console.log(`provided group "${group}" exceeds current highest bin (group id) which is ${_node.ledger.bins}!`)
+                    throw Error(`provided group "${group}" exceeds current highest bin (group id) which is ${_node.ledger.bins}!`)
                 }
 
                 // from the group ID get the correct stack from the ledger
-                const stack = this.ledger.group[group];
+                const stack = _node.ledger.group[group];
 
                 /* set the group id to the highest observed global id_glob in the ledger. 
                 This will assure that the next entry pkg thrown into the group stack will 
                 have an id > id_glob */
-                if (!this.ledger.maxid) { // ledger is empty
+                if (_node.ledger.maxid) { // ledger is empty
                     response_pkg.id_high = 0;
                 } else {
-                    response_pkg.id_high = this.ledger.maxid + 1;
+                    response_pkg.id_high = _node.ledger.maxid + 1;
                 }
                 
                 // proceed with collecting entries within requested id bound if the group stack is non-empty
-                if (!Object.keys(stack).length == 0) {
+                if (stack && !Object.keys(stack).length == 0) {
 
                     // get an array of ids contained in the group stack
                     const stackIdArray = Array.from(Object.keys(stack));
@@ -173,8 +169,8 @@ node.prototype.build = function () {
 
                 /* directly raise the maxid in the ledger
                 to save the id and space from other requests for the current message */
-                this.ledger.maxid += 1;
-                const reservedEntryId = this.ledger.maxid;
+                _node.ledger.maxid += 1;
+                const reservedEntryId = _node.ledger.maxid;
 
                 // extract the package body
                 const json = request.body;
@@ -183,14 +179,14 @@ node.prototype.build = function () {
                 const id = json.group;
 
                 // append message to ledger group stack
-                this.ledger.group[id][reservedEntryId] = json;
+                _node.ledger.group[id][reservedEntryId] = json;
 
                 /* add mapping from ledger entry ID to group ID, this will make it very easy for the cleaner 
                 to collect messages chronically starting from lowest id. */
-                this.map[reservedEntryId] = id;
+                _node.map[reservedEntryId] = id;
 
                 // update the traffic load for the traffic listener
-                this.trafficLoad += traffic.estimateSize(json);
+                _node.trafficLoad += traffic.estimateSize(json);
 
             }
         } catch (error) {
@@ -232,7 +228,7 @@ node.prototype.createLedger = function (maxBins=1024) {
         ledger.group[i] = {}                                    // every group will have a ledger stack
     }
 
-    ledger.structSize = traffic.estimateSize(this.ledger)       // estimate vanilla structure size
+    ledger.structSize = traffic.estimateSize(ledger)            // estimate vanilla structure size
 
     return ledger
 
@@ -253,44 +249,50 @@ node.prototype.cleaner = async function () {
 
         try {
 
-            // draw current timestamp once for reference
-            const currentTimestamp = new Date().getTime();
+            if (this.ledger.maxid) {
 
-            // iterate from lowest id known in the ledger
-            for (let i = this.ledger.minid; i <= this.ledger.maxid; i++) {
+                // draw current timestamp once for reference
+                const currentTimestamp = new Date().getTime();
 
-                // use mapping to get group and entry id
-                const entryId = i;
-                const groupId = this.map[entryId];
-                
-                // draw entry from ledger group stack
-                const entry = this.ledger.group[groupId][i];
+                // iterate from lowest id known in the ledger
+                for (let i = this.ledger.minid; i <= this.ledger.maxid; i++) {
 
-                // compute the entry's age in minutes
-                const age = (currentTimestamp - entry.time) * ms2min;
+                    // use mapping to get group and entry id
+                    const entryId = i;
+                    const groupId = this.map[entryId];
+                    
+                    // draw entry from ledger group stack
+                    const entry = this.ledger.group[groupId][i];
 
-                if (age >= this.lifetime) {
+                    // compute the entry's age in minutes
+                    const age = (currentTimestamp - entry.time) * ms2min;
 
-                    console.log(`delete message [id ${firstKey}] in group ${i}`)
+                    if (age >= this.lifetime) {
 
-                    // remove message from group stack
-                    delete this.ledger.group[i][ledgerId];
+                        console.log(`delete message [id ${firstKey}] in group ${i}`)
 
-                    // remove ID from map
-                    delete this.map[entryId];
+                        // remove message from group stack
+                        delete this.ledger.group[i][ledgerId];
 
-                } else {
+                        // remove ID from map
+                        delete this.map[entryId];
 
-                    // exit here, save the current index as new minimum
-                    this.ledger.minid = i;
+                    } else {
 
-                    /* The map is mighty as it allows to stop checking entries by respecting the chronic.
-                    If an entry's age associated with an id "i" does not exceed the lifetime then all later entries with id > i
-                    won't either. This allows to skip the loop over these IDs. */
-                    break
+                        // exit here, save the current index as new minimum
+                        this.ledger.minid = i;
 
+                        /* The map is mighty as it allows to stop checking entries by respecting the chronic.
+                        If an entry's age associated with an id "i" does not exceed the lifetime then all later entries with id > i
+                        won't either. This allows to skip the loop over these IDs. */
+                        break
+
+                    }
                 }
+
             }
+
+            
             
         } catch (e) {
         
@@ -359,7 +361,7 @@ node.prototype.screenTraffic = async function () {
     traffic parameters, aiming to adjust the current bins size.
     */
 
-    const T = 60; // sec period
+    const T = 5; // sec period
     const N = 20; // time window for EMA
     
     while(this.server) {
@@ -378,7 +380,7 @@ node.prototype.screenTraffic = async function () {
             this.stream = await traffic.updateStream(load/T, this.stream, N);
 
             // try to estimate bins
-            const lowerBound = await traffic.estimateBinLowerBound(this.stream);
+            const lowerBound = await traffic.estimateBinLowerBound(this.stream, this.userTrafficLimit);
             this.ledger.bins = await traffic.base(lowerBound);
 
             var output = `---------- Traffic Analysis ----------\n`;

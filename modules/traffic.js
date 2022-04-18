@@ -5,8 +5,7 @@ const bins = [1, 4, 16, 26, 64, 128, 256, 512, 1024];
 
 async function estimateSize (ledger) {
     /* Estimates the size in bytes */
-    const size = new TextEncoder().encode(JSON.stringify(ledger)).length;
-    return size;
+    return JSON.stringify(ledger).length;
 }
 
 async function updateStream (newValue, old, window=20) {
@@ -19,11 +18,11 @@ async function updateStream (newValue, old, window=20) {
     
 }
 
-async function estimateBinLowerBound (stream) {
+async function estimateBinLowerBound (stream, limit) {
 
     /* Estimate the lower bound for needed bins = number of groups*/
 
-    return Math.floor( stream/userTrafficLimit ) + 1
+    return Math.floor( stream/limit ) + 1
 
 }
 
