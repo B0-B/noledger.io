@@ -33,8 +33,7 @@ var node = function () {
     this.lifetime = 60;                                         // message lifetime in the ledger in minutes
     this.port = null;                                           // port on which to start the node (is provided by run() method)
     
-    this.server = this.build();                                 // build the express server         
-    
+    this.server = this.build();                                 // build the express server
     
     this.requests = 0;                                          // no. of attempts
     this.connections = 0;                                       // total no. of requests to the client
@@ -117,7 +116,7 @@ node.prototype.build = function () {
 
                     // determine from which id to start from
                     let lowerBound;
-                    if (json.id < ledger.minid) {
+                    if (json.id < _node.ledger.minid) {
 
                         /* if the last observed id (sent by json pkg) is smaller than
                         the smallest id in the entire ledger, it is outdated. Best one may
@@ -269,10 +268,10 @@ node.prototype.cleaner = async function () {
 
                     if (age >= this.lifetime) {
 
-                        console.log(`delete message [id ${firstKey}] in group ${i}`)
+                        console.log(`delete message [id ${firstKey}] in group ${groupId}`)
 
                         // remove message from group stack
-                        delete this.ledger.group[i][ledgerId];
+                        delete this.ledger.group[groupId][entryId];
 
                         // remove ID from map
                         delete this.map[entryId];
@@ -280,7 +279,7 @@ node.prototype.cleaner = async function () {
                     } else {
 
                         // exit here, save the current index as new minimum
-                        this.ledger.minid = i;
+                        this.ledger.minid = entryId;
 
                         /* The map is mighty as it allows to stop checking entries by respecting the chronic.
                         If an entry's age associated with an id "i" does not exceed the lifetime then all later entries with id > i
@@ -291,8 +290,6 @@ node.prototype.cleaner = async function () {
                 }
 
             }
-
-            
             
         } catch (e) {
         
@@ -381,6 +378,7 @@ node.prototype.screenTraffic = async function () {
 
             // try to estimate bins
             const lowerBound = await traffic.estimateBinLowerBound(this.stream, this.userTrafficLimit);
+            console.log('lower bound', lowerBound);
             this.ledger.bins = await traffic.base(lowerBound);
 
             var output = `---------- Traffic Analysis ----------\n`;

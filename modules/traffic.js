@@ -22,7 +22,7 @@ async function estimateBinLowerBound (stream, limit) {
 
     /* Estimate the lower bound for needed bins = number of groups*/
 
-    return Math.floor( stream/limit ) + 1
+    return stream/limit 
 
 }
 
@@ -30,9 +30,8 @@ async function base (binLowerBound) {
 
     /* This function chooses an appropriate base >= given bins */
 
-    for (let i = 1; i < bins.length; i++) {
-        if (bins[i] > binLowerBound && 
-            bins[i-1] <= binLowerBound) {
+    for (let i = 0; i < bins.length; i++) {
+        if (bins[i] > binLowerBound) {
             return bins[i]
         }
     }

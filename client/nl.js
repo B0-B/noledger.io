@@ -1481,11 +1481,11 @@ var noledger = new Vue({
             // 
             document.addEventListener('click', async function(e){ 
                 console.log('click event happened');
-                this.screenActivityTime = Date.now();
+                noledger.screenActivityTime = Date.now();
             });
             document.onkeydown = function (e) {
                 console.log('keydown event happened')
-                this.screenActivityTime = Date.now();
+                noledger.screenActivityTime = Date.now();
             }
 
             // initialize the first activity timestamp
