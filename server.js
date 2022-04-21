@@ -167,8 +167,14 @@ node.prototype.build = function () {
             if (await firewall(request)) {
 
                 /* directly raise the maxid in the ledger
-                to save the id and space from other requests for the current message */
-                _node.ledger.maxid += 1;
+                to save the id and space from other requests for the current message.
+                The maxid is only raised in case of definition, otherwise define as 0 to initialize the first entry*/
+                if (_node.ledger.maxid) {
+                    _node.ledger.maxid += 1
+                } else {
+                    _node.ledger.maxid = 0
+                }
+                
                 const reservedEntryId = _node.ledger.maxid;
 
                 // extract the package body
@@ -185,7 +191,7 @@ node.prototype.build = function () {
                 _node.map[reservedEntryId] = id;
 
                 // update the traffic load for the traffic listener
-                _node.trafficLoad += traffic.estimateSize(json);
+                _node.trafficLoad += await traffic.estimateSize(json);
 
             }
         } catch (error) {
@@ -259,9 +265,14 @@ node.prototype.cleaner = async function () {
                     // use mapping to get group and entry id
                     const entryId = i;
                     const groupId = this.map[entryId];
+                    const group = this.ledger.group[groupId];
+
+                    console.log('ledger', this.ledger)
+                    console.log('groupID', groupId)
+                    console.log('group', this.ledger.group[groupId])
                     
                     // draw entry from ledger group stack
-                    const entry = this.ledger.group[groupId][i];
+                    const entry = group[entryId];
 
                     // compute the entry's age in minutes
                     const age = (currentTimestamp - entry.time) * ms2min;
@@ -271,7 +282,7 @@ node.prototype.cleaner = async function () {
                         console.log(`delete message [id ${firstKey}] in group ${groupId}`)
 
                         // remove message from group stack
-                        delete this.ledger.group[groupId][entryId];
+                        delete group[entryId];
 
                         // remove ID from map
                         delete this.map[entryId];
@@ -374,11 +385,14 @@ node.prototype.screenTraffic = async function () {
             // update current stream by recent load gathered within a period in B/s
             const load = this.trafficLoad;
             this.trafficLoad = 0;
-            this.stream = await traffic.updateStream(load/T, this.stream, N);
+            const newStreamValue = load/T;
+            console.log('new stream', load, newStreamValue);
+            
+            this.stream = await traffic.updateStream(newStreamValue, this.stream, N);
 
             // try to estimate bins
             const lowerBound = await traffic.estimateBinLowerBound(this.stream, this.userTrafficLimit);
-            console.log('lower bound', lowerBound);
+            console.log('lower bound',this.stream, this.userTrafficLimit, lowerBound);
             this.ledger.bins = await traffic.base(lowerBound);
 
             var output = `---------- Traffic Analysis ----------\n`;
