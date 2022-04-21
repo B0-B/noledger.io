@@ -100,9 +100,9 @@ node.prototype.build = function () {
                 const stack = _node.ledger.group[group];
 
                 /* set the group id to the highest observed global id_glob in the ledger. 
-                This will assure that the next entry pkg thrown into the group stack will 
-                have an id > id_glob */
-                if (_node.ledger.maxid) { // ledger is empty
+                This will assure that the next request from the same client will ask for
+                entries with maxid+1 so future packages. */
+                if (!_node.ledger.maxid) { // ledger is empty
                     response_pkg.id_high = 0;
                 } else {
                     response_pkg.id_high = _node.ledger.maxid + 1;
@@ -124,6 +124,9 @@ node.prototype.build = function () {
                         The lower bound becomes an infimum.*/
                         lowerBound = stackIdArray[0];
                     
+                    } else if (json.id > _node.ledger.maxid) {
+                        // lower bound cannot be determined
+                        lowerBound = null;
                     } else {
 
                         /* Provided json id is still served */
@@ -131,13 +134,20 @@ node.prototype.build = function () {
 
                     }
 
-                    // find the index in the keys array of stack obj
-                    const lowerBoundIndex = stackIdArray.indexOf(lowerBound);
+                    if (lowerBound) {
+                        // find the index in the keys array of stack obj
+                        const lowerBoundIndex = stackIdArray.indexOf(lowerBound);
 
-                    /* the desired collection equals the slice starting from the lower bound index.
-                    Add it to the response package. */
-                    response_pkg.collection = Array.from(Object.values(stack)).slice(lowerBoundIndex);
-                
+                        /* the desired collection equals the slice starting from the lower bound index.
+                        Add it to the response package. */
+                        response_pkg.collection = Array.from(Object.values(stack)).slice(lowerBoundIndex);
+                        console.log("highest id", response_pkg.id_high)
+                    } else {
+                        /* if the requested index is higher than the highest index in the ledger 
+                        -> the client is up to date and an empty collection is sent */
+                        response_pkg.collection = []
+                    }
+                    
                 }
 
             } else {
