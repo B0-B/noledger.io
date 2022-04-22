@@ -102,7 +102,7 @@ node.prototype.build = function () {
                 /* set the group id to the highest observed global id_glob in the ledger. 
                 This will assure that the next request from the same client will ask for
                 entries with maxid+1 so future packages. */
-                if (!_node.ledger.maxid) { // ledger is empty
+                if (_node.ledger.maxid == null) { // ledger is empty
                     response_pkg.id_high = 0;
                 } else {
                     response_pkg.id_high = _node.ledger.maxid + 1;
@@ -191,14 +191,14 @@ node.prototype.build = function () {
                 const json = request.body;
 
                 // determine group id
-                const id = json.group;
+                const groupId = json.group;
 
                 // append message to ledger group stack
-                _node.ledger.group[id][reservedEntryId] = json;
+                _node.ledger.group[groupId][reservedEntryId] = json;
 
                 /* add mapping from ledger entry ID to group ID, this will make it very easy for the cleaner 
                 to collect messages chronically starting from lowest id. */
-                _node.map[reservedEntryId] = id;
+                _node.map[reservedEntryId] = groupId;
 
                 // update the traffic load for the traffic listener
                 _node.trafficLoad += await traffic.estimateSize(json);

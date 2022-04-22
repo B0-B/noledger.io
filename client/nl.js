@@ -790,6 +790,12 @@ var noledger = new Vue({
             }
         },
         initLedgerHook: async function () {
+
+            /*
+            Ledger request hook.
+            This function is called right after account generation or restore and thus an address is known.
+            */
+
             console.log('start listener ...')
             while (true) {
                 try {
@@ -804,28 +810,24 @@ var noledger = new Vue({
                         }
 
                         const collection = Array.from(response.collection);                                     // get collected messages from API
-
+                        
                         for (let pkg of collection) {                                                           // iterate through packages in returned collection
                             if (pkg) {
                                 console.log('New package')
+
                                 try {
-                                    console.log(0)
                                     let check_decrypted;                                                        // try to decrypt the check
                                     try {
                                         check_decrypted = await this.decrypt(str2buf(pkg.header));
-                                        console.log(1)
                                     } catch (error) {
                                         check_decrypted = null
-                                        console.log(2)
                                     }
 
                                     if (check_decrypted == this.checkString) {                                  // on success (1. Factor)
                                         console.log('Factor 1')
-                                        console.log(3)
                                         let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
                                         let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
                                         
-                                        console.log(4)
                                         let msg = await this.aesDecrypt(pkg.cipher, aesKey);                    // decrypt body and senders address
                                         let from = await this.aesDecrypt(pkg.from, aesKey);
 
@@ -863,6 +865,8 @@ var noledger = new Vue({
                                 }
                             }
                         }
+
+
                         this.id = response.id_high;                                                             // if everything worked without errors raise the ledger id
                                                                                                                 // to the latest id observed on the ledger to avoid 
                                                                                                                 // old packages and thus redundant downloads                                                                       
