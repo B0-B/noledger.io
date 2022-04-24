@@ -179,10 +179,10 @@ node.prototype.build = function () {
                 /* directly raise the maxid in the ledger
                 to save the id and space from other requests for the current message.
                 The maxid is only raised in case of definition, otherwise define as 0 to initialize the first entry*/
-                if (_node.ledger.maxid) {
-                    _node.ledger.maxid += 1
-                } else {
+                if (_node.ledger.maxid == null) {
                     _node.ledger.maxid = 0
+                } else {
+                    _node.ledger.maxid += 1
                 }
                 
                 const reservedEntryId = _node.ledger.maxid;
@@ -383,7 +383,7 @@ node.prototype.screenTraffic = async function () {
         try {
             
             // estimate current ledger size by subtracting the initial size (when empty) as this is the data amount users have to download
-            this.ledger.size = (traffic.estimateSize(this.ledger)-this.ledger.structSize);
+            this.ledger.size = Math.round(traffic.estimateSize(this.ledger)-this.ledger.structSize);
 
             // update the number of messages
             this.messages = this.ledger.maxid - this.ledger.minid;
@@ -402,6 +402,7 @@ node.prototype.screenTraffic = async function () {
             this.ledger.bins = await traffic.base(lowerBound);
 
             var output = `---------- Traffic Analysis ----------\n`;
+            output += `Highest Entry ID:\t${this.ledger.maxid}\n`;
             output += `Total Requests:\t${this.requests}\n`;
             output += `Total Valid Connections:\t${this.connections}\n`;
             output += `Current Ledger Size:\t${this.ledger.size} Bytes\n`;
