@@ -76,7 +76,7 @@ node.prototype.build = function () {
     api.use(bodyParser.json());
     api.post('/ledger', async function(request, response){
         
-        // establish an empty response package
+        // init empty response package
         let response_pkg = {collection: [], id_high: null, bins: _node.ledger.bins, errors: []}
         
         try {
@@ -92,8 +92,9 @@ node.prototype.build = function () {
 
                 // check if the format is proper
                 if (group >= _node.ledger.bins) {
-                    console.log(`provided group "${group}" exceeds current highest bin (group id) which is ${_node.ledger.bins}!`)
-                    throw Error(`provided group "${group}" exceeds current highest bin (group id) which is ${_node.ledger.bins}!`)
+                    const error = `provided group "${group}" exceeds current highest bin (group id) which is ${_node.ledger.bins}!`;
+                    response_pkg.errors.push(error)
+                    throw Error(error)
                 }
 
                 // from the group ID get the correct stack from the ledger
@@ -157,7 +158,7 @@ node.prototype.build = function () {
             }
 
         } catch (error) {
-
+            
             console.log('ledger request error:', error)
 
         } finally {
