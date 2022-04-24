@@ -167,7 +167,6 @@ var noledger = new Vue({
             encrypted.encrypted = str2buf(encrypted.encrypted);
             encrypted.iv = str2buf(encrypted.iv);
             const algo = { name: this.encryption.aes.algorithm, iv: encrypted.iv };
-            await this.sleep(1)
             const encodedBuffer = await crypto.subtle.decrypt(algo, cryptoKey, encrypted.encrypted); // problem
             const decoded = await this.encryption.decoder.decode(encodedBuffer);
             return decoded

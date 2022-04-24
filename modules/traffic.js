@@ -1,5 +1,3 @@
-/* Grouping mechanism methods */
-
 const userTrafficLimit = 1; // traffic lower bound in [MB/s]
 const bins = [1, 4, 16, 26, 64, 128, 256, 512, 1024];
 
@@ -14,7 +12,7 @@ async function updateStream (newValue, old, window=20) {
 
     // return updated value using exponential smoothing with delay window converted to alpha
     const alpha = 2/(window+1);
-    return alpha*newValue+(1-alpha)*old;
+    return Math.round(alpha*newValue+(1-alpha)*old);
     
 }
 
@@ -36,7 +34,7 @@ async function base (binLowerBound) {
         }
     }
 
-    throw Error("The provided stream traffic is to high to choose an appropriate base and respect the user traffic limit.")
+    throw Error("The provided stream traffic is too high to choose an appropriate base and respect the user traffic limit.")
 }
 
 module.exports = {

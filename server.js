@@ -28,7 +28,7 @@ var node = function () {
     this.dir = path.join(__dirname, '/');
     
     this.ledger = this.createLedger();                          // create a new ledger object
-    this.map = {}                                               // object which maps entry IDs to group
+    this.map = {}                                               // object which maps entry IDs to corr. group
 
     this.lifetime = 60;                                         // message lifetime in the ledger in minutes
     this.port = null;                                           // port on which to start the node (is provided by run() method)
@@ -276,10 +276,6 @@ node.prototype.cleaner = async function () {
                     const entryId = i;
                     const groupId = this.map[entryId];
                     const group = this.ledger.group[groupId];
-
-                    console.log('ledger', this.ledger)
-                    console.log('groupID', groupId)
-                    console.log('group', this.ledger.group[groupId])
                     
                     // draw entry from ledger group stack
                     const entry = group[entryId];
