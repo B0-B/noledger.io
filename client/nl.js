@@ -36,6 +36,13 @@ async function testBuffer () {
     console.log('key', _key)
     console.log('output', await noledger.decrypt(str2buf(JSON.parse(JSON.stringify({x:buf2str(await noledger.encrypt('hello world !', _key))})).x) ))
 } 
+
+function b64Index(char) {
+    /* Returns the Base64 char index from RFC 4648 table */
+    let b64Table = "ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0123456789+/";
+    if (!b64Table.includes(char)) { throw Error(`"${char}" is not a base 64 character.`)}
+    return b64Table.indexOf(char)
+}
 /* ---------------------------- */
 
 
@@ -130,9 +137,16 @@ var noledger = new Vue({
             hash: 'SHA-256'
         },
         fileSource: null,
+        grouping: {
+            bins: 1,
+            id: 0
+        },
         id: 0,
         keyPair: {},
         lifetime: '1 Hour',
+        safeScreenTime: 1,
+        safeScreenOnLeaveEnabled: true,
+        screenActivityTime: 0,
         settingsVisible: false,
         sounds: {
             mute: false
@@ -153,7 +167,6 @@ var noledger = new Vue({
             encrypted.encrypted = str2buf(encrypted.encrypted);
             encrypted.iv = str2buf(encrypted.iv);
             const algo = { name: this.encryption.aes.algorithm, iv: encrypted.iv };
-            await this.sleep(1)
             const encodedBuffer = await crypto.subtle.decrypt(algo, cryptoKey, encrypted.encrypted); // problem
             const decoded = await this.encryption.decoder.decode(encodedBuffer);
             return decoded
@@ -243,7 +256,7 @@ var noledger = new Vue({
 
             // listen to simulated outside focus events
             document.addEventListener('click', function(e){   
-                if (document.contains(e.target) && !dots.contains(e.target) ){
+                if (document.includes(e.target) && !dots.includes(e.target) ){
                     dots.style.color = '#ddd';
                     menu.remove()
                 }
@@ -442,11 +455,13 @@ var noledger = new Vue({
             let wrapper = document.getElementById('wrapper');               // flush wrapper content
             wrapper.innerHTML = "";
             this.address = await this.getAddress();
-            
+            this.id = 
             await this.loadContactsPage();                                  // build contacts page
             this.initCleanerHook();                                         // start cleaner once the account is available
             this.initLedgerHook();                                          // start the ledger reading
+            this.initSafeScreenGuard();                                     // start listener to close the screen on inactivity or leave
 
+            
         },
         generateRandomBytes: async function (length) {
 
@@ -464,6 +479,184 @@ var noledger = new Vue({
         getAddress: async function () {
             let pub = await this.keyExport(this.keyPair.publicKey);
             return pub.n;
+        },
+        getGroupIdFromAddress: async function (address, bins=null) {
+
+            /* Determines the current GroupId from the group bins and address */
+            
+            // draw the latest observed bins from server
+            if (!bins) {
+                bins = this.grouping.bins;
+            }
+            
+            /* ---- Mechanism Switcher ---- */
+            if (bins == 1) {
+
+                // 1 group is the default setting, so all users will be assigned to lowest group "0"
+
+                return 0
+
+            } else if (bins == 4) { // stable
+
+                // base 4 is established by 2 bits determined from first two digits 
+                // obtained from address (when read from left to right). Determine if the
+                // integer is odd then bit = 0; otherwise 1.
+
+                let bit1 = null;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (!isNaN(char)) {
+                        let b = 0;
+                        if (char % 2 == 0) { b = 0 } 
+                        else { b = 1 }
+                        if (!bit1) { bit1 = b}
+                        else {
+                            return parseInt(`${bit1}${b}`, 2)
+                        }
+                    } 
+                }
+
+            } else if (bins == 16) { // stable
+
+                // base 16 mechanism scans for the first HEX-conform number in the address
+                const hex = '0123456789abcdef';
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i].toLowerCase();
+                    if (hex.includes(char)) {
+                        return parseInt(char, 16)
+                    }
+                }
+
+            } else if (bins == 26) { // stable
+
+                // base 26 considers finding the first alphabetic letter
+                const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i].toLowerCase();
+                    if (char.match(/[a-z]/i)) {
+                        return alphabet.indexOf(char)
+                    }
+                }
+
+            } else if (bins == 64) { // stable
+
+                // base 64 uses b64 conform characters to get the group id from 0-63
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i];
+                    try {
+                        return b64Index(char)
+                    } catch (error) {
+                        //
+                    }
+                }
+
+            } else if (bins == 128) { // stable
+
+                // base 128 will use base 64 combined with a random binary query e.g. 
+                // wether the first digit is odd or even that will yield a factor 1 or 2
+                // which is multiplied with the b64 result.
+
+                let factor = null;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (!isNaN(char)) {
+                        if (char % 2 == 0) { factor = 1 } 
+                        else { factor = 2 }
+                        break
+                    } 
+                }
+
+                // determine b64 number multiplied with determined factor
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i];
+                    try {
+                        return b64Index(char)*factor
+                    } catch (error) {
+                        //
+                    }
+                }
+
+            } else if (bins == 256) { // stable
+                
+                // base 256 is analogous to base 128 but with 2 combined base 16 HEX numbers
+
+                let n1=null;
+                const hex = '0123456789abcdef'
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i];
+                    if (hex.includes(char)) {
+                        if (!n1) {
+                            n1 = parseInt(char, 16)
+                        } else {
+                            return n1 * parseInt(char, 16)
+                        }
+                    }
+                }
+
+            } else if (bins == 512) { // stable
+
+                // base 512 uses base 256 number combined with a binary query
+
+                let factor = null;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (!isNaN(char)) {
+                        if (char % 2 == 0) { factor = 1 } 
+                        else { factor = 2 }
+                        break
+                    } 
+                }
+
+                let n1=null;
+                const hex = '0123456789abcdef'
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i];
+                    if (hex.includes(char)) {
+                        if (!n1) {
+                            n1 = parseInt(char, 16)
+                        } else {
+                            return n1 * parseInt(char, 16) * factor
+                        }
+                    }
+                }
+
+            } else if (bins == 1024) {
+
+                // base 1024 is build like base 512 but with two bits
+
+                let factor = 1;
+                let bit1 = null;
+                for (let i = 0; i < address.length; i++) {
+                    const char = parseInt(address[i]);
+                    if (!isNaN(char)) {
+                        let b = 0;
+                        if (char % 2 == 0) { b = 0 } 
+                        else { b = 1 }
+                        if (!bit1) { bit1 = b}
+                        else {
+                            factor = parseInt(`${bit1}${b}`, 2)
+                            break
+                        }
+                    } 
+                }
+
+                let n1=null;
+                const hex = '0123456789abcdef'
+                for (let i = 0; i < address.length; i++) {
+                    const char = address[i];
+                    if (hex.includes(char)) {
+                        if (!n1) {
+                            n1 = parseInt(char, 16)
+                        } else {
+                            return n1 * parseInt(char, 16) * factor
+                        }
+                    }
+                }
+
+            } else {
+                throw Error(`base ${bins} exceeds maximum of 1024.`)
+            }
+
         },
         initCleanerHook: async function () {
             /* A loop which deletes expired messages */
@@ -596,35 +789,44 @@ var noledger = new Vue({
             }
         },
         initLedgerHook: async function () {
+
+            /*
+            Ledger request hook.
+            This function is called right after account generation or restore and thus an address is known.
+            */
+
             console.log('start listener ...')
             while (true) {
                 try {
                     if (Object.keys(this.keyPair).length > 0) {
                         
-                        const response = await this.request({id: this.id}, '/ledger');
-                        const collection = Array.from(response.collection);                                     // get collected messages from API
+                        var response = await this.request({id: this.id, group: this.grouping.id}, '/ledger');
 
+                        // check if the bins have changed, then apply and repeat request
+                        if (response.bins != this.grouping.bins) {
+                            this.grouping.bins = response.bins;
+                            response = await this.request({id: this.id, group: this.grouping.id}, '/ledger');
+                        }
+
+                        const collection = Array.from(response.collection);                                     // get collected messages from API
+                        
                         for (let pkg of collection) {                                                           // iterate through packages in returned collection
                             if (pkg) {
                                 console.log('New package')
+
                                 try {
-                                    console.log(0)
                                     let check_decrypted;                                                        // try to decrypt the check
                                     try {
                                         check_decrypted = await this.decrypt(str2buf(pkg.header));
-                                        console.log(1)
                                     } catch (error) {
                                         check_decrypted = null
-                                        console.log(2)
                                     }
 
                                     if (check_decrypted == this.checkString) {                                  // on success (1. Factor)
                                         console.log('Factor 1')
-                                        console.log(3)
                                         let aesPhrase = await this.decrypt(str2buf(pkg.phrase));                // extract credentials from the pkg
                                         let aesKey = await this.generateAESkeyFromPhrase(phrase=aesPhrase);     // reconstruct the aesKey from the phrase
                                         
-                                        console.log(4)
                                         let msg = await this.aesDecrypt(pkg.cipher, aesKey);                    // decrypt body and senders address
                                         let from = await this.aesDecrypt(pkg.from, aesKey);
 
@@ -662,6 +864,8 @@ var noledger = new Vue({
                                 }
                             }
                         }
+
+
                         this.id = response.id_high;                                                             // if everything worked without errors raise the ledger id
                                                                                                                 // to the latest id observed on the ledger to avoid 
                                                                                                                 // old packages and thus redundant downloads                                                                       
@@ -720,6 +924,7 @@ var noledger = new Vue({
             return imported
         },
         loadChat: async function (address) {
+
             this.toAddress = address;
             this.chatVisible = true;
             this.wrapperVisible = false;
@@ -756,6 +961,7 @@ var noledger = new Vue({
 
             this.scrollToBottom();
             this.noUnreadMessages(address);
+
         },
         loadCheckStringField: async function () {
 
@@ -1014,7 +1220,7 @@ var noledger = new Vue({
 
             // focus out on outside click
             document.addEventListener('click', async function(e){   
-                if (document.contains(e.target) && !span.contains(e.target) ){
+                if (document.includes(e.target) && !span.includes(e.target) ){
                     span.classList.remove("notify-box-transparent");
                     await noledger.sleep(1);
                     span.remove();
@@ -1252,6 +1458,7 @@ var noledger = new Vue({
                         // initialize all hooks
                         noledger.initCleanerHook();                                     // start cleaner once the account is available
                         noledger.initLedgerHook();                                      // start the ledger reading
+                        noledger.initSafeScreenGuard();                                     // start listener to close the screen on inactivity or leave
 
                         // remove legacies
                         delete pkgDecrypted;
@@ -1266,6 +1473,61 @@ var noledger = new Vue({
                 "restore",
                 "done."
             )
+        },
+        initSafeScreenGuard: async function () {
+
+            /*
+            Starts a listener who waits for a click outside of the document which will
+            close any chat/settings window and go back to contacts page.
+            */
+
+            // 
+            document.addEventListener('click', async function(e){ 
+                console.log('click event happened');
+                noledger.screenActivityTime = Date.now();
+            });
+            document.onkeydown = function (e) {
+                console.log('keydown event happened')
+                noledger.screenActivityTime = Date.now();
+            }
+
+            // initialize the first activity timestamp
+            if (this.screenActivityTime == 0) {
+                this.screenActivityTime = Date.now();
+            }
+
+            // detect if there was no activity for longer than the set sleep time
+            var now, minutesSinceLastActivity;
+            while (true) {
+
+                try {
+
+                    // check if inactivity has exceeded tolerance
+                    now = Date.now();
+                    minutesSinceLastActivity = (now - this.screenActivityTime)*.001/60;
+                    console.log('trigger back to contacts, time:', minutesSinceLastActivity, this.safeScreenTime)
+                    if (this.safeScreenTime && minutesSinceLastActivity > this.safeScreenTime) {
+                        this.backToContacts()
+                    }
+
+                    // check if the document is still focused, otherwise lock
+                    const focusOut = !document.hasFocus();
+                    if (this.safeScreenOnLeaveEnabled && focusOut) {
+                        this.backToContacts()
+                    } 
+
+                } catch (error) {
+
+                    console.log('SafeScreenGuard:',error)
+
+                } finally {
+
+                    await this.sleep(1)
+
+                }
+                
+            }
+
         },
         scrollToBottom: function () {
             if (this.chatVisible) {
@@ -1305,13 +1567,16 @@ var noledger = new Vue({
                 delete aesPhrase;
             }
             
+            const group = await this.getGroupIdFromAddress(address);                    // determine current group of receiver
+
             pkg = {
+                group: group,
                 header: buf2str(check),
                 check: buf2str(check2),
                 from: from,
                 cipher: cipher,
                 phrase: buf2str(phrase),
-                time: new Date().getTime(),
+                time: new Date().getTime()
             }
 
             if (!this.sounds.mute) {this.sounds.send.play()}                            // play a send sound

@@ -11,6 +11,3 @@ sudo apt install nodejs -y &&
 sudo apt install npm -y && 
 sudo apt install git -y &&
 npm i &&
-cd cert &&
-bash create.sh &&
-cd ..
