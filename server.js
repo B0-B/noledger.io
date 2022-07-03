@@ -40,7 +40,7 @@ var node = function () {
     this.messages = 0;                                          // trace the number of messages
     this.stream = 0;
     this.traffic = 0;
-    this.userTrafficLimit = 10**6                               // traffic limit per user
+    this.userTrafficLimit = 1000000                             // traffic limit per user
     this.trafficLoad = 0;
 
 }
@@ -384,7 +384,9 @@ node.prototype.screenTraffic = async function () {
         try {
             
             // estimate current ledger size by subtracting the initial size (when empty) as this is the data amount users have to download
-            this.ledger.size = Math.round(traffic.estimateSize(this.ledger)-this.ledger.structSize);
+            this.ledger.size = await traffic.estimateSize(this.ledger);//Math.round(traffic.estimateSize(this.ledger)-this.ledger.structSize);
+            
+            
 
             // update the number of messages
             this.messages = this.ledger.maxid - this.ledger.minid;
@@ -399,18 +401,22 @@ node.prototype.screenTraffic = async function () {
 
             // try to estimate bins
             const lowerBound = await traffic.estimateBinLowerBound(this.stream, this.userTrafficLimit);
-            console.log('lower bound',this.stream, this.userTrafficLimit, lowerBound);
+            //console.log('lower bound',this.stream, this.userTrafficLimit, lowerBound);
             this.ledger.bins = await traffic.base(lowerBound);
 
             var output = `---------- Traffic Analysis ----------\n`;
             output += `Highest Entry ID:\t${this.ledger.maxid}\n`;
             output += `Total Requests:\t${this.requests}\n`;
             output += `Total Valid Connections:\t${this.connections}\n`;
-            output += `Current Ledger Size:\t${this.ledger.size} Bytes\n`;
+            output += `Current Ledger Size:\t${await traffic.byteAutoFormat( this.ledger.size )}\n`;
             output += `Current Messages:\t${this.messages}\n`;
-            output += `Stream Traffic:\t${this.stream} Bytes/s\n`;
+            output += `Stream Traffic:\t${await traffic.byteAutoFormat(this.stream, '/s')}\n`;
             output += `Group Bins:\t${this.ledger.bins}\n`;
             output += '---------------------------------------'
+            
+            // rewrite output in console
+            console.clear()
+            console.log('test')
             console.log(output)
 
         } catch (error) {

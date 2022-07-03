@@ -37,6 +37,26 @@ async function base (binLowerBound) {
     throw Error("The provided stream traffic is too high to choose an appropriate base and respect the user traffic limit.")
 }
 
+async function byteAutoFormat (size, suffix="", digits=2) {
+
+    /*
+    Returns the correct prefix kilo, mega, giga, ... in bytes.
+    Size is provided in bytes as default.
+    */
+
+    const prefixes = ['', 'K', 'M', 'G', 'T', 'P', 'E']
+    var prefix;
+    for (let i = 0; i < prefixes.length; i++) {
+        prefix = prefixes[i];
+        if (size >= 1024) {
+            size /= 1024
+        } else {
+            break
+        }
+    }
+    return `${Math.round(size,digits)} ${prefix}B${suffix}`
+}
+
 module.exports = {
-    estimateSize, updateStream, estimateBinLowerBound, base
+    estimateSize, updateStream, estimateBinLowerBound, base, byteAutoFormat
 };
