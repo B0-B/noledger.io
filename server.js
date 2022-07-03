@@ -40,8 +40,11 @@ var node = function () {
     this.messages = 0;                                          // trace the number of messages
     this.stream = 0;
     this.traffic = 0;
-    this.userTrafficLimit = 1000000                             // traffic limit per user
+    this.userTrafficLimit = 1000000;                            // traffic limit per user
     this.trafficLoad = 0;
+    this.streamSmoothingWindow = 20;
+
+    this.updatePeriod = 5;                                      // in s
 
 }
 
@@ -345,20 +348,28 @@ node.prototype.cleaner = async function () {
 }
 
 node.prototype.run = async function (port) {
+
+    // Orchestrate the server start.
+
     try {
+
+        // start services
         this.cleaner();
-        this.screenTraffic();
+        this.update();
+
+        // start server
         this.port = port;
         this.server.listen(port, () => {
             console.log(`noledger node running at https://localhost:${port}`);
         });
+
     } catch (error) {
+
         console.log('Error - terminate\n');
         this.server = null;
         throw error
-    } finally {
-        //
-    }
+
+    } 
 }
 
 node.prototype.sleep = function (seconds) {
@@ -375,57 +386,80 @@ node.prototype.screenTraffic = async function () {
     This method uses the traffic module to determine the current
     traffic parameters, aiming to adjust the current bins size.
     */
-
-    const T = 5; // sec period
-    const N = 20; // time window for EMA
     
-    while(this.server) {
+    try {
+            
+        // estimate current ledger size by subtracting the initial size (when empty) as this is the data amount users have to download
+        this.ledger.size = await traffic.estimateSize(this.ledger);//Math.round(traffic.estimateSize(this.ledger)-this.ledger.structSize);
+        
+        
+
+        // update the number of messages
+        this.messages = this.ledger.maxid - this.ledger.minid;
+
+        // update current stream by recent load gathered within a period in B/s
+        const load = this.trafficLoad;
+        this.trafficLoad = 0;
+        const newStreamValue = load/this.updatePeriod;
+        console.log('new stream', load, newStreamValue);
+        
+        this.stream = await traffic.updateStream(newStreamValue, this.stream, this.streamSmoothingWindow );
+
+        // try to estimate bins
+        const lowerBound = await traffic.estimateBinLowerBound(this.stream, this.userTrafficLimit);
+        //console.log('lower bound',this.stream, this.userTrafficLimit, lowerBound);
+        this.ledger.bins = await traffic.base(lowerBound);
+
+        var output = `---------- Traffic Analysis ----------\n`;
+        output += `Highest Entry ID:\t${this.ledger.maxid}\n`;
+        output += `Total Requests:\t\t${this.requests}\n`;
+        output += `Valid Requests:\t\t${this.connections}\n`;
+        output += `Current Ledger Size:\t${await traffic.byteAutoFormat( this.ledger.size )}\n`;
+        output += `Current Messages:\t${this.messages}\n`;
+        output += `Stream Traffic:\t\t${await traffic.byteAutoFormat(this.stream, '/s')}\n`;
+        output += `Group Bins:\t\t${this.ledger.bins}\n`;
+        output += '---------------------------------------'
+
+    } catch (error) {
+
+        output = error
+
+    } finally {
+
+        return output
+
+    }
+
+}
+
+node.prototype.update = async function () {
+
+    /*
+    Collect the output from all screeners.
+    */
+
+    
+    var output = ''
+
+    while (this.server) {
 
         try {
-            
-            // estimate current ledger size by subtracting the initial size (when empty) as this is the data amount users have to download
-            this.ledger.size = await traffic.estimateSize(this.ledger);//Math.round(traffic.estimateSize(this.ledger)-this.ledger.structSize);
-            
-            
 
-            // update the number of messages
-            this.messages = this.ledger.maxid - this.ledger.minid;
-
-            // update current stream by recent load gathered within a period in B/s
-            const load = this.trafficLoad;
-            this.trafficLoad = 0;
-            const newStreamValue = load/T;
-            console.log('new stream', load, newStreamValue);
-            
-            this.stream = await traffic.updateStream(newStreamValue, this.stream, N);
-
-            // try to estimate bins
-            const lowerBound = await traffic.estimateBinLowerBound(this.stream, this.userTrafficLimit);
-            //console.log('lower bound',this.stream, this.userTrafficLimit, lowerBound);
-            this.ledger.bins = await traffic.base(lowerBound);
-
-            var output = `---------- Traffic Analysis ----------\n`;
-            output += `Highest Entry ID:\t${this.ledger.maxid}\n`;
-            output += `Total Requests:\t${this.requests}\n`;
-            output += `Total Valid Connections:\t${this.connections}\n`;
-            output += `Current Ledger Size:\t${await traffic.byteAutoFormat( this.ledger.size )}\n`;
-            output += `Current Messages:\t${this.messages}\n`;
-            output += `Stream Traffic:\t${await traffic.byteAutoFormat(this.stream, '/s')}\n`;
-            output += `Group Bins:\t${this.ledger.bins}\n`;
-            output += '---------------------------------------'
-            
-            // rewrite output in console
-            console.clear()
-            console.log('test')
-            console.log(output)
-
+            // update sequence
+            output += await this.screenTraffic() + '\n\n';
+  
         } catch (error) {
 
+            output = error;
             console.log(error)
-
+            
         } finally {
 
-            await this.sleep(T)
+            // refresh console and wait
+            console.clear()
+            console.log(output)
+            await this.sleep(this.updatePeriod)
+            output = ''
 
         }
     }
