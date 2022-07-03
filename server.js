@@ -393,7 +393,6 @@ node.prototype.screenTraffic = async function () {
         this.ledger.size = await traffic.estimateSize(this.ledger);//Math.round(traffic.estimateSize(this.ledger)-this.ledger.structSize);
         
         
-
         // update the number of messages
         this.messages = this.ledger.maxid - this.ledger.minid;
 

@@ -1,6 +1,6 @@
 # Protocol Proposals and Development
-# 1.1.1
-<h2><strong>Adaptive Grouping</strong> [pending]</h2>
+# 1.2.0
+<h2><strong>Adaptive Grouping</strong> [stable]</h2>
 
 [Bitmessage](https://wiki.bitmessage.org/) (est. 2012) has already shown that grouping the clients into "streams" would releaf their traffic. DDoS quickly appears to be the downside of the protocol, since an attacker could submit junk data to the ledger which needs to be downloaded by every client to determine the integrity. But the protocol can be enhanced through further decentralization of service (split the traffic) or computational infeasability - or in this case by grouping.
 
