@@ -418,7 +418,11 @@ node.prototype.screenTraffic = async function () {
         output += `Stream Traffic:\t\t${await traffic.byteAutoFormat(this.stream, '/s')}\n`;
         output += `Group Bins:\t\t${this.ledger.bins}\n`;
         output += '---------------------------------------'
-
+        
+        // log to file
+        const log_payload = new Date().toLocaleTimeString() + ':\n' + output;
+        fs.writeFileSync('./logs/traffic.log', log_payload, {encoding: 'utf8', flag: 'w'})
+        
     } catch (error) {
 
         output = error
@@ -446,6 +450,8 @@ node.prototype.update = async function () {
 
             // update sequence
             output += await this.screenTraffic() + '\n\n';
+
+
   
         } catch (error) {
 
